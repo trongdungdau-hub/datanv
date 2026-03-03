@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Trị Nhân Sự - Xuất PDF Tự Động Toàn Diện</title>
+    <title>Quản Trị Nhân Sự - Xuất PDF (Bản Phá Cache & Xóa Nền Trắng)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
@@ -16,7 +16,7 @@
         .btn-export { background-color: #d9534f; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
         .btn-export:hover { background-color: #c9302c; }
         .btn-reload { background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 10px;}
-        #status { color: #0056b3; font-weight: bold; margin-top: 15px; white-space: pre-wrap; background: #e9ecef; padding: 10px; border-radius: 5px; display: none; line-height: 1.5;}
+        #status { color: #d9534f; font-weight: bold; margin-top: 15px; white-space: pre-wrap; background: #fff3cd; padding: 15px; border-radius: 5px; display: none; line-height: 1.6; border: 1px solid #ffeeba;}
     </style>
 </head>
 <body>
@@ -49,7 +49,6 @@
 
     let employeesData = [];
 
-    // [CẬP NHẬT] HÀNG RÀO XUYÊN THỦNG LẤY ẢNH TỪ DRIVE
     async function fetchImageBytes(driveUrl) {
         if (!driveUrl) return null;
         let match = driveUrl.match(/\/d\/(.+?)\//) || driveUrl.match(/id=(.+?)(&|$)/);
@@ -57,10 +56,8 @@
         let id = match[1];
         
         let fetchUrls = [
-            `https://lh3.googleusercontent.com/d/${id}=w1000`, // Cổng ưu tiên số 1 (Nhanh, nguyên gốc)
-            `https://drive.google.com/thumbnail?id=${id}&sz=w1000`, // Cổng ưu tiên số 2
-            `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`),
-            `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`)
+            `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`),
+            `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`)
         ];
 
         for (let u of fetchUrls) {
@@ -92,13 +89,13 @@
     async function loadData() {
         let st = document.getElementById('status');
         st.style.display = 'block';
-        st.innerText = "⏳ Đang tải dữ liệu từ Google Sheets...";
+        st.innerText = "⏳ Đang tải dữ liệu...";
         try {
             let res = await fetch(SCRIPT_URL);
             employeesData = await res.json();
             renderTable();
             st.innerText = "✅ Tải dữ liệu thành công!";
-            setTimeout(() => { st.style.display = 'none'; }, 3000);
+            setTimeout(() => { st.style.display = 'none'; }, 2000);
         } catch (e) {
             st.innerText = "❌ Lỗi kết nối: " + e;
         }
@@ -131,61 +128,46 @@
         } catch (e) {}
     }
 
-    // [CÔNG NGHỆ MỚI] BIẾN Ô CHỮ THÀNH NÚT BẤM VÀ ÉP ẢNH VÀO
-    async function fillImagePerfectly(form, pdfDoc, fieldName, driveUrl, pageIndex, tenAnh) {
+    // VŨ KHÍ TỐI THƯỢNG: XÓA Ô TRẮNG VÀ IN ẢNH
+    async function fillImageAndDestroyBox(form, pdfDoc, fieldName, driveUrl, pageIndex, tenAnh) {
         let st = document.getElementById('status');
         if (!driveUrl) {
-            st.innerText += `\n⚠️ Bỏ qua [${tenAnh}]: Nhân viên không nộp.`;
+            st.innerText += `\n⚠️ Bỏ qua [${tenAnh}]: Không có link ảnh.`;
             return;
         }
         try {
             const field = form.getField(fieldName);
             if (!field) return;
 
-            // 1. Lưu lại kích thước và vị trí của ô
+            // 1. Lấy kích thước chuẩn của cái ô
             const widgets = field.acroField.getWidgets();
             if (!widgets || widgets.length === 0) return;
             const rect = widgets[0].getRectangle();
 
-            st.innerText += `\n⏳ Đang xử lý [${tenAnh}]...`;
+            st.innerText += `\n⏳ Đang nhúng [${tenAnh}]...`;
             
-            // 2. Tải ảnh từ Drive
             const imgBytes = await fetchImageBytes(driveUrl);
-            if (!imgBytes) {
-                st.innerText += ` ❌ Lỗi Google Drive chặn tải ảnh.`;
-                return;
+            if (imgBytes) {
+                let img;
+                try { img = await pdfDoc.embedJpg(imgBytes); }
+                catch(e) {
+                    try { img = await pdfDoc.embedPng(imgBytes); }
+                    catch(e2) { st.innerText += ` ❌ Lỗi định dạng ảnh.`; return; }
+                }
+
+                // 2. Tiêu diệt cái ô trắng cản đường
+                form.removeField(fieldName);
+
+                // 3. In bức ảnh đè đúng vào tọa độ đó
+                const page = pdfDoc.getPages()[pageIndex];
+                page.drawImage(img, { x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+                
+                st.innerText += ` ✅ THÀNH CÔNG! Đã xóa nền trắng và ép ảnh lọt khe.`;
+            } else {
+                st.innerText += ` ❌ Lỗi Google Drive chặn ảnh.`;
             }
-
-            let img;
-            try { img = await pdfDoc.embedJpg(imgBytes); }
-            catch(e) {
-                try { img = await pdfDoc.embedPng(imgBytes); }
-                catch(e2) { st.innerText += ` ❌ Lỗi định dạng ảnh (Yêu cầu JPG/PNG).`; return; }
-            }
-
-            // 3. Xóa bỏ ô cũ đi (Xóa luôn cả cái viền trắng đáng ghét)
-            form.removeField(fieldName);
-
-            // 4. Tạo Nút bấm ngay tại vị trí vừa xóa và nhét ảnh vào
-            const page = pdfDoc.getPages()[pageIndex];
-            const btnName = fieldName + '_btn_img';
-            const button = form.createButton(btnName);
-
-            button.addToPage(page, {
-                x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height
-            });
-            
-            // Lệnh thần thánh ép ảnh vừa khít 100% khung
-            button.setImage(img);
-
-            st.innerText += ` ✅ Đã ép lọt khung!`;
-
         } catch (e) { 
             st.innerText += ` ❌ Lỗi cấu trúc PDF.`;
-            console.error(e);
         }
     }
 
@@ -195,10 +177,11 @@
         
         let st = document.getElementById('status');
         st.style.display = 'block';
-        st.innerText = `🔄 Đang xử lý hồ sơ cho [${hoTen}]...`;
+        st.innerText = `🔄 ĐANG XỬ LÝ HỒ SƠ CHO [${hoTen}]...\n-------------------------------------------------`;
 
         try {
-            const existingPdfBytes = await fetch(PDF_TEMPLATE_URL).then(res => res.arrayBuffer());
+            // Thêm '?v=' để chống cache file template PDF
+            const existingPdfBytes = await fetch(PDF_TEMPLATE_URL + "?v=" + new Date().getTime()).then(res => res.arrayBuffer());
             const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
             
             pdfDoc.registerFontkit(window.fontkit);
@@ -207,7 +190,7 @@
 
             const form = pdfDoc.getForm();
 
-            // 1. ĐIỀN CHỮ
+            // ĐIỀN CHỮ
             fillField(form, 'Họ Tên', emp[0], customFont);
             fillField(form, 'MSNV', emp[2], customFont); 
             fillField(form, 'Học Lực', emp[1], customFont);
@@ -225,20 +208,19 @@
             fillField(form, 'Ngành nghề', emp[29], customFont);
             fillField(form, 'Đại học', emp[30], customFont); 
 
-            // TICK GIỚI TÍNH
             try {
                 let gioiTinh = toText(emp[4]).toLowerCase();
                 if (gioiTinh === 'nam') form.getCheckBox('Nam').check();
                 if (gioiTinh === 'nữ') form.getCheckBox('Nữ').check();
             } catch(e) {}
 
-            // 2. ĐIỀN ẢNH BẰNG NÚT BẤM (Page Index: Trang 1 là 0, Trang 2 là 1...)
-            await fillImagePerfectly(form, pdfDoc, 'Ảnh cá nhân_af_image', emp[44], 2, 'Ảnh thẻ 4x6'); 
-            await fillImagePerfectly(form, pdfDoc, 'Ảnh STK _af_image', emp[46], 1, 'Ảnh Thẻ Ngân hàng');    
-            await fillImagePerfectly(form, pdfDoc, 'Ảnh SoBHXH_af_image', emp[47], 1, 'Ảnh Sổ BHXH');  
-            await fillImagePerfectly(form, pdfDoc, 'CCCC_ANH_1_af_image', emp[45], 3, 'Ảnh CCCD Mặt trước');  
-            await fillImagePerfectly(form, pdfDoc, 'CCCC_ANH_2_af_image', emp[45], 3, 'Ảnh CCCD Mặt sau'); 
-            // await fillImagePerfectly(form, pdfDoc, 'Ảnh DDCN_af_image', emp[45], 3, 'Ảnh Định danh');    
+            // ĐIỀN ẢNH BẰNG HÀM XÓA NỀN MỚI
+            await fillImageAndDestroyBox(form, pdfDoc, 'Ảnh cá nhân_af_image', emp[44], 2, 'Ảnh thẻ 4x6'); 
+            await fillImageAndDestroyBox(form, pdfDoc, 'Ảnh STK _af_image', emp[46], 1, 'Ảnh Thẻ Ngân hàng');    
+            await fillImageAndDestroyBox(form, pdfDoc, 'Ảnh SoBHXH_af_image', emp[47], 1, 'Ảnh Sổ BHXH');  
+            await fillImageAndDestroyBox(form, pdfDoc, 'CCCC_ANH_1_af_image', emp[45], 3, 'Ảnh CCCD Mặt trước');  
+            await fillImageAndDestroyBox(form, pdfDoc, 'CCCC_ANH_2_af_image', emp[45], 3, 'Ảnh CCCD Mặt sau'); 
+            await fillImageAndDestroyBox(form, pdfDoc, 'Ảnh DDCN_af_image', emp[45], 3, 'Ảnh Định danh');    
 
             // Khóa cứng file PDF
             form.flatten();
@@ -246,11 +228,11 @@
             const pdfBytes = await pdfDoc.save();
             download(pdfBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
             
-            st.innerText += `\n\n🎉 HOÀN TẤT 100%! Hình ảnh đã hiện rõ mồn một.`;
+            st.innerText += `\n-------------------------------------------------\n🎉 HOÀN TẤT 100%! Bức màn trắng đã bị xé bỏ.`;
             
         } catch (err) {
             console.error(err);
-            st.innerText += `\n❌ Lỗi xuất file PDF: ` + err.message;
+            st.innerText += `\n❌ Lỗi hệ thống: ` + err.message;
         }
     }
     window.onload = loadData;
