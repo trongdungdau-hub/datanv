@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Trị Nhân Sự - Xuất PDF</title>
+    <title>Quản Trị Nhân Sự - Xuất PDF Tự Động Toàn Diện</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
@@ -14,6 +14,7 @@
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px;}
         th { background-color: #0056b3; color: white; }
         .btn-export { background-color: #d9534f; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .btn-export:hover { background-color: #c9302c; }
         .btn-reload { background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 10px;}
     </style>
 </head>
@@ -42,12 +43,13 @@
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
+    // MẸO: Bạn để nguyên tên file PDF GỐC của bạn lên đây nhé (File mà bạn vừa cho máy quét đọc ấy)
     const PDF_TEMPLATE_URL = "template.pdf"; 
     const FONT_URL = "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf";
 
     let employeesData = [];
 
-    // HÀM XỬ LÝ ẢNH MỚI: Chống lỗi ô trắng và lấy ảnh tốc độ cao
+    // Lấy ảnh tốc độ cao từ Drive
     async function fetchImageBytes(driveUrl) {
         if (!driveUrl) return null;
         let match = driveUrl.match(/\/d\/(.+?)\//) || driveUrl.match(/id=(.+?)(&|$)/);
@@ -55,8 +57,8 @@
         let id = match[1];
         
         let fetchUrls = [
-            `https://lh3.googleusercontent.com/d/${id}`, // Link trực tiếp mạnh nhất
-            `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`) // Link dự phòng
+            `http://googleusercontent.com/profile/picture/6{id}`, 
+            `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`)
         ];
 
         for (let u of fetchUrls) {
@@ -64,11 +66,9 @@
                 let res = await fetch(u);
                 if (res.ok) {
                     let blob = await res.blob();
-                    if (blob.type.startsWith('image/')) {
-                        return await blob.arrayBuffer(); // Trả về dữ liệu ảnh thô
-                    }
+                    if (blob.type.startsWith('image/')) return await blob.arrayBuffer();
                 }
-            } catch (e) { console.log("Thử lại link ảnh khác..."); }
+            } catch (e) {}
         }
         return null;
     }
@@ -85,19 +85,6 @@
         let day = ("0" + d.getDate()).slice(-2);
         let month = ("0" + (d.getMonth() + 1)).slice(-2);
         return `${day}/${month}/${d.getFullYear()}`;
-    }
-
-    function drawSafe(page, text, x, y, font, size) {
-        let str = toText(text);
-        if (str !== "") {
-            page.drawText(str, { x: x, y: y, font: font, size: size });
-        }
-    }
-
-    function drawCheck(page, condition, x, y, font) {
-        if (condition) {
-            page.drawText("V", { x: x, y: y, font: font, size: 14 });
-        }
     }
 
     async function loadData() {
@@ -129,10 +116,35 @@
         document.getElementById('tableBody').innerHTML = html || '<tr><td colspan="6">Chưa có dữ liệu.</td></tr>';
     }
 
+    // Hàm an toàn để điền chữ vào Form Field
+    function fillField(form, fieldName, value, customFont) {
+        try {
+            const field = form.getTextField(fieldName);
+            if (field && value) {
+                field.setText(value);
+                field.updateAppearances(customFont);
+            }
+        } catch (e) { console.log("Không tìm thấy ô chữ: " + fieldName); }
+    }
+
+    // Hàm an toàn để điền Ảnh vào Form Field (nút Button)
+    async function fillImage(form, pdfDoc, fieldName, driveUrl) {
+        try {
+            const button = form.getButton(fieldName);
+            if (button && driveUrl) {
+                const imgBytes = await fetchImageBytes(driveUrl);
+                if (imgBytes) {
+                    let img = await pdfDoc.embedJpg(imgBytes).catch(() => pdfDoc.embedPng(imgBytes));
+                    button.setImage(img);
+                }
+            }
+        } catch (e) { console.log("Không tìm thấy ô ảnh: " + fieldName); }
+    }
+
     async function generatePDF(index) {
         const emp = employeesData[index]; 
         const hoTen = toText(emp[0]) || 'NhanVien';
-        document.getElementById('status').innerText = `Đang tải hình ảnh và đóng gói PDF cho [${hoTen}]... KHÔNG tắt trang nhé!`;
+        document.getElementById('status').innerText = `Đang bơm dữ liệu và hình ảnh vào form cho [${hoTen}]... KHÔNG tắt trình duyệt!`;
 
         try {
             const existingPdfBytes = await fetch(PDF_TEMPLATE_URL).then(res => res.arrayBuffer());
@@ -142,86 +154,54 @@
             const fontBytes = await fetch(FONT_URL).then(res => res.arrayBuffer());
             const customFont = await pdfDoc.embedFont(fontBytes);
 
-            const pages = pdfDoc.getPages();
-            const page1 = pages[0]; // Trang Lương
-            const page2 = pages[1]; // Trang Ngân hàng / BHXH
-            const page3 = pages[2]; // Trang Hồ sơ cá nhân
-            const page4 = pages[3]; // Trang CCCD
-
-            const fontSize = 11;
-            let gioiTinh = toText(emp[4]).toLowerCase();
-            let honNhan = toText(emp[17]).toLowerCase();
+            const form = pdfDoc.getForm();
 
             // ==========================================================
-            // TRANG 1: ĐÃ CĂN LẠI DỰA TRÊN ẢNH BẠN GỬI
+            // 1. TỰ ĐỘNG BƠM CHỮ (Sử dụng đúng tên ô từ file PDF gốc của bạn)
             // ==========================================================
-            drawSafe(page1, emp[0], 180, 690, customFont, 14); // Họ Tên
-            drawSafe(page1, emp[2], 380, 690, customFont, fontSize); // Số hiệu
-            drawSafe(page1, emp[1], 500, 690, customFont, fontSize); // Học lực
-            drawSafe(page1, emp[5], 180, 645, customFont, fontSize); // Nơi sinh
-            drawSafe(page1, formatDate(emp[3]), 380, 645, customFont, fontSize); // Ngày sinh
+            fillField(form, 'Họ Tên', emp[0], customFont);
+            fillField(form, 'MSNV', emp[2], customFont); // Tôi đoán MSNV là Số hiệu (cột 2)
+            fillField(form, 'Học Lực', emp[1], customFont);
             
-            drawCheck(page1, gioiTinh === "nam", 480, 655, customFont); // Tick Nam
-            drawCheck(page1, gioiTinh === "nữ", 480, 635, customFont);  // Tick Nữ
-
-            drawSafe(page1, formatDate(emp[10]), 180, 600, customFont, fontSize); // Ngày làm việc
-            drawSafe(page1, emp[6], 180, 565, customFont, fontSize); // Bộ phận
-            drawSafe(page1, emp[7], 380, 535, customFont, fontSize); // Chức vụ
-            drawSafe(page1, emp[9], 180, 475, customFont, fontSize); // Lương VND
-
-            // ==========================================================
-            // TRANG 3: ĐÃ ĐẨY LÊN CHO VỪA KHUNG ĐỎ
-            // ==========================================================
-            drawSafe(page3, emp[0], 180, 715, customFont, 14); // Họ Tên
+            fillField(form, 'Nơi Sinh', emp[5], customFont);
+            fillField(form, 'Ngày sinh', formatDate(emp[3]), customFont);
+            fillField(form, 'Ngày_sinh', formatDate(emp[3]), customFont); // Trang 3
             
-            drawCheck(page3, gioiTinh === "nam", 355, 715, customFont); // Tick Nam
-            drawCheck(page3, gioiTinh === "nữ", 355, 695, customFont);  // Tick Nữ
-            drawCheck(page3, true, 440, 715, customFont); // Tick Quốc tịch VN
+            fillField(form, 'Ngày vào làm', formatDate(emp[10]), customFont);
+            fillField(form, 'Bộ phận', emp[6], customFont);
+            fillField(form, 'Vị trí', emp[7], customFont); // Vị trí / Chức vụ
+            fillField(form, 'Mức lương căn bản', emp[9], customFont);
 
-            drawSafe(page3, formatDate(emp[3]), 180, 680, customFont, fontSize); // Ngày sinh
-            drawCheck(page3, honNhan.includes("độc thân") || honNhan.includes("chưa"), 355, 675, customFont); // Tick Chưa KH
-            drawCheck(page3, honNhan.includes("đã"), 355, 655, customFont); // Tick Đã KH
-            
-            drawSafe(page3, emp[5], 480, 680, customFont, fontSize); // Nơi sinh
-            drawSafe(page3, emp[18], 180, 640, customFont, fontSize); // Địa chỉ hộ khẩu
-            drawSafe(page3, emp[19], 180, 610, customFont, fontSize); // Số CCCD
-            drawSafe(page3, formatDate(emp[20]), 450, 610, customFont, fontSize); // Ngày cấp CCCD
+            fillField(form, 'Tỉnh', emp[18], customFont); // Hộ khẩu
+            fillField(form, 'CCCD', emp[19], customFont);
+            fillField(form, 'Ngày cấp CCCD', formatDate(emp[20]), customFont);
+            fillField(form, 'SDT', emp[21], customFont);
 
-            drawSafe(page3, emp[29], 180, 580, customFont, fontSize); // Học vấn
-            drawSafe(page3, emp[30], 350, 580, customFont, fontSize); // Tên trường
-            drawSafe(page3, emp[21], 480, 580, customFont, fontSize); // SĐT cá nhân
+            fillField(form, 'Ngành nghề', emp[29], customFont); // Chuyên ngành
+            fillField(form, 'Đại học', emp[30], customFont); // Tên trường
+
+            // Đánh dấu Checkbox Nam / Nữ
+            try {
+                let gioiTinh = toText(emp[4]).toLowerCase();
+                if (gioiTinh === 'nam') form.getCheckBox('Nam').check();
+                if (gioiTinh === 'nữ') form.getCheckBox('Nữ').check();
+            } catch(e) {}
 
             // ==========================================================
-            // CHÈN HÌNH ẢNH: XỬ LÝ GỌN GÀNG, KHÔNG BỊ KHỔNG LỒ
+            // 2. TỰ ĐỘNG BƠM HÌNH ẢNH (Sử dụng đúng tên ô ảnh)
             // ==========================================================
-            
-            // Hàm nhúng ảnh (Hỗ trợ cả JPG và PNG để chống lỗi ô trắng)
-            async function drawImageSafe(page, url, x, y, width, height) {
-                let bytes = await fetchImageBytes(url);
-                if (bytes) {
-                    try {
-                        let img = await pdfDoc.embedJpg(bytes).catch(() => pdfDoc.embedPng(bytes));
-                        page.drawImage(img, { x, y, width, height });
-                    } catch (e) { console.log("Lỗi định dạng ảnh"); }
-                }
-            }
+            await fillImage(form, pdfDoc, 'Ảnh cá nhân_af_image', emp[44]);     // Ảnh 4x6
+            await fillImage(form, pdfDoc, 'CCCC_ANH_1_af_image', emp[45]);      // Ảnh CCCD Mặt trước
+            await fillImage(form, pdfDoc, 'Ảnh STK _af_image', emp[46]);        // Ảnh Ngân Hàng
+            await fillImage(form, pdfDoc, 'Ảnh SoBHXH_af_image', emp[47]);      // Ảnh BHXH
+            await fillImage(form, pdfDoc, 'Ảnh DDCN_af_image', emp[45]);        // Ảnh Định danh cá nhân
 
-            // 1. Ảnh 4x6 (Trang 3) - Thu nhỏ gọn vào ô trống
-            await drawImageSafe(page3, emp[44], 450, 630, 90, 120);
+            // Khóa toàn bộ Form lại (Flatten) để không ai sửa được nữa và in ra nhẹ hơn
+            form.flatten();
 
-            // 2. Ảnh Thẻ Ngân hàng (Trang 2) - Kích thước bằng bàn tay
-            await drawImageSafe(page2, emp[46], 120, 450, 350, 200);
-
-            // 3. Ảnh Sổ BHXH (Trang 2)
-            await drawImageSafe(page2, emp[47], 120, 200, 350, 200);
-
-            // 4. Ảnh CCCD (Trang 4)
-            await drawImageSafe(page4, emp[45], 120, 400, 350, 200);
-
-            // Tải file về
             const pdfBytes = await pdfDoc.save();
             download(pdfBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
-            document.getElementById('status').innerText = `✅ Đã xuất PDF thành công cho ${hoTen}!`;
+            document.getElementById('status').innerText = `✅ Đã xuất PDF TỰ ĐỘNG thành công cho ${hoTen}!`;
             
         } catch (err) {
             console.error(err);
