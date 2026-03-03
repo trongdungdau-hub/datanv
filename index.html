@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khai Báo Hồ Sơ Nhân Sự - Samson Group</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 900px; background: #fff; padding: 30px; margin: auto; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 25px; text-transform: uppercase;}
+        .section { margin-bottom: 25px; padding: 20px; background: #fafafa; border: 1px solid #ddd; border-radius: 5px; }
+        .section h3 { margin-top: 0; color: #d9534f; font-size: 16px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px; color: #444;}
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 15px; background: #28a745; color: white; border: none; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; text-transform: uppercase; }
+        button:hover { background: #218838; }
+        .loading { display: none; text-align: center; color: #0056b3; font-weight: bold; margin-top: 15px; font-size: 16px; }
+        .note { font-size: 12px; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>BIỂU KHAI BÁO HỒ SƠ NHÂN SỰ</h2>
+    <form id="hrForm">
+
+        <div class="section">
+            <h3>1. THÔNG TIN CÁ NHÂN</h3>
+            <div class="grid-2">
+                <div><label>Họ Và Tên (VIẾT HOA):</label><input type="text" id="col0" required></div>
+                <div><label>Ngày sinh:</label><input type="date" id="col3" required></div>
+            </div>
+            <div class="grid-3">
+                <div><label>Giới tính:</label><select id="col4"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
+                <div><label>Nơi sinh (Tỉnh/TP):</label><input type="text" id="col2"></div>
+                <div><label>Tình trạng hôn nhân:</label><select id="col17"><option value="Độc thân">Độc thân</option><option value="Đã kết hôn">Đã kết hôn</option></select></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Số điện thoại cá nhân:</label><input type="text" id="col21" required></div>
+                <div><label>Email cá nhân:</label><input type="email" id="col31"></div>
+            </div>
+            <div class="grid-3">
+                <div><label>Số Căn Cước Công Dân:</label><input type="number" id="col19" required></div>
+                <div><label>Ngày cấp CCCD:</label><input type="date" id="col20"></div>
+                <div><label>Số CMND cũ (Nếu có):</label><input type="number" id="col36"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Địa chỉ thường trú (Ghi rõ Thôn/Xã/Huyện/Tỉnh):</label><input type="text" id="col18" required></div>
+                <div><label>Nơi ở hiện tại:</label><select id="col37"><option value="Thường trú">Thường trú</option><option value="Tạm trú">Tạm trú</option></select></div>
+            </div>
+            <div><label>Địa chỉ tạm trú (Nếu khác thường trú):</label><input type="text" id="col38"></div>
+        </div>
+
+        <div class="section">
+            <h3>2. NGƯỜI LIÊN HỆ KHẨN CẤP</h3>
+            <div class="grid-3">
+                <div><label>Họ Và Tên người liên hệ:</label><input type="text" id="col22" required></div>
+                <div><label>Số điện thoại người liên hệ:</label><input type="text" id="col23" required></div>
+                <div><label>Địa chỉ người liên hệ:</label><input type="text" id="col24"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>3. THÔNG TIN SỔ HỘ KHẨU</h3>
+            <div><label>Bạn có phải chủ hộ gia đình không?</label><select id="col39"><option value="Có">Có</option><option value="Không">Không</option></select></div>
+            <p class="note" style="color:red;">* Nếu KHÔNG phải chủ hộ, vui lòng điền các thông tin dưới đây:</p>
+            <div class="grid-3">
+                <div><label>Họ Và Tên Chủ Hộ:</label><input type="text" id="col40"></div>
+                <div><label>Ngày sinh Chủ Hộ:</label><input type="date" id="col41"></div>
+                <div><label>Giới tính chủ hộ:</label><select id="col42"><option value="">-- Chọn --</option><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
+            </div>
+            <div><label>Địa chỉ chủ hộ:</label><input type="text" id="col43"></div>
+        </div>
+
+        <div class="section">
+            <h3>4. TRÌNH ĐỘ HỌC VẤN</h3>
+            <div class="grid-2">
+                <div><label>Học lực (VD: 12/12):</label><input type="text" id="col1"></div>
+                <div><label>Trường Tiểu học (Thời gian - Tên):</label><input type="text" id="col25"></div>
+                <div><label>Trường THCS (Thời gian - Tên):</label><input type="text" id="col26"></div>
+                <div><label>Trường THPT (Thời gian - Tên):</label><input type="text" id="col27"></div>
+            </div>
+            <div class="grid-3">
+                <div><label>Có học CĐ/Đại học không?</label><select id="col28"><option value="Không">Không</option><option value="Có">Có</option></select></div>
+                <div><label>Học vấn (VD: Đại học):</label><input type="text" id="col29"></div>
+                <div><label>Tên trường Cao đẳng/Đại học:</label><input type="text" id="col30"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>5. TÀI KHOẢN NGÂN HÀNG, THUẾ & BHXH</h3>
+            <div class="grid-2">
+                <div><label>Tại ngân hàng:</label><input type="text" id="col15" required></div>
+                <div><label>Số tài khoản ngân hàng:</label><input type="number" id="col16" required></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Bạn đã có mã số Thuế chưa?</label><select id="col34"><option value="Rồi">Rồi</option><option value="Chưa">Chưa</option></select></div>
+                <div><label>Mã số thuế:</label><input type="number" id="col35"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Đã tham gia Bảo hiểm xã hội chưa?</label><select id="col32"><option value="Rồi">Rồi</option><option value="Chưa">Chưa</option></select></div>
+                <div><label>Số sổ Bảo hiểm xã hội:</label><input type="number" id="col33"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>6. CÔNG VIỆC & THỎA THUẬN LƯƠNG (HR Điền)</h3>
+            <div class="grid-3">
+                <div><label>Ngày bắt đầu làm việc:</label><input type="date" id="col5"></div>
+                <div><label>Tại Bộ Phận:</label><input type="text" id="col6"></div>
+                <div><label>Chức vụ:</label><input type="text" id="col7"></div>
+            </div>
+            <div class="grid-3">
+                <div><label>Đơn vị tiền tệ lương:</label><select id="col8"><option value="Tiền Việt ( VND )">Tiền Việt ( VND )</option><option value="USD">USD</option></select></div>
+                <div><label>Mức lương VND:</label><input type="text" id="col9"></div>
+                <div><label>Mức lương USD:</label><input type="text" id="col10"></div>
+            </div>
+            <div class="grid-3">
+                <div><label>Tăng lương (Có/Không):</label><input type="text" id="col11"></div>
+                <div><label>Lương sau thử việc (VND):</label><input type="text" id="col12"></div>
+                <div><label>Lương sau thử việc (USD):</label><input type="text" id="col13"></div>
+            </div>
+            <div><label>Thỏa thuận lương (GROSS/NET):</label><input type="text" id="col14"></div>
+        </div>
+
+        <div class="section">
+            <h3>7. ĐÍNH KÈM HÌNH ẢNH CHỨNG TỪ</h3>
+            <p class="note">Vui lòng tải lên ảnh chụp rõ nét, không bị lóa sáng hay mờ.</p>
+            <div class="grid-2">
+                <div><label>1. Ảnh 4x6 (Chân dung):</label><input type="file" id="img4x6" accept="image/*" required></div>
+                <div><label>2. Ảnh Căn cước công dân (Mặt trước + Sau):</label><input type="file" id="imgCCCD" accept="image/*" required></div>
+                <div><label>3. Ảnh Số tài khoản ngân hàng:</label><input type="file" id="imgSTK" accept="image/*" required></div>
+                <div><label>4. Ảnh trang bìa Sổ bảo hiểm xã hội:</label><input type="file" id="imgBHXH" accept="image/*"></div>
+            </div>
+        </div>
+
+        <button type="submit" id="submitBtn">GỬI HỒ SƠ</button>
+        <div class="loading" id="loading">Hệ thống đang xử lý và tải ảnh lên máy chủ. Vui lòng không đóng trang web...</div>
+    </form>
+</div>
+
+<script>
+    // Hàm nén và chuyển file ảnh thành văn bản Base64
+    const fileToBase64 = (file) => new Promise((resolve, reject) => {
+        if (!file) { resolve(""); return; }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+
+    document.getElementById("hrForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        // Khóa nút bấm, hiện trạng thái loading
+        document.getElementById("submitBtn").style.display = "none";
+        document.getElementById("loading").style.display = "block";
+
+        // Khởi tạo mảng chứa 49 cột trống
+        let rowData = new Array(49).fill("");
+        
+        // Đưa dữ liệu vào đúng vị trí Index cột
+        for (let i = 0; i <= 43; i++) {
+            let field = document.getElementById("col" + i);
+            if (field) {
+                rowData[i] = field.value;
+            }
+        }
+
+        try {
+            // Xử lý 4 file ảnh
+            let img4x6 = await fileToBase64(document.getElementById("img4x6").files[0]);
+            let imgCCCD = await fileToBase64(document.getElementById("imgCCCD").files[0]);
+            let imgSTK = await fileToBase64(document.getElementById("imgSTK").files[0]);
+            let imgBHXH = await fileToBase64(document.getElementById("imgBHXH").files[0]);
+
+            // Đóng gói dữ liệu
+            let payload = {
+                rowData: rowData,
+                img4x6: img4x6,
+                imgCCCD: imgCCCD,
+                imgSTK: imgSTK,
+                imgBHXH: imgBHXH
+            };
+
+            // LINK APPS SCRIPT CỦA BẠN (Không cần sửa)
+            const URL_APP_SCRIPT = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
+
+            // Bắn dữ liệu đi
+            let res = await fetch(URL_APP_SCRIPT, {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: { "Content-Type": "text/plain;charset=utf-8" }
+            });
+            
+            let result = await res.json();
+            
+            if(result.status === "success"){
+                alert("🎉 Gửi hồ sơ thành công! Dữ liệu đã được lưu vào Google Sheets.");
+                document.getElementById("hrForm").reset(); // Xóa trắng form để người sau điền
+            } else {
+                alert("❌ Lỗi từ máy chủ: " + result.message);
+            }
+        } catch (error) {
+            alert("❌ Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng! " + error);
+        } finally {
+            // Mở khóa nút bấm
+            document.getElementById("submitBtn").style.display = "block";
+            document.getElementById("loading").style.display = "none";
+        }
+    });
+</script>
+
+</body>
+</html>
