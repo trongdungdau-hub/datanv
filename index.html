@@ -25,7 +25,6 @@
 <div class="container">
     <h2>BIỂU KHAI BÁO HỒ SƠ NHÂN SỰ</h2>
     <form id="hrForm">
-
         <div class="section">
             <h3>1. THÔNG TIN CÁ NHÂN</h3>
             <div class="grid-2">
@@ -142,7 +141,6 @@
 </div>
 
 <script>
-    // Hàm nén và chuyển file ảnh thành văn bản Base64
     const fileToBase64 = (file) => new Promise((resolve, reject) => {
         if (!file) { resolve(""); return; }
         const reader = new FileReader();
@@ -153,15 +151,11 @@
 
     document.getElementById("hrForm").addEventListener("submit", async function(e) {
         e.preventDefault();
-        
-        // Khóa nút bấm, hiện trạng thái loading
         document.getElementById("submitBtn").style.display = "none";
         document.getElementById("loading").style.display = "block";
 
-        // Khởi tạo mảng chứa 49 cột trống
         let rowData = new Array(49).fill("");
         
-        // Đưa dữ liệu vào đúng vị trí Index cột
         for (let i = 0; i <= 43; i++) {
             let field = document.getElementById("col" + i);
             if (field) {
@@ -170,25 +164,15 @@
         }
 
         try {
-            // Xử lý 4 file ảnh
             let img4x6 = await fileToBase64(document.getElementById("img4x6").files[0]);
             let imgCCCD = await fileToBase64(document.getElementById("imgCCCD").files[0]);
             let imgSTK = await fileToBase64(document.getElementById("imgSTK").files[0]);
             let imgBHXH = await fileToBase64(document.getElementById("imgBHXH").files[0]);
 
-            // Đóng gói dữ liệu
-            let payload = {
-                rowData: rowData,
-                img4x6: img4x6,
-                imgCCCD: imgCCCD,
-                imgSTK: imgSTK,
-                imgBHXH: imgBHXH
-            };
+            let payload = { rowData: rowData, img4x6: img4x6, imgCCCD: imgCCCD, imgSTK: imgSTK, imgBHXH: imgBHXH };
 
-            // LINK APPS SCRIPT CỦA BẠN (Không cần sửa)
             const URL_APP_SCRIPT = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 
-            // Bắn dữ liệu đi
             let res = await fetch(URL_APP_SCRIPT, {
                 method: "POST",
                 body: JSON.stringify(payload),
@@ -199,19 +183,17 @@
             
             if(result.status === "success"){
                 alert("🎉 Gửi hồ sơ thành công! Dữ liệu đã được lưu vào Google Sheets.");
-                document.getElementById("hrForm").reset(); // Xóa trắng form để người sau điền
+                document.getElementById("hrForm").reset(); 
             } else {
                 alert("❌ Lỗi từ máy chủ: " + result.message);
             }
         } catch (error) {
             alert("❌ Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng! " + error);
         } finally {
-            // Mở khóa nút bấm
             document.getElementById("submitBtn").style.display = "block";
             document.getElementById("loading").style.display = "none";
         }
     });
 </script>
-
 </body>
 </html>
