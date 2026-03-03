@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Hệ thống quản trị - Xuất hồ sơ PDF</title>
 
-  <!-- PDF libs -->
+  <!-- pdf-lib -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
@@ -34,10 +34,8 @@
     }
     h2{
       color:var(--blue);text-align:center;text-transform:uppercase;
-      margin:10px 0 16px;
-      letter-spacing:.5px;
+      margin:10px 0 16px;letter-spacing:.5px;
     }
-
     .topbar{
       display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
       margin:10px 0 14px;
@@ -47,16 +45,13 @@
     .btn{
       border:none;padding:10px 14px;cursor:pointer;border-radius:8px;
       font-weight:700;display:inline-flex;gap:8px;align-items:center;
-      transition:.15s ease-in-out;
-      user-select:none;
+      transition:.15s ease-in-out;user-select:none;
     }
     .btn-reload{background:var(--success);color:#fff}
     .btn-reload:hover{background:var(--success-hover)}
     .btn-export{background:var(--danger);color:#fff;padding:8px 12px;border-radius:7px}
     .btn-export:hover{background:var(--danger-hover)}
-    .btn-ghost{
-      background:#eef2ff;color:#1e3a8a;border:1px solid #dbeafe;font-weight:700;
-    }
+    .btn-ghost{background:#eef2ff;color:#1e3a8a;border:1px solid #dbeafe;font-weight:700}
     .btn-ghost:hover{filter:brightness(.98)}
     .pill{
       padding:8px 10px;border:1px solid var(--border);border-radius:10px;
@@ -67,22 +62,19 @@
       min-width:260px;outline:none;
     }
     input[type="text"]:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
-
     #status{
-      color:#7c2d12;font-weight:700;margin-top:10px;white-space:pre-wrap;
+      color:#7c2d12;font-weight:800;margin-top:10px;white-space:pre-wrap;
       background:var(--warn-bg);padding:12px 14px;border-radius:10px;
       display:none;line-height:1.6;border:1px solid var(--warn-border);
     }
-
     table{width:100%;border-collapse:collapse;margin-top:14px;overflow:hidden;border-radius:10px}
     th,td{border:1px solid var(--border);padding:10px;text-align:left;font-size:14px;vertical-align:top}
     th{background:var(--blue);color:#fff}
     tbody tr:hover{background:#f9fafb}
-    .name{font-weight:800}
+    .name{font-weight:900}
     .muted{color:var(--muted);font-size:12px}
     .nowrap{white-space:nowrap}
     .center{text-align:center}
-
     @media (max-width: 768px){
       body{padding:10px}
       .container{padding:14px}
@@ -94,142 +86,147 @@
 </head>
 
 <body>
-  <div class="container">
-    <h2>HỆ THỐNG QUẢN TRỊ - XUẤT HỒ SƠ PDF</h2>
+<div class="container">
+  <h2>HỆ THỐNG QUẢN TRỊ - XUẤT HỒ SƠ PDF</h2>
 
-    <div class="topbar">
-      <div class="left-actions">
-        <button class="btn btn-reload" onclick="loadData()">🔄 Tải lại dữ liệu</button>
-        <button class="btn btn-ghost" onclick="testImgEndpoint()">🧪 Test ảnh (endpoint)</button>
-      </div>
-      <div class="right-actions">
-        <input id="searchBox" type="text" placeholder="Tìm theo tên / CCCD / SĐT..." oninput="renderTable()"/>
-        <span class="pill" id="countPill">0 hồ sơ</span>
-      </div>
+  <div class="topbar">
+    <div class="left-actions">
+      <button class="btn btn-reload" onclick="loadData()">🔄 Tải lại dữ liệu</button>
+      <button class="btn btn-ghost" onclick="quickDiag()">🧪 Test ảnh (endpoint)</button>
     </div>
-
-    <div id="status"></div>
-
-    <table>
-      <thead>
-        <tr>
-          <th class="nowrap">Ngày nộp</th>
-          <th>Họ tên</th>
-          <th>Nơi sinh</th>
-          <th>CCCD</th>
-          <th>SĐT</th>
-          <th class="center nowrap">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="6" class="center">Bấm “Tải lại dữ liệu” để hiển thị...</td></tr>
-      </tbody>
-    </table>
+    <div class="right-actions">
+      <input id="searchBox" type="text" placeholder="Tìm theo tên / CCCD / SĐT..." oninput="renderTable()"/>
+      <span class="pill" id="countPill">0 hồ sơ</span>
+    </div>
   </div>
 
+  <div id="status"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="nowrap">Ngày nộp</th>
+        <th>Họ tên</th>
+        <th>Nơi sinh</th>
+        <th>CCCD</th>
+        <th>SĐT</th>
+        <th class="center nowrap">Thao tác</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr><td colspan="6" class="center">Bấm “Tải lại dữ liệu” để hiển thị...</td></tr>
+    </tbody>
+  </table>
+</div>
+
 <script>
-/** ================== CONFIG ================== **/
+/** ================== CONFIG (SỬA 2 DÒNG NÀY) ================== **/
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-const PDF_TEMPLATE_URL = "template.pdf"; // phải nằm cùng folder admin.html
+const PDF_TEMPLATE_URL = "template.pdf";  // phải nằm cùng thư mục admin.html
+
+/** Font */
 const FONT_URL = "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf";
 
 /**
- * Nếu sheet của bạn đang trả dạng MẢNG (row array), đây là map index dùng để fill PDF.
- * Nếu sau này script trả dạng OBJECT theo key, code vẫn chạy (getVal() tự hiểu).
+ * Mapping cột khi dữ liệu trả về là ARRAY (emp[?]).
+ * Nếu sheet của bạn không có header, code sẽ dùng các index này.
+ * (Bạn có thể sửa nhanh tại đây nếu cột bị lệch)
  */
 const IDX = {
-  hoTen: 0,
-  hocLuc: 1,
-  msnv: 2,
-  ngaySinh: 3,
-  gioiTinh: 4,
-  noiSinh: 5,
-  boPhan: 6,
-  viTri: 7,
-  mucLuong: 9,
-  ngayVaoLam: 10,
-  tinh: 18,
-  cccd: 19,
-  ngayCapCccd: 20,
-  sdt: 21,
-  nganhNghe: 29,
-  daiHoc: 30,
+  HO_TEN: 0,
+  HOC_LUC: 1,
+  NOI_SINH: 2,          // <-- theo code gốc của bạn trước đó: emp[2] là "BÌNH DƯƠNG"
+  NGAY_SINH: 3,
+  GIOI_TINH: 4,
+  NOI_SINH_ALT: 5,      // <-- fallback
+  BO_PHAN: 6,
+  VI_TRI: 7,
+  MUC_LUONG: 9,
+  NGAY_VAO_LAM: 10,
+  TINH: 18,
+  CCCD: 19,
+  NGAY_CAP_CCCD: 20,
+  SDT: 21,
+  NGANH_NGHE: 29,
+  DAI_HOC: 30,
 
-  // Link/ID ảnh (tùy sheet bạn đang lưu)
-  anhThe: 44,
-  cccdAnh: 45,    // có thể là link mặt trước / hoặc 1 link chung
-  anhSTK: 46,
-  anhSoBHXH: 47,
-  ngayNop: 48,
+  IMG_ANH_THE: 44,
+  IMG_CCCD: 45,
+  IMG_STK: 46,
+  IMG_SOBHXH: 47,
+  NGAY_NOP: 48,
 };
 
 /**
- * Mapping field trên PDF template (tên field phải khớp với template.pdf)
- * Nếu template của bạn đặt tên hơi khác, cứ sửa tại đây.
+ * Tên field trong template.pdf (cho TEXT)
+ * Bạn không cần sửa nếu template giống của bạn hiện tại.
  */
-const PDF_FIELDS = {
-  hoTen: ["Họ Tên", "Ho Ten", "HOTEN"],
-  msnv: ["MSNV", "Mã số", "Ma so"],
-  hocLuc: ["Học Lực", "Hoc Luc"],
-  noiSinh: ["Nơi Sinh", "Noi Sinh"],
-  ngaySinh: ["Ngày sinh", "Ngày_sinh", "Ngay sinh"],
-  ngayVaoLam: ["Ngày vào làm", "Ngay vao lam"],
-  boPhan: ["Bộ phận", "Bo phan"],
-  viTri: ["Vị trí", "Vi tri"],
-  mucLuong: ["Mức lương căn bản", "Muc luong can ban"],
-  tinh: ["Tỉnh", "Tinh"],
-  cccd: ["CCCD", "CMND"],
-  ngayCapCccd: ["Ngày cấp CCCD", "Ngay cap CCCD"],
-  sdt: ["SDT", "SĐT", "Phone"],
-  nganhNghe: ["Ngành nghề", "Nganh nghe"],
-  daiHoc: ["Đại học", "Dai hoc"],
-  cbNam: ["Nam"],
-  cbNu: ["Nữ", "Nu"],
-};
+const PDF_TEXT_FIELDS = [
+  { names:["Họ Tên","Ho Ten","HOTEN"], get:(emp)=>getCell(emp,"Họ Tên", IDX.HO_TEN) },
+  { names:["MSNV","Mã số","Ma so"],   get:(emp)=>getCell(emp,"MSNV", IDX.MSNV) }, // nếu không có, sẽ tự rỗng
+  { names:["Học Lực","Hoc Luc"],      get:(emp)=>getCell(emp,"Học Lực", IDX.HOC_LUC) },
+  { names:["Nơi Sinh","Noi Sinh"],    get:(emp)=>getPlaceBirth(emp) },
+  { names:["Ngày sinh","Ngày_sinh","Ngay sinh"], get:(emp)=>formatDateAny(getCell(emp,"Ngày sinh", IDX.NGAY_SINH)) },
+  { names:["Ngày vào làm","Ngay vao lam"], get:(emp)=>formatDateAny(getCell(emp,"Ngày vào làm", IDX.NGAY_VAO_LAM)) },
+  { names:["Bộ phận","Bo phan"],      get:(emp)=>getCell(emp,"Bộ phận", IDX.BO_PHAN) },
+  { names:["Vị trí","Vi tri"],        get:(emp)=>getCell(emp,"Vị trí", IDX.VI_TRI) },
+  { names:["Mức lương căn bản","Muc luong can ban"], get:(emp)=>getCell(emp,"Mức lương", IDX.MUC_LUONG) },
+  { names:["Tỉnh","Tinh"],            get:(emp)=>getCell(emp,"Tỉnh", IDX.TINH) },
+  { names:["CCCD","CMND"],            get:(emp)=>getCell(emp,"CCCD", IDX.CCCD) },
+  { names:["Ngày cấp CCCD","Ngay cap CCCD"], get:(emp)=>formatDateAny(getCell(emp,"Ngày cấp CCCD", IDX.NGAY_CAP_CCCD)) },
+  { names:["SDT","SĐT","Phone"],      get:(emp)=>getCell(emp,"SĐT", IDX.SDT) },
+  { names:["Ngành nghề","Nganh nghe"], get:(emp)=>getCell(emp,"Ngành nghề", IDX.NGANH_NGHE) },
+  { names:["Đại học","Dai hoc"],      get:(emp)=>getCell(emp,"Đại học", IDX.DAI_HOC) },
+];
 
-const PDF_IMAGES = [
-  // fieldName(s), srcKey, pageIndex(0-based), label
-  { names:["Ảnh cá nhân_af_image","Ảnh cá nhân","Anh ca nhan"], src:"anhThe", page:2, label:"Ảnh thẻ 4x6" },
-  { names:["Ảnh STK _af_image","Ảnh STK_af_image","Ảnh STK","Anh STK"], src:"anhSTK", page:1, label:"Ảnh thẻ ngân hàng" },
-  { names:["Ảnh SoBHXH_af_image","Ảnh Sổ BHXH","SoBHXH"], src:"anhSoBHXH", page:1, label:"Ảnh sổ BHXH" },
-
-  { names:["CCCC_ANH_1_af_image","CCCD_ANH_1","CCCD_TRUOC"], src:"cccdFront", page:3, label:"CCCD mặt trước" },
-  { names:["CCCC_ANH_2_af_image","CCCD_ANH_2","CCCD_SAU"], src:"cccdBack", page:3, label:"CCCD mặt sau" },
-
-  { names:["Ảnh DDCN_af_image","Ảnh ĐDCN","DINH_DANH"], src:"dinhDanh", page:3, label:"Ảnh định danh" },
+/**
+ * Tên field trong template.pdf (cho ẢNH)
+ * KHÔNG dùng pageIndex đoán nữa -> tự tìm đúng trang từ widget.
+ */
+const PDF_IMAGE_FIELDS = [
+  { label:"Ảnh thẻ 4x6",   names:["Ảnh cá nhân_af_image","Ảnh cá nhân","Anh ca nhan"],        src:(emp)=>getCell(emp,"Ảnh thẻ", IDX.IMG_ANH_THE) },
+  { label:"Ảnh thẻ ngân hàng", names:["Ảnh STK _af_image","Ảnh STK_af_image","Ảnh STK","Anh STK"], src:(emp)=>getCell(emp,"Ảnh STK", IDX.IMG_STK) },
+  { label:"Ảnh sổ BHXH",   names:["Ảnh SoBHXH_af_image","Ảnh Sổ BHXH","SoBHXH"],              src:(emp)=>getCell(emp,"Ảnh BHXH", IDX.IMG_SOBHXH) },
+  { label:"CCCD mặt trước",names:["CCCC_ANH_1_af_image","CCCD_ANH_1","CCCD_TRUOC"],          src:(emp)=>getCell(emp,"Ảnh CCCD", IDX.IMG_CCCD) },
+  { label:"CCCD mặt sau",  names:["CCCC_ANH_2_af_image","CCCD_ANH_2","CCCD_SAU"],            src:(emp)=>getCell(emp,"Ảnh CCCD", IDX.IMG_CCCD) },
+  { label:"Ảnh định danh", names:["Ảnh DDCN_af_image","Ảnh ĐDCN","DINH_DANH"],               src:(emp)=>getCell(emp,"Ảnh CCCD", IDX.IMG_CCCD) },
 ];
 
 /** ================== STATE ================== **/
-let rowsRaw = [];
-let rowsNorm = [];
+let rows = [];            // raw rows (array rows)
+let headerMap = null;     // nếu có header -> map tên cột -> index
 
-/** ================== HELPERS ================== **/
+/** ================== UI HELPERS ================== **/
 const $ = (id)=>document.getElementById(id);
 
 function showStatus(text){
-  const st = $("status");
-  st.style.display = "block";
-  st.innerText = text;
+  $("status").style.display = "block";
+  $("status").innerText = text;
 }
 function appendStatus(text){
-  const st = $("status");
-  st.style.display = "block";
-  st.innerText += text;
+  $("status").style.display = "block";
+  $("status").innerText += text;
 }
 function hideStatusSoon(ms=2000){
-  setTimeout(()=>{$("status").style.display="none";}, ms);
+  setTimeout(()=>{ $("status").style.display="none"; }, ms);
 }
 
+/** ================== TEXT / DATE HELPERS ================== **/
 function toText(v){
   if (v === null || v === undefined) return "";
   return String(v).trim();
 }
-
+function escapeHtml(s){
+  return toText(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 function formatDateAny(v){
-  if (!v) return "";
-  // Nếu sheet trả kiểu "03/03/2026" => giữ nguyên
   const s = toText(v);
-  // Nếu ISO / Date parse được => format dd/mm/yyyy
+  if (!s) return "";
   const d = new Date(s);
   if (!isNaN(d.getTime())){
     const dd = String(d.getDate()).padStart(2,"0");
@@ -240,66 +237,93 @@ function formatDateAny(v){
   return s;
 }
 
-/**
- * normalize: hỗ trợ cả row dạng ARRAY và row dạng OBJECT
- */
-function getVal(row, key, idx, fallbackIdx){
-  if (!row) return "";
-  if (typeof row === "object" && !Array.isArray(row)){
-    if (row[key] !== undefined) return row[key];
-    // thử thêm vài key hay gặp
-    const altKeyMap = {
-      hoTen: ["hoten","ho_ten","name","Họ Tên","HọTên"],
-      msnv: ["msnv","ma_so","mã_số","employee_id"],
-      noiSinh: ["noiSinh","noisinh","placeOfBirth","Nơi sinh"],
-      cccd: ["cccd","cmnd","idNumber","CCCD"],
-      sdt: ["sdt","phone","tel","SĐT"],
-      ngayNop: ["ngayNop","createdAt","timestamp","Ngày nộp"],
-      anhThe: ["anhThe","avatar","photo","Ảnh thẻ"],
-      cccdAnh: ["cccdAnh","cccd","anhCccd","Ảnh CCCD"],
-      anhSTK: ["anhSTK","bankCard","stk"],
-      anhSoBHXH: ["anhSoBHXH","bhxh","soBhxh"],
-      cccdFront: ["cccdFront","cccdTruoc","cccd_mat_truoc"],
-      cccdBack: ["cccdBack","cccdSau","cccd_mat_sau"],
-      dinhDanh: ["dinhDanh","face","selfie"],
-    };
-    const alts = altKeyMap[key] || [];
-    for (const k of alts){
-      if (row[k] !== undefined) return row[k];
-    }
-    return "";
+/** ================== HEADER DETECT + CELL GET ================== **/
+function normKey(s){
+  return toText(s).toLowerCase().replace(/\s+/g,"").replace(/_/g,"").replace(/-/g,"");
+}
+function buildHeaderMapIfAny(data){
+  headerMap = null;
+  if (!Array.isArray(data) || data.length < 2) return;
+
+  const r0 = data[0];
+  if (!Array.isArray(r0)) return;
+
+  // nhận header nếu có nhiều string "Họ" "Tên" "CCCD"...
+  const joined = r0.map(x=>toText(x).toLowerCase()).join(" | ");
+  const looksHeader = joined.includes("họ") || joined.includes("ho") || joined.includes("cccd") || joined.includes("sđt") || joined.includes("sdt");
+  if (!looksHeader) return;
+
+  const map = {};
+  for (let i=0;i<r0.length;i++){
+    const k = normKey(r0[i]);
+    if (k) map[k] = i;
   }
-  // array
-  if (Array.isArray(row)){
-    if (idx !== undefined && row[idx] !== undefined) return row[idx];
-    if (fallbackIdx !== undefined && row[fallbackIdx] !== undefined) return row[fallbackIdx];
-    return "";
+  headerMap = map;
+}
+function getByHeader(emp, labelCandidates){
+  if (!headerMap) return "";
+  for (const lb of labelCandidates){
+    const k = normKey(lb);
+    if (headerMap[k] !== undefined) return emp[headerMap[k]];
   }
   return "";
 }
+function getCell(emp, logicalLabel, fallbackIndex){
+  // ưu tiên header nếu có
+  if (headerMap){
+    const v = getByHeader(emp, [
+      logicalLabel,
+      logicalLabel.replaceAll(" ", ""),
+      logicalLabel.replaceAll("Đ","D"),
+      logicalLabel.replaceAll("đ","d"),
+    ]);
+    if (toText(v)) return v;
+  }
+  // fallback array index
+  if (Array.isArray(emp) && fallbackIndex !== undefined && emp[fallbackIndex] !== undefined) return emp[fallbackIndex];
+  return "";
+}
+function getPlaceBirth(emp){
+  // ưu tiên cột NOI_SINH, nếu nó giống timestamp thì thử ALT
+  const v1 = getCell(emp, "Nơi sinh", IDX.NOI_SINH);
+  const s1 = toText(v1);
+  if (s1 && !(s1.includes("T") && s1.includes("Z"))) return v1;
 
+  const v2 = getCell(emp, "Nơi sinh", IDX.NOI_SINH_ALT);
+  const s2 = toText(v2);
+  if (s2) return v2;
+
+  // nếu vẫn là ISO, format cho đỡ xấu
+  if (s1) return formatDateAny(s1);
+  return "";
+}
+
+/** ================== DRIVE ID PARSE ================== **/
 function extractDriveId(input){
-  if (!input) return null;
-  const s = String(input).trim();
+  const s = toText(input);
+  if (!s) return null;
 
-  // data uri
+  // data url
   if (s.startsWith("data:image/")) return null;
 
-  // /d/FILEID/
+  // /d/ID/
   let m = s.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
   if (m) return m[1];
 
-  // id=FILEID
+  // thumbnail?id=ID
   m = s.match(/[?&]id=([a-zA-Z0-9_-]{20,})/);
   if (m) return m[1];
 
-  // chỉ là id
+  // raw ID
   m = s.match(/^([a-zA-Z0-9_-]{20,})$/);
+  if (m) return m[1];
+
+  // googleusercontent /d/ID
+  m = s.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]{20,})/);
   if (m) return m[1];
 
   return null;
 }
-
 function base64ToArrayBuffer(base64){
   const binary = atob(base64);
   const len = binary.length;
@@ -309,18 +333,18 @@ function base64ToArrayBuffer(base64){
 }
 
 /**
- * Lấy bytes ảnh theo thứ tự ưu tiên:
- * 1) Apps Script ?action=img&id=...
- * 2) Nếu input là data:image/... base64
- * 3) Fallback: thử proxy (corsproxy/allorigins) như bản cũ nhưng chắc chắn hơn
+ * Lấy bytes ảnh:
+ * 1) Nếu là data:image/... -> decode
+ * 2) Nếu có Drive ID -> gọi Apps Script action=img
+ * 3) Nếu là URL http -> thử fetch qua proxy
  */
-async function fetchImagePack(driveUrlOrId){
-  const input = toText(driveUrlOrId);
-  if (!input) return null;
+async function fetchImagePack(src){
+  const s = toText(src);
+  if (!s) return null;
 
-  // 2) data uri
-  if (input.startsWith("data:image/")){
-    const parts = input.split(",");
+  // 1) data url
+  if (s.startsWith("data:image/")){
+    const parts = s.split(",");
     if (parts.length < 2) return null;
     const meta = parts[0]; // data:image/png;base64
     const b64 = parts[1];
@@ -328,9 +352,9 @@ async function fetchImagePack(driveUrlOrId){
     return { bytes: base64ToArrayBuffer(b64), mime };
   }
 
-  const id = extractDriveId(input);
+  // 2) drive id -> script endpoint
+  const id = extractDriveId(s);
   if (id){
-    // 1) Apps Script endpoint (ổn định nhất)
     try{
       const url = `${SCRIPT_URL}?action=img&id=${encodeURIComponent(id)}&v=${Date.now()}`;
       const res = await fetch(url);
@@ -341,25 +365,21 @@ async function fetchImagePack(driveUrlOrId){
         }
       }
     }catch(e){}
+  }
 
-    // 3) fallback proxies (hên xui)
-    const direct = `https://drive.google.com/uc?export=download&id=${id}`;
+  // 3) URL http -> proxy
+  if (s.startsWith("http://") || s.startsWith("https://")){
     const tries = [
-      `https://corsproxy.io/?${encodeURIComponent(direct)}`,
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`
+      `https://corsproxy.io/?${encodeURIComponent(s)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(s)}`
     ];
-
     for (const u of tries){
       try{
         const res = await fetch(u);
         if (!res.ok) continue;
-
         const ct = (res.headers.get("content-type") || "").toLowerCase();
         const buf = await res.arrayBuffer();
-        if (buf && buf.byteLength > 1000){
-          // dù ct không phải image, vẫn thử embed
-          return { bytes: buf, mime: ct };
-        }
+        if (buf && buf.byteLength > 1000) return { bytes: buf, mime: ct };
       }catch(e){}
     }
   }
@@ -367,18 +387,16 @@ async function fetchImagePack(driveUrlOrId){
   return null;
 }
 
-/**
- * Field finder: khớp tên field linh hoạt (case-insensitive, bỏ khoảng trắng)
- */
-function normalizeName(s){
+/** ================== PDF FIELD FINDERS ================== **/
+function normalizeFieldName(s){
   return toText(s).toLowerCase().replace(/\s+/g,"").replace(/_/g,"").replace(/-/g,"");
 }
 function findFieldByCandidates(form, candidates){
   const all = form.getFields();
-  const want = candidates.map(normalizeName);
+  const wants = candidates.map(normalizeFieldName);
   for (const f of all){
-    const n = normalizeName(f.getName());
-    if (want.includes(n)) return f;
+    const n = normalizeFieldName(f.getName());
+    if (wants.includes(n)) return f;
   }
   return null;
 }
@@ -388,38 +406,85 @@ function trySetText(form, candidates, value, font){
   try{
     const field = findFieldByCandidates(form, candidates);
     if (!field) return;
-    // text field
     if (field.setText){
       field.setText(v);
       if (field.updateAppearances) field.updateAppearances(font);
     }
   }catch(e){}
 }
-function tryCheck(form, candidates, shouldCheck){
-  if (!shouldCheck) return;
+function tryCheckGender(form, gtLower){
   try{
-    const field = findFieldByCandidates(form, candidates);
-    if (!field) return;
-    if (field.check) field.check();
+    if (gtLower === "nam"){
+      const f = findFieldByCandidates(form, ["Nam"]);
+      if (f && f.check) f.check();
+    }else if (gtLower === "nữ" || gtLower === "nu" || gtLower === "female"){
+      const f = findFieldByCandidates(form, ["Nữ","Nu"]);
+      if (f && f.check) f.check();
+    }
   }catch(e){}
 }
 
-/** Xóa field nền trắng + vẽ ảnh lên đúng rect */
-async function putImageOverField(form, pdfDoc, fieldCandidates, srcValue, pageIndex, label){
+/**
+ * ✅ FIX CHÍNH: tìm đúng trang chứa widget annotation của field ảnh.
+ */
+function findPageIndexForWidget(pdfDoc, widget){
+  try{
+    const pages = pdfDoc.getPages();
+    const wref = widget?.ref ? widget.ref.toString() : null;
+    if (!wref) return null;
+
+    for (let i=0;i<pages.length;i++){
+      const annots = pages[i].node?.Annots?.();
+      if (!annots) continue;
+      const arr = annots.asArray ? annots.asArray() : [];
+      for (const a of arr){
+        if (a && a.toString && a.toString() === wref) return i;
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
+async function embedImage(pdfDoc, pack){
+  if (!pack || !pack.bytes) return null;
+  const mime = (pack.mime || "").toLowerCase();
+
+  // ưu tiên theo mime, fallback thử cả 2
+  try{
+    if (mime.includes("png")) return await pdfDoc.embedPng(pack.bytes);
+    return await pdfDoc.embedJpg(pack.bytes);
+  }catch(e){
+    try{ return await pdfDoc.embedPng(pack.bytes); }catch(e2){}
+    try{ return await pdfDoc.embedJpg(pack.bytes); }catch(e3){}
+  }
+  return null;
+}
+
+/**
+ * Nhúng ảnh đè lên field: lấy rect + auto pageIndex + remove field + drawImage
+ */
+async function putImageOverField(form, pdfDoc, fieldCandidates, srcValue, label){
   const field = findFieldByCandidates(form, fieldCandidates);
   if (!field){
-    appendStatus(`\n⚠️ Không tìm thấy field ảnh: ${fieldCandidates[0]} (${label})`);
+    appendStatus(`\n⏳ Nhúng ảnh: ${label}... ⚠️ Không thấy field trong PDF`);
     return;
   }
 
   const widgets = field.acroField?.getWidgets?.() || [];
   if (!widgets.length){
-    appendStatus(`\n⚠️ Field ảnh không có widget: ${fieldCandidates[0]} (${label})`);
+    appendStatus(`\n⏳ Nhúng ảnh: ${label}... ⚠️ Field không có widget`);
     return;
   }
-  const rect = widgets[0].getRectangle();
 
-  appendStatus(`\n⏳ Nhúng ảnh: ${label}...`);
+  const widget = widgets[0];
+  const rect = widget.getRectangle();
+
+  const autoPageIndex = findPageIndexForWidget(pdfDoc, widget);
+  const pages = pdfDoc.getPages();
+  const pageIndex = (autoPageIndex !== null) ? autoPageIndex : 0;
+  const page = pages[pageIndex] || pages[0];
+
+  appendStatus(`\n⏳ Nhúng ảnh: ${label}... (page=${pageIndex})`);
 
   const pack = await fetchImagePack(srcValue);
   if (!pack || !pack.bytes){
@@ -427,30 +492,19 @@ async function putImageOverField(form, pdfDoc, fieldCandidates, srcValue, pageIn
     return;
   }
 
-  let img = null;
-  try{
-    const mime = (pack.mime || "").toLowerCase();
-    if (mime.includes("png")) img = await pdfDoc.embedPng(pack.bytes);
-    else img = await pdfDoc.embedJpg(pack.bytes);
-  }catch(e){
-    // fallback thử lần lượt
-    try{ img = await pdfDoc.embedPng(pack.bytes); }
-    catch(e2){
-      try{ img = await pdfDoc.embedJpg(pack.bytes); }
-      catch(e3){
-        appendStatus(` ❌ Bytes không phải ảnh hợp lệ.`);
-        return;
-      }
-    }
+  const img = await embedImage(pdfDoc, pack);
+  if (!img){
+    appendStatus(` ❌ Bytes không phải ảnh hợp lệ.`);
+    return;
   }
 
-  try{
-    // xóa field để mất nền trắng
-    form.removeField(field.getName());
-  }catch(e){}
+  // remove field (xóa cái box trắng/annotation)
+  try{ form.removeField(field); }
+  catch(e){
+    try{ form.removeField(field.getName()); }catch(e2){}
+  }
 
-  const pages = pdfDoc.getPages();
-  const page = pages[pageIndex] || pages[0];
+  // draw image đúng vị trí
   page.drawImage(img, { x: rect.x, y: rect.y, width: rect.width, height: rect.height });
 
   appendStatus(` ✅ OK`);
@@ -460,68 +514,68 @@ async function putImageOverField(form, pdfDoc, fieldCandidates, srcValue, pageIn
 async function loadData(){
   showStatus("⏳ Đang tải dữ liệu...");
   try{
-    const res = await fetch(`${SCRIPT_URL}?action=data&v=${Date.now()}`);
+    // ưu tiên action=data nếu script có, fallback gọi thẳng nếu không
+    let res = await fetch(`${SCRIPT_URL}?action=data&v=${Date.now()}`);
+    if (!res.ok){
+      res = await fetch(`${SCRIPT_URL}?v=${Date.now()}`);
+    }
     const json = await res.json();
 
-    // json có thể là: [rows] hoặc {data:[rows]}
-    rowsRaw = Array.isArray(json) ? json : (json.data || []);
-    // loại bỏ header nếu row đầu là header
-    rowsNorm = rowsRaw.slice();
+    rows = Array.isArray(json) ? json : (json.data || []);
+    buildHeaderMapIfAny(rows);
 
-    // nếu row đầu có chữ "Họ tên" thì remove header
-    if (rowsNorm.length && Array.isArray(rowsNorm[0])){
-      const head0 = toText(rowsNorm[0][0]).toLowerCase();
-      if (head0.includes("họ") || head0.includes("ho")) rowsNorm.shift();
-    }
+    // nếu có header row thì bỏ row 0
+    if (headerMap) rows = rows.slice(1);
 
     renderTable();
     showStatus("✅ Tải dữ liệu thành công!");
-    hideStatusSoon(1500);
+    hideStatusSoon(1200);
   }catch(e){
     showStatus("❌ Lỗi tải dữ liệu: " + (e?.message || e));
   }
 }
 
-function rowToSearchText(row){
-  const name = toText(getVal(row,"hoTen",IDX.hoTen));
-  const cccd = toText(getVal(row,"cccd",IDX.cccd));
-  const sdt  = toText(getVal(row,"sdt",IDX.sdt));
-  const msnv = toText(getVal(row,"msnv",IDX.msnv));
-  return `${name} ${cccd} ${sdt} ${msnv}`.toLowerCase();
+function rowSearchText(emp){
+  const name = toText(getCell(emp,"Họ Tên", IDX.HO_TEN));
+  const cccd = toText(getCell(emp,"CCCD", IDX.CCCD));
+  const sdt  = toText(getCell(emp,"SĐT", IDX.SDT));
+  return `${name} ${cccd} ${sdt}`.toLowerCase();
 }
 
 function renderTable(){
   const q = toText($("searchBox").value).toLowerCase();
-  let list = rowsNorm.filter(r=>{
-    const name = toText(getVal(r,"hoTen",IDX.hoTen));
-    if (!name) return false;
-    if (!q) return true;
-    return rowToSearchText(r).includes(q);
-  });
 
-  // mới nhất lên trước
-  list = list.slice().reverse();
+  const list = rows
+    .filter(emp=>{
+      const name = toText(getCell(emp,"Họ Tên", IDX.HO_TEN));
+      if (!name) return false;
+      if (!q) return true;
+      return rowSearchText(emp).includes(q);
+    })
+    .slice()
+    .reverse(); // mới nhất lên trước
 
   $("countPill").innerText = `${list.length} hồ sơ`;
 
   let html = "";
-  list.forEach((row, viewIndex)=>{
-    const realIndex = rowsNorm.length - 1 - viewIndex; // index theo rowsNorm
-    const ngayNop = formatDateAny(getVal(row,"ngayNop",IDX.ngayNop));
-    const hoTen = toText(getVal(row,"hoTen",IDX.hoTen));
-    const noiSinh = toText(getVal(row,"noiSinh",IDX.noiSinh, IDX.msnv)); // fallback nếu sheet lệch
-    const cccd = toText(getVal(row,"cccd",IDX.cccd));
-    const sdt  = toText(getVal(row,"sdt",IDX.sdt));
+  list.forEach((emp, viewIndex)=>{
+    const actualIndex = rows.length - 1 - viewIndex;
+
+    const ngayNop = formatDateAny(getCell(emp,"Ngày nộp", IDX.NGAY_NOP));
+    const hoTen   = toText(getCell(emp,"Họ Tên", IDX.HO_TEN));
+    const noiSinh = toText(getPlaceBirth(emp));
+    const cccd    = toText(getCell(emp,"CCCD", IDX.CCCD));
+    const sdt     = toText(getCell(emp,"SĐT", IDX.SDT));
 
     html += `
       <tr>
-        <td class="nowrap">${ngayNop || "<span class='muted'>(trống)</span>"}</td>
+        <td class="nowrap">${escapeHtml(ngayNop)}</td>
         <td><div class="name">${escapeHtml(hoTen)}</div></td>
         <td>${escapeHtml(noiSinh)}</td>
         <td class="nowrap">${escapeHtml(cccd)}</td>
         <td class="nowrap">${escapeHtml(sdt)}</td>
         <td class="center">
-          <button class="btn-export" onclick="generatePDFByViewIndex(${realIndex})">📄 XUẤT PDF</button>
+          <button class="btn-export" onclick="generatePDF(${actualIndex})">📄 XUẤT PDF</button>
         </td>
       </tr>
     `;
@@ -530,38 +584,14 @@ function renderTable(){
   $("tableBody").innerHTML = html || `<tr><td colspan="6" class="center">Chưa có dữ liệu.</td></tr>`;
 }
 
-function escapeHtml(s){
-  return toText(s)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-/** ================== PDF EXPORT ================== **/
-function pickImageSources(row){
-  // Ưu tiên key object nếu có; còn không thì index.
-  const anhThe = getVal(row,"anhThe",IDX.anhThe);
-  const anhSTK = getVal(row,"anhSTK",IDX.anhSTK);
-  const anhSoBHXH = getVal(row,"anhSoBHXH",IDX.anhSoBHXH);
-
-  // CCCD: nếu có front/back riêng thì dùng, không thì dùng 1 link chung
-  const cccdFront = getVal(row,"cccdFront", undefined) || getVal(row,"cccdAnh",IDX.cccdAnh);
-  const cccdBack  = getVal(row,"cccdBack", undefined)  || getVal(row,"cccdAnh",IDX.cccdAnh);
-  const dinhDanh  = getVal(row,"dinhDanh", undefined)  || getVal(row,"cccdAnh",IDX.cccdAnh);
-
-  return { anhThe, anhSTK, anhSoBHXH, cccdFront, cccdBack, dinhDanh };
-}
-
-async function generatePDFByViewIndex(index){
-  const row = rowsNorm[index];
-  const hoTen = toText(getVal(row,"hoTen",IDX.hoTen)) || "NhanVien";
+/** ================== PDF GENERATE ================== **/
+async function generatePDF(index){
+  const emp = rows[index];
+  const hoTen = toText(getCell(emp,"Họ Tên", IDX.HO_TEN)) || "NhanVien";
 
   showStatus(`🔄 ĐANG XỬ LÝ HỒ SƠ CHO [${hoTen}]...\n----------------------------------------`);
 
   try{
-    // load template (chống cache)
     const tplBytes = await fetch(`${PDF_TEMPLATE_URL}?v=${Date.now()}`).then(r=>r.arrayBuffer());
     const pdfDoc = await PDFLib.PDFDocument.load(tplBytes);
 
@@ -571,47 +601,34 @@ async function generatePDFByViewIndex(index){
 
     const form = pdfDoc.getForm();
 
-    // text fields
-    trySetText(form, PDF_FIELDS.hoTen, getVal(row,"hoTen",IDX.hoTen), customFont);
-    trySetText(form, PDF_FIELDS.msnv, getVal(row,"msnv",IDX.msnv), customFont);
-    trySetText(form, PDF_FIELDS.hocLuc, getVal(row,"hocLuc",IDX.hocLuc), customFont);
-    trySetText(form, PDF_FIELDS.noiSinh, getVal(row,"noiSinh",IDX.noiSinh), customFont);
-    trySetText(form, PDF_FIELDS.ngaySinh, formatDateAny(getVal(row,"ngaySinh",IDX.ngaySinh)), customFont);
-    trySetText(form, PDF_FIELDS.ngayVaoLam, formatDateAny(getVal(row,"ngayVaoLam",IDX.ngayVaoLam)), customFont);
-    trySetText(form, PDF_FIELDS.boPhan, getVal(row,"boPhan",IDX.boPhan), customFont);
-    trySetText(form, PDF_FIELDS.viTri, getVal(row,"viTri",IDX.viTri), customFont);
-    trySetText(form, PDF_FIELDS.mucLuong, getVal(row,"mucLuong",IDX.mucLuong), customFont);
-    trySetText(form, PDF_FIELDS.tinh, getVal(row,"tinh",IDX.tinh), customFont);
-    trySetText(form, PDF_FIELDS.cccd, getVal(row,"cccd",IDX.cccd), customFont);
-    trySetText(form, PDF_FIELDS.ngayCapCccd, formatDateAny(getVal(row,"ngayCapCccd",IDX.ngayCapCccd)), customFont);
-    trySetText(form, PDF_FIELDS.sdt, getVal(row,"sdt",IDX.sdt), customFont);
-    trySetText(form, PDF_FIELDS.nganhNghe, getVal(row,"nganhNghe",IDX.nganhNghe), customFont);
-    trySetText(form, PDF_FIELDS.daiHoc, getVal(row,"daiHoc",IDX.daiHoc), customFont);
-
-    // checkbox giới tính
-    const gt = toText(getVal(row,"gioiTinh",IDX.gioiTinh)).toLowerCase();
-    tryCheck(form, PDF_FIELDS.cbNam, gt === "nam");
-    tryCheck(form, PDF_FIELDS.cbNu, gt === "nữ" || gt === "nu" || gt === "female");
-
-    // images
-    const imgSrc = pickImageSources(row);
-    for (const it of PDF_IMAGES){
-      const srcVal = imgSrc[it.src] || getVal(row, it.src, IDX[it.src]);
-      if (!toText(srcVal)) {
-        appendStatus(`\n⚠️ Bỏ qua ảnh (${it.label}): không có dữ liệu.`);
-        continue;
-      }
-      await putImageOverField(form, pdfDoc, it.names, srcVal, it.page, it.label);
+    // Fill TEXT
+    for (const f of PDF_TEXT_FIELDS){
+      const val = f.get(emp);
+      trySetText(form, f.names, val, customFont);
     }
 
-    // flatten
-    try { form.flatten(); } catch(e){}
+    // Checkbox giới tính
+    const gt = toText(getCell(emp,"Giới tính", IDX.GIOI_TINH)).toLowerCase();
+    tryCheckGender(form, gt);
+
+    // Fill IMAGES (✅ auto page)
+    for (const img of PDF_IMAGE_FIELDS){
+      const srcVal = img.src(emp);
+      if (!toText(srcVal)){
+        appendStatus(`\n⏳ Nhúng ảnh: ${img.label}... ⚠️ Không có dữ liệu`);
+        continue;
+      }
+      await putImageOverField(form, pdfDoc, img.names, srcVal, img.label);
+    }
+
+    // Flatten
+    try{ form.flatten(); }catch(e){}
 
     const outBytes = await pdfDoc.save();
     download(outBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
 
     appendStatus(`\n----------------------------------------\n🎉 XONG!`);
-    hideStatusSoon(2200);
+    hideStatusSoon(2000);
 
   }catch(err){
     console.error(err);
@@ -619,12 +636,16 @@ async function generatePDFByViewIndex(index){
   }
 }
 
-/** ================== QUICK TEST ================== **/
-async function testImgEndpoint(){
-  showStatus("🧪 Test endpoint ảnh...\n- Mục tiêu: SCRIPT_URL?action=img&id=FILE_ID phải trả JSON ok:true");
-  appendStatus("\n➡️ Bạn bấm Xuất PDF nếu vẫn lỗi ảnh thì chắc chắn Apps Script chưa có action=img hoặc chưa đủ quyền Drive.");
+/** ================== QUICK DIAG ================== **/
+function quickDiag(){
+  showStatus(
+`🧪 Test nhanh:
+- Nếu ảnh báo ✅ OK mà vẫn không thấy trên PDF => bản admin cũ vẽ sai trang. Bản này đã FIX bằng auto page.
+- Nếu ảnh báo ❌ Không lấy được bytes ảnh => ô ảnh trong sheet không phải link/ID Drive hợp lệ hoặc script chưa có action=img.`
+  );
 }
 
+/** Auto load */
 window.onload = loadData;
 </script>
 </body>
