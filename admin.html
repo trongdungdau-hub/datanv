@@ -14,7 +14,6 @@
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px;}
         th { background-color: #0056b3; color: white; }
         .btn-export { background-color: #d9534f; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-export:hover { background-color: #c9302c; }
         .btn-reload { background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 10px;}
     </style>
 </head>
@@ -42,20 +41,17 @@
 </div>
 
 <script>
-    // Link API và Template
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
     const PDF_TEMPLATE_URL = "template.pdf"; 
     const FONT_URL = "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf";
 
     let employeesData = [];
 
-    // LẤY ẢNH TRỰC TIẾP TỪ GOOGLE DRIVE (MỚI NHẤT - 100% THÀNH CÔNG)
     function getDirectImageUrl(driveUrl) {
         if (!driveUrl) return null;
         let match = driveUrl.match(/\/d\/(.+?)\//) || driveUrl.match(/id=(.+?)(&|$)/);
         if (match && match[1]) {
-            // Sử dụng LH3 của Google, bỏ qua CORS hoàn toàn
-            return `https://lh3.googleusercontent.com/d/${match[1]}=w1000`;
+            return `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${match[1]}`);
         }
         return null;
     }
@@ -78,13 +74,6 @@
         let str = toText(text);
         if (str !== "") {
             page.drawText(str, { x: x, y: y, font: font, size: size });
-        }
-    }
-
-    // Đánh dấu tick "V"
-    function drawCheck(page, condition, x, y, font) {
-        if (condition) {
-            page.drawText("V", { x: x, y: y, font: font, size: 14 });
         }
     }
 
@@ -120,7 +109,7 @@
     async function generatePDF(index) {
         const emp = employeesData[index]; 
         const hoTen = toText(emp[0]) || 'NhanVien';
-        document.getElementById('status').innerText = `Đang xử lý PDF và tải hình ảnh cho [${hoTen}]... Vui lòng đợi!`;
+        document.getElementById('status').innerText = `Đang xử lý PDF cho [${hoTen}]... KHÔNG tắt trình duyệt!`;
 
         try {
             const existingPdfBytes = await fetch(PDF_TEMPLATE_URL).then(res => res.arrayBuffer());
@@ -131,69 +120,62 @@
             const customFont = await pdfDoc.embedFont(fontBytes);
 
             const pages = pdfDoc.getPages();
-            const page1 = pages[0]; // Trang 1: Lương
-            const page2 = pages[1]; // Trang 2: Ngân hàng
-            const page3 = pages[2]; // Trang 3: Hồ sơ cá nhân
-            const page4 = pages[3]; // Trang 4: Phụ lục
+            const page1 = pages[0]; // Trang 1
+            const page2 = pages[1]; // Trang 2
+            const page3 = pages[2]; // Trang 3
+            const page4 = pages[3]; // Trang 4
 
             const fontSize = 11;
-            let gioiTinh = toText(emp[4]).toLowerCase();
-            let honNhan = toText(emp[17]).toLowerCase();
+            const { rgb } = PDFLib;
 
             // ==========================================================
-            // TRANG 1: BIỂU PHÊ DUYỆT LƯƠNG 
-            // Đã căn chỉnh chính xác theo lưới PDF của bạn
+            // CÔNG TẮC BẬT/TẮT LƯỚI THƯỚC ĐO TỌA ĐỘ
+            // Đổi chữ "true" thành "false" khi bạn đã căn xong tọa độ để xóa lưới đi.
             // ==========================================================
-            drawSafe(page1, emp[0], 130, 705, customFont, 12); // Họ Tên
+            const hienThiThuocDo = true; 
+
+            if (hienThiThuocDo) {
+                [page1, page2, page3, page4].forEach(p => {
+                    if(!p) return;
+                    let w = p.getWidth(); let h = p.getHeight();
+                    // Vẽ các đường dọc (Trục X)
+                    for(let i=0; i<w; i+=50){
+                        p.drawLine({start:{x:i, y:0}, end:{x:i, y:h}, thickness:0.5, color:rgb(1,0,0)});
+                        p.drawText(i.toString(), {x:i, y:15, size:8, color:rgb(1,0,0)});
+                    }
+                    // Vẽ các đường ngang (Trục Y)
+                    for(let j=0; j<h; j+=50){
+                        p.drawLine({start:{x:0, y:j}, end:{x:w, y:j}, thickness:0.5, color:rgb(0,0,1)});
+                        p.drawText(j.toString(), {x:15, y:j, size:8, color:rgb(0,0,1)});
+                    }
+                });
+            }
+
+            // ==========================================================
+            // IN CHỮ (Tọa độ X: Trái qua Phải | Tọa độ Y: Dưới lên Trên)
+            // ==========================================================
+            drawSafe(page1, emp[0], 130, 705, customFont, 14); // Họ Tên
             drawSafe(page1, emp[2], 360, 705, customFont, fontSize); // Số hiệu
             drawSafe(page1, emp[1], 480, 705, customFont, fontSize); // Học lực
-            
             drawSafe(page1, emp[5], 130, 665, customFont, fontSize); // Nơi sinh
             drawSafe(page1, formatDate(emp[3]), 360, 665, customFont, fontSize); // Ngày sinh
             
-            drawCheck(page1, gioiTinh === "nam", 456, 663, customFont); // Tick Nam
-            drawCheck(page1, gioiTinh === "nữ", 500, 663, customFont);  // Tick Nữ
-
-            drawSafe(page1, formatDate(emp[10]), 130, 625, customFont, fontSize); // Ngày bắt đầu làm việc
-            drawSafe(page1, emp[6], 130, 590, customFont, fontSize); // Bộ phận
-            drawSafe(page1, emp[7], 360, 560, customFont, fontSize); // Chức vụ
-            
-            drawSafe(page1, emp[9], 130, 500, customFont, fontSize); // Mức lương VND
-
-            // ==========================================================
-            // TRANG 3: HỒ SƠ NHÂN VIÊN
-            // ==========================================================
-            drawSafe(page3, emp[0], 130, 735, customFont, 12); // Họ Tên
-            
-            drawCheck(page3, gioiTinh === "nam", 328, 735, customFont); // Tick Nam (Trang 3)
-            drawCheck(page3, gioiTinh === "nữ", 328, 720, customFont);  // Tick Nữ (Trang 3)
-            drawCheck(page3, true, 417, 742, customFont); // Tick Quốc tịch VN
-
-            drawSafe(page3, formatDate(emp[3]), 130, 700, customFont, fontSize); // Ngày sinh
-            drawCheck(page3, honNhan.includes("độc thân") || honNhan.includes("chưa"), 328, 705, customFont); // Tick Chưa KH
-            drawCheck(page3, honNhan.includes("đã"), 328, 690, customFont); // Tick Đã KH
-            
-            drawSafe(page3, emp[5], 440, 695, customFont, fontSize); // Nơi sinh (Trang 3)
-            drawSafe(page3, emp[18], 130, 660, customFont, fontSize); // Địa chỉ hộ khẩu
+            drawSafe(page3, emp[0], 130, 735, customFont, 14); // Họ Tên (Trang 3)
             drawSafe(page3, emp[19], 130, 625, customFont, fontSize); // Số CCCD
-            drawSafe(page3, formatDate(emp[20]), 370, 625, customFont, fontSize); // Ngày cấp CCCD
-
-            drawSafe(page3, emp[29], 130, 595, customFont, fontSize); // Học vấn
-            drawSafe(page3, emp[30], 360, 595, customFont, fontSize); // Tên trường
-            drawSafe(page3, emp[21], 460, 595, customFont, fontSize); // SĐT cá nhân
 
             // ==========================================================
-            // CHÈN HÌNH ẢNH LÊN PDF (ĐÃ SỬA LỖI TẢI ẢNH)
+            // CHÈN HÌNH ẢNH (Đã bóp nhỏ width, height để ảnh lọt khung)
             // ==========================================================
             
-            // 1. Ảnh 4x6 (Dán lên góc phải Trang 3)
+            // 1. Ảnh 4x6 (Dán lên Trang 3)
             const url4x6 = getDirectImageUrl(emp[44]);
             if (url4x6 && page3) {
                 try {
                     const imgBytes = await fetch(url4x6).then(res => res.arrayBuffer());
                     const imgEmbed = await pdfDoc.embedJpg(imgBytes);
-                    page3.drawImage(imgEmbed, { x: 455, y: 625, width: 85, height: 115 });
-                } catch (e) { console.log("Không tải được ảnh 4x6"); }
+                    // Đã thu nhỏ ảnh 4x6 (Rộng 90, Cao 120)
+                    page3.drawImage(imgEmbed, { x: 450, y: 620, width: 90, height: 120 });
+                } catch (e) { console.log("Lỗi ảnh 4x6"); }
             }
 
             // 2. Ảnh Thẻ Ngân hàng (Dán lên Trang 2)
@@ -202,17 +184,19 @@
                 try {
                     const imgBytes = await fetch(urlSTK).then(res => res.arrayBuffer());
                     const imgEmbed = await pdfDoc.embedJpg(imgBytes);
-                    page2.drawImage(imgEmbed, { x: 140, y: 250, width: 300, height: 180 });
+                    // Thu nhỏ ảnh thẻ ngân hàng (Rộng 250, Cao 150)
+                    page2.drawImage(imgEmbed, { x: 100, y: 250, width: 250, height: 150 });
                 } catch (e) {}
             }
 
-            // 3. Ảnh Sổ BHXH (Dán lên Trang 2, phía dưới Thẻ NH)
+            // 3. Ảnh Sổ BHXH (Dán lên Trang 2)
             const urlBHXH = getDirectImageUrl(emp[47]);
             if (urlBHXH && page2) {
                 try {
                     const imgBytes = await fetch(urlBHXH).then(res => res.arrayBuffer());
                     const imgEmbed = await pdfDoc.embedJpg(imgBytes);
-                    page2.drawImage(imgEmbed, { x: 140, y: 50, width: 300, height: 180 });
+                    // Thu nhỏ ảnh BHXH
+                    page2.drawImage(imgEmbed, { x: 100, y: 50, width: 250, height: 150 });
                 } catch (e) {}
             }
 
@@ -222,13 +206,11 @@
                 try {
                     const imgBytes = await fetch(urlCCCD).then(res => res.arrayBuffer());
                     const imgEmbed = await pdfDoc.embedJpg(imgBytes);
-                    page4.drawImage(imgEmbed, { x: 140, y: 150, width: 320, height: 200 });
+                    // Thu nhỏ ảnh CCCD
+                    page4.drawImage(imgEmbed, { x: 100, y: 400, width: 300, height: 180 });
                 } catch (e) {}
             }
 
-            // ==========================================================
-            // TẢI FILE VỀ
-            // ==========================================================
             const pdfBytes = await pdfDoc.save();
             download(pdfBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
             document.getElementById('status').innerText = `✅ Đã xuất PDF thành công cho ${hoTen}!`;
