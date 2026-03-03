@@ -2,7 +2,6 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Trị Nhân Sự - Xuất PDF</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
@@ -23,7 +22,7 @@
 
 <div class="container">
     <h2>HỆ THỐNG QUẢN TRỊ - XUẤT HỒ SƠ PDF</h2>
-    <button class="btn-reload" onclick="loadData()">🔄 Tải Lại Dữ Liệu Từ Bảng Tính</button>
+    <button class="btn-reload" onclick="loadData()">🔄 Tải Lại Dữ Liệu Bảng Tính</button>
     <div id="status" style="color: blue; font-style: italic; margin-top: 10px; font-weight: bold;"></div>
     <table>
         <thead>
@@ -32,7 +31,7 @@
                 <th>Họ Tên</th>
                 <th>Nơi sinh</th>
                 <th>CCCD</th>
-                <th>Số điện thoại</th>
+                <th>SĐT</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -49,6 +48,7 @@
 
     let employeesData = [];
 
+    // Bypass CORS để lấy ảnh từ Drive
     function getDirectImageUrl(driveUrl) {
         if (!driveUrl) return null;
         let match = driveUrl.match(/\/d\/(.+?)\//) || driveUrl.match(/id=(.+?)(&|$)/);
@@ -58,13 +58,33 @@
         return null;
     }
 
+    // Ép kiểu chữ chống lỗi Number
     function toText(value) {
         if (value === null || value === undefined) return "";
-        return String(value);
+        return String(value).trim();
+    }
+
+    // Hàm chuyển đổi Ngày tháng (từ dạng thô 0234-04-22T... sang DD/MM/YYYY)
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        let d = new Date(dateStr);
+        if (isNaN(d.getTime())) return toText(dateStr); // Nếu không phải ngày chuẩn thì in nguyên gốc
+        let day = ("0" + d.getDate()).slice(-2);
+        let month = ("0" + (d.getMonth() + 1)).slice(-2);
+        let year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    // Hàm in chữ an toàn
+    function drawSafe(page, text, x, y, font, size) {
+        let str = toText(text);
+        if (str !== "") {
+            page.drawText(str, { x: x, y: y, font: font, size: size });
+        }
     }
 
     async function loadData() {
-        document.getElementById('status').innerText = "Đang tải dữ liệu từ Google Sheets...";
+        document.getElementById('status').innerText = "Đang tải dữ liệu...";
         try {
             let res = await fetch(SCRIPT_URL);
             employeesData = await res.json();
@@ -79,9 +99,9 @@
         let html = '';
         employeesData.slice().reverse().forEach((emp, revIndex) => {
             let actualIndex = employeesData.length - 1 - revIndex; 
-            if (!emp[0]) return;
+            if (!emp[0]) return; 
             html += `<tr>
-                <td>${toText(emp[48])}</td>
+                <td>${formatDate(emp[48])}</td>
                 <td><b>${toText(emp[0])}</b></td>
                 <td>${toText(emp[2])}</td> 
                 <td>${toText(emp[19])}</td>
@@ -106,26 +126,42 @@
             const customFont = await pdfDoc.embedFont(fontBytes);
 
             const pages = pdfDoc.getPages();
-            const page1 = pages[0]; 
-            const page2 = pages[1]; 
-            const page3 = pages[2]; 
-            const page4 = pages[3]; 
+            const page1 = pages[0]; // Trang 1
+            const page2 = pages[1]; // Trang 2
+            const page3 = pages[2]; // Trang 3
+            const page4 = pages[3]; // Trang 4
 
             const fontSize = 11;
 
-            // In chữ Trang 1
-            if (emp[0]) page1.drawText(toText(emp[0]), { x: 120, y: 680, font: customFont, size: 14 });
-            if (emp[1]) page1.drawText(toText(emp[1]), { x: 350, y: 680, font: customFont, size: fontSize });
-            if (emp[2]) page1.drawText(toText(emp[2]), { x: 120, y: 650, font: customFont, size: fontSize });
-            if (emp[3]) page1.drawText(toText(emp[3]), { x: 350, y: 650, font: customFont, size: fontSize });
-            if (emp[4]) page1.drawText(toText(emp[4]), { x: 480, y: 650, font: customFont, size: fontSize });
-            if (emp[5]) page1.drawText(toText(emp[5]), { x: 120, y: 620, font: customFont, size: fontSize });
+            // ==========================================================
+            // KHU VỰC CĂN CHỈNH TỌA ĐỘ
+            // Tôi đã tăng trục Y lên để chữ dịch lên trên một chút.
+            // Nếu bạn thấy vẫn chưa vừa ý, hãy sửa các con số X, Y ở đây nhé!
+            // ==========================================================
             
-            // In chữ Trang 3 (Hồ sơ)
-            if (emp[0]) page3.drawText(toText(emp[0]), { x: 120, y: 680, font: customFont, size: 14 }); 
-            if (emp[19]) page3.drawText(toText(emp[19]), { x: 120, y: 600, font: customFont, size: fontSize });
+            // --- TRANG 1 ---
+            drawSafe(page1, emp[0], 120, 695, customFont, 14); // Họ tên (Cột 0)
+            drawSafe(page1, emp[2], 350, 695, customFont, fontSize); // Số hiệu (Cột 2)
+            drawSafe(page1, emp[1], 480, 695, customFont, fontSize); // Học lực (Cột 1)
+            
+            drawSafe(page1, emp[5], 120, 665, customFont, fontSize); // Nơi sinh (Cột 5)
+            drawSafe(page1, formatDate(emp[4]), 350, 665, customFont, fontSize); // Ngày sinh (Cột 4) - Đã dùng formatDate
 
-            // In hình ảnh
+            // Xử lý Checkbox Giới tính cực xịn: Điền dấu "V" vào đúng ô vuông
+            let gioiTinh = toText(emp[3]);
+            if (gioiTinh.toLowerCase() === "nam") {
+                drawSafe(page1, "V", 455, 665, customFont, 14); // Tọa độ nhét vào ô vuông "Nam" (Bạn chỉnh lại X, Y cho khớp ô vuông nhé)
+            } else if (gioiTinh.toLowerCase() === "nữ") {
+                drawSafe(page1, "V", 505, 665, customFont, 14); // Tọa độ nhét vào ô vuông "Nữ"
+            }
+
+            drawSafe(page1, formatDate(emp[10]), 120, 635, customFont, fontSize); // Bắt đầu làm việc (Cột 10)
+            
+            // --- TRANG 3 (Hồ sơ) ---
+            drawSafe(page3, emp[0], 120, 680, customFont, 14); // Họ tên
+            drawSafe(page3, emp[19], 120, 600, customFont, fontSize); // CCCD
+
+            // ================= IN HÌNH ẢNH =================
             const url4x6 = getDirectImageUrl(emp[44]);
             if (url4x6 && page3) {
                 try {
@@ -135,24 +171,7 @@
                 } catch (e) {}
             }
 
-            const urlSTK = getDirectImageUrl(emp[46]);
-            if (urlSTK && page2) {
-                try {
-                    const imgBytes = await fetch(urlSTK).then(res => res.arrayBuffer());
-                    const imgEmbed = await pdfDoc.embedJpg(imgBytes);
-                    page2.drawImage(imgEmbed, { x: 100, y: 200, width: 250, height: 150 });
-                } catch (e) {}
-            }
-
-            const urlCCCD = getDirectImageUrl(emp[45]);
-            if (urlCCCD && page4) {
-                try {
-                    const imgBytes = await fetch(urlCCCD).then(res => res.arrayBuffer());
-                    const imgEmbed = await pdfDoc.embedJpg(imgBytes);
-                    page4.drawImage(imgEmbed, { x: 100, y: 400, width: 280, height: 160 });
-                } catch (e) {}
-            }
-
+            // Tải file PDF về máy
             const pdfBytes = await pdfDoc.save();
             download(pdfBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
             document.getElementById('status').innerText = `✅ Đã xuất PDF thành công cho ${hoTen}!`;
