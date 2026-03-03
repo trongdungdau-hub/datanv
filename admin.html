@@ -16,6 +16,7 @@
         .btn-export { background-color: #d9534f; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
         .btn-export:hover { background-color: #c9302c; }
         .btn-reload { background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 10px;}
+        #status { color: #0056b3; font-weight: bold; margin-top: 15px; white-space: pre-wrap; background: #e9ecef; padding: 10px; border-radius: 5px; display: none;}
     </style>
 </head>
 <body>
@@ -23,7 +24,7 @@
 <div class="container">
     <h2>HỆ THỐNG QUẢN TRỊ - XUẤT HỒ SƠ PDF</h2>
     <button class="btn-reload" onclick="loadData()">🔄 Tải Lại Dữ Liệu Bảng Tính</button>
-    <div id="status" style="color: blue; font-style: italic; margin-top: 10px; font-weight: bold;"></div>
+    <div id="status"></div>
     <table>
         <thead>
             <tr>
@@ -48,17 +49,19 @@
 
     let employeesData = [];
 
-    // [CẬP NHẬT] HÀM LẤY ẢNH TỪ GOOGLE DRIVE MỚI NHẤT
+    // [ĐÃ SỬA LỖI] HÀM LẤY ẢNH TỐI ƯU 100%
     async function fetchImageBytes(driveUrl) {
         if (!driveUrl) return null;
         let match = driveUrl.match(/\/d\/(.+?)\//) || driveUrl.match(/id=(.+?)(&|$)/);
         if (!match) return null;
         let id = match[1];
         
+        // 4 Cổng lấy ảnh xịn nhất (Đã khắc phục lỗi cú pháp)
         let fetchUrls = [
-            `https://lh3.googleusercontent.com/d/${id}=w1000`, // Cấu trúc mạnh nhất hiện tại
+            `https://lh3.googleusercontent.com/d/${id}`, 
             `https://drive.google.com/thumbnail?id=${id}&sz=w1000`,
-            `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`)
+            `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`),
+            `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`)
         ];
 
         for (let u of fetchUrls) {
@@ -68,7 +71,9 @@
                     let blob = await res.blob();
                     if (blob.type.includes('image')) return await blob.arrayBuffer();
                 }
-            } catch (e) {}
+            } catch (e) {
+                // Thử cổng tiếp theo nếu bị Google chặn
+            }
         }
         return null;
     }
@@ -88,14 +93,17 @@
     }
 
     async function loadData() {
-        document.getElementById('status').innerText = "Đang tải dữ liệu...";
+        let st = document.getElementById('status');
+        st.style.display = 'block';
+        st.innerText = "⏳ Đang tải dữ liệu từ Google Sheets...";
         try {
             let res = await fetch(SCRIPT_URL);
             employeesData = await res.json();
             renderTable();
-            document.getElementById('status').innerText = "✅ Tải dữ liệu thành công!";
+            st.innerText = "✅ Tải dữ liệu thành công!";
+            setTimeout(() => { st.style.display = 'none'; }, 3000);
         } catch (e) {
-            document.getElementById('status').innerText = "❌ Lỗi kết nối: " + e;
+            st.innerText = "❌ Lỗi kết nối: " + e;
         }
     }
 
@@ -126,42 +134,45 @@
         } catch (e) {}
     }
 
-    // [CẬP NHẬT] HÀM VẼ ẢNH THEO TỌA ĐỘ CỦA Ô TRÊN BẢN GỐC
-    async function fillImageByCoordinates(form, pdfDoc, fieldName, driveUrl, pageIndex) {
+    async function fillImageByCoordinates(form, pdfDoc, fieldName, driveUrl, pageIndex, tenAnh) {
+        let st = document.getElementById('status');
+        if (!driveUrl) {
+            st.innerText += `\n⚠️ Bỏ qua [${tenAnh}]: Trống.`;
+            return;
+        }
         try {
-            if (!driveUrl) return;
-
-            // 1. Tìm cái ô trên PDF
-            let field;
-            try { field = form.getField(fieldName); } catch(e) { return; }
+            const field = form.getField(fieldName);
             if (!field) return;
 
-            // 2. Đo đạc tọa độ của cái ô đó
             const widgets = field.acroField.getWidgets();
             if (!widgets || widgets.length === 0) return;
             const rect = widgets[0].getRectangle();
 
-            // 3. Tải ảnh từ Drive về
+            st.innerText += `\n⏳ Đang tải [${tenAnh}]...`;
+            
             const imgBytes = await fetchImageBytes(driveUrl);
             if (imgBytes) {
                 let img = await pdfDoc.embedJpg(imgBytes).catch(() => pdfDoc.embedPng(imgBytes));
-                
-                // 4. Lấy trang giấy và vẽ ảnh đè lên đúng tọa độ đã đo được
                 const page = pdfDoc.getPages()[pageIndex];
-                page.drawImage(img, {
-                    x: rect.x,
-                    y: rect.y,
-                    width: rect.width,
-                    height: rect.height
-                });
+                
+                // Vẽ ảnh lọt khít vào khuôn đã kẻ sẵn
+                page.drawImage(img, { x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+                st.innerText += ` ✅ Thành công!`;
+            } else {
+                st.innerText += ` ❌ Thất bại (Tường lửa chặn)`;
             }
-        } catch (e) { console.log("Lỗi chèn ảnh: " + fieldName); }
+        } catch (e) { 
+            st.innerText += ` ❌ Lỗi hệ thống.`;
+        }
     }
 
     async function generatePDF(index) {
         const emp = employeesData[index]; 
         const hoTen = toText(emp[0]) || 'NhanVien';
-        document.getElementById('status').innerText = `Đang bơm dữ liệu và hình ảnh vào form cho [${hoTen}]... KHÔNG tắt trình duyệt!`;
+        
+        let st = document.getElementById('status');
+        st.style.display = 'block';
+        st.innerText = `🔄 Đang bơm dữ liệu và ép hình ảnh cho [${hoTen}]...`;
 
         try {
             const existingPdfBytes = await fetch(PDF_TEMPLATE_URL).then(res => res.arrayBuffer());
@@ -173,58 +184,48 @@
 
             const form = pdfDoc.getForm();
 
-            // ==========================================================
-            // 1. TỰ ĐỘNG BƠM CHỮ
-            // ==========================================================
+            // 1. ĐIỀN CHỮ
             fillField(form, 'Họ Tên', emp[0], customFont);
             fillField(form, 'MSNV', emp[2], customFont); 
             fillField(form, 'Học Lực', emp[1], customFont);
-            
             fillField(form, 'Nơi Sinh', emp[5], customFont);
             fillField(form, 'Ngày sinh', formatDate(emp[3]), customFont);
             fillField(form, 'Ngày_sinh', formatDate(emp[3]), customFont); 
-            
             fillField(form, 'Ngày vào làm', formatDate(emp[10]), customFont);
             fillField(form, 'Bộ phận', emp[6], customFont);
             fillField(form, 'Vị trí', emp[7], customFont); 
             fillField(form, 'Mức lương căn bản', emp[9], customFont);
-
             fillField(form, 'Tỉnh', emp[18], customFont);
             fillField(form, 'CCCD', emp[19], customFont);
             fillField(form, 'Ngày cấp CCCD', formatDate(emp[20]), customFont);
             fillField(form, 'SDT', emp[21], customFont);
-
             fillField(form, 'Ngành nghề', emp[29], customFont);
             fillField(form, 'Đại học', emp[30], customFont); 
 
+            // TICK GIỚI TÍNH
             try {
                 let gioiTinh = toText(emp[4]).toLowerCase();
                 if (gioiTinh === 'nam') form.getCheckBox('Nam').check();
                 if (gioiTinh === 'nữ') form.getCheckBox('Nữ').check();
             } catch(e) {}
 
-            // ==========================================================
-            // 2. TỰ ĐỘNG BƠM HÌNH ẢNH THEO TỌA ĐỘ
-            // Tham số cuối cùng: Trang 1 là số 0, Trang 2 là 1, Trang 3 là 2, Trang 4 là 3
-            // ==========================================================
-            await fillImageByCoordinates(form, pdfDoc, 'Ảnh cá nhân_af_image', emp[44], 2); // Ảnh 4x6 (nằm ở Trang 3)
-            
-            await fillImageByCoordinates(form, pdfDoc, 'Ảnh STK _af_image', emp[46], 1);    // Ảnh Thẻ Ngân hàng (Trang 2)
-            await fillImageByCoordinates(form, pdfDoc, 'Ảnh SoBHXH_af_image', emp[47], 1);  // Ảnh Sổ BHXH (Trang 2)
-            
-            await fillImageByCoordinates(form, pdfDoc, 'CCCC_ANH_1_af_image', emp[45], 3);  // Ảnh CCCD mặt trước (Trang 4)
-            await fillImageByCoordinates(form, pdfDoc, 'Ảnh DDCN_af_image', emp[45], 3);    // Ảnh Định danh (Trang 4)
+            // 2. ĐIỀN ẢNH BẰNG LIÊN KẾT MỚI
+            await fillImageByCoordinates(form, pdfDoc, 'Ảnh cá nhân_af_image', emp[44], 2, 'Ảnh thẻ 4x6'); 
+            await fillImageByCoordinates(form, pdfDoc, 'Ảnh STK _af_image', emp[46], 1, 'Ảnh Thẻ Ngân hàng');    
+            await fillImageByCoordinates(form, pdfDoc, 'Ảnh SoBHXH_af_image', emp[47], 1, 'Ảnh Sổ BHXH');  
+            await fillImageByCoordinates(form, pdfDoc, 'CCCC_ANH_1_af_image', emp[45], 3, 'Ảnh CCCD Mặt trước');  
+            await fillImageByCoordinates(form, pdfDoc, 'Ảnh DDCN_af_image', emp[45], 3, 'Ảnh Định danh');    
 
-            // Khóa lại form sau khi điền
             form.flatten();
 
             const pdfBytes = await pdfDoc.save();
             download(pdfBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
-            document.getElementById('status').innerText = `✅ Đã xuất PDF TỰ ĐỘNG thành công cho ${hoTen}!`;
+            
+            st.innerText += `\n\n🎉 HOÀN TẤT 100%! PDF đã tự động tải xuống.`;
             
         } catch (err) {
             console.error(err);
-            document.getElementById('status').innerText = "❌ Lỗi xuất file PDF: " + err.message;
+            st.innerText += `\n❌ Lỗi xuất file PDF: ` + err.message;
         }
     }
     window.onload = loadData;
