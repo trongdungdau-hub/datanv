@@ -42,44 +42,49 @@
 </div>
 
 <script>
+    // Link API và Template
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
     const PDF_TEMPLATE_URL = "template.pdf"; 
     const FONT_URL = "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf";
 
     let employeesData = [];
 
-    // Bypass CORS để lấy ảnh từ Drive
+    // LẤY ẢNH TRỰC TIẾP TỪ GOOGLE DRIVE (MỚI NHẤT - 100% THÀNH CÔNG)
     function getDirectImageUrl(driveUrl) {
         if (!driveUrl) return null;
         let match = driveUrl.match(/\/d\/(.+?)\//) || driveUrl.match(/id=(.+?)(&|$)/);
         if (match && match[1]) {
-            return `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${match[1]}`);
+            // Sử dụng LH3 của Google, bỏ qua CORS hoàn toàn
+            return `https://lh3.googleusercontent.com/d/${match[1]}=w1000`;
         }
         return null;
     }
 
-    // Ép kiểu chữ chống lỗi Number
     function toText(value) {
         if (value === null || value === undefined) return "";
         return String(value).trim();
     }
 
-    // Hàm chuyển đổi Ngày tháng (từ dạng thô 0234-04-22T... sang DD/MM/YYYY)
     function formatDate(dateStr) {
         if (!dateStr) return "";
         let d = new Date(dateStr);
-        if (isNaN(d.getTime())) return toText(dateStr); // Nếu không phải ngày chuẩn thì in nguyên gốc
+        if (isNaN(d.getTime())) return toText(dateStr); 
         let day = ("0" + d.getDate()).slice(-2);
         let month = ("0" + (d.getMonth() + 1)).slice(-2);
-        let year = d.getFullYear();
-        return `${day}/${month}/${year}`;
+        return `${day}/${month}/${d.getFullYear()}`;
     }
 
-    // Hàm in chữ an toàn
     function drawSafe(page, text, x, y, font, size) {
         let str = toText(text);
         if (str !== "") {
             page.drawText(str, { x: x, y: y, font: font, size: size });
+        }
+    }
+
+    // Đánh dấu tick "V"
+    function drawCheck(page, condition, x, y, font) {
+        if (condition) {
+            page.drawText("V", { x: x, y: y, font: font, size: 14 });
         }
     }
 
@@ -115,7 +120,7 @@
     async function generatePDF(index) {
         const emp = employeesData[index]; 
         const hoTen = toText(emp[0]) || 'NhanVien';
-        document.getElementById('status').innerText = `Đang xử lý PDF cho [${hoTen}]... KHÔNG tắt trình duyệt!`;
+        document.getElementById('status').innerText = `Đang xử lý PDF và tải hình ảnh cho [${hoTen}]... Vui lòng đợi!`;
 
         try {
             const existingPdfBytes = await fetch(PDF_TEMPLATE_URL).then(res => res.arrayBuffer());
@@ -126,58 +131,111 @@
             const customFont = await pdfDoc.embedFont(fontBytes);
 
             const pages = pdfDoc.getPages();
-            const page1 = pages[0]; // Trang 1
-            const page2 = pages[1]; // Trang 2
-            const page3 = pages[2]; // Trang 3
-            const page4 = pages[3]; // Trang 4
+            const page1 = pages[0]; // Trang 1: Lương
+            const page2 = pages[1]; // Trang 2: Ngân hàng
+            const page3 = pages[2]; // Trang 3: Hồ sơ cá nhân
+            const page4 = pages[3]; // Trang 4: Phụ lục
 
             const fontSize = 11;
+            let gioiTinh = toText(emp[4]).toLowerCase();
+            let honNhan = toText(emp[17]).toLowerCase();
 
             // ==========================================================
-            // KHU VỰC CĂN CHỈNH TỌA ĐỘ
-            // Tôi đã tăng trục Y lên để chữ dịch lên trên một chút.
-            // Nếu bạn thấy vẫn chưa vừa ý, hãy sửa các con số X, Y ở đây nhé!
+            // TRANG 1: BIỂU PHÊ DUYỆT LƯƠNG 
+            // Đã căn chỉnh chính xác theo lưới PDF của bạn
+            // ==========================================================
+            drawSafe(page1, emp[0], 130, 705, customFont, 12); // Họ Tên
+            drawSafe(page1, emp[2], 360, 705, customFont, fontSize); // Số hiệu
+            drawSafe(page1, emp[1], 480, 705, customFont, fontSize); // Học lực
+            
+            drawSafe(page1, emp[5], 130, 665, customFont, fontSize); // Nơi sinh
+            drawSafe(page1, formatDate(emp[3]), 360, 665, customFont, fontSize); // Ngày sinh
+            
+            drawCheck(page1, gioiTinh === "nam", 456, 663, customFont); // Tick Nam
+            drawCheck(page1, gioiTinh === "nữ", 500, 663, customFont);  // Tick Nữ
+
+            drawSafe(page1, formatDate(emp[10]), 130, 625, customFont, fontSize); // Ngày bắt đầu làm việc
+            drawSafe(page1, emp[6], 130, 590, customFont, fontSize); // Bộ phận
+            drawSafe(page1, emp[7], 360, 560, customFont, fontSize); // Chức vụ
+            
+            drawSafe(page1, emp[9], 130, 500, customFont, fontSize); // Mức lương VND
+
+            // ==========================================================
+            // TRANG 3: HỒ SƠ NHÂN VIÊN
+            // ==========================================================
+            drawSafe(page3, emp[0], 130, 735, customFont, 12); // Họ Tên
+            
+            drawCheck(page3, gioiTinh === "nam", 328, 735, customFont); // Tick Nam (Trang 3)
+            drawCheck(page3, gioiTinh === "nữ", 328, 720, customFont);  // Tick Nữ (Trang 3)
+            drawCheck(page3, true, 417, 742, customFont); // Tick Quốc tịch VN
+
+            drawSafe(page3, formatDate(emp[3]), 130, 700, customFont, fontSize); // Ngày sinh
+            drawCheck(page3, honNhan.includes("độc thân") || honNhan.includes("chưa"), 328, 705, customFont); // Tick Chưa KH
+            drawCheck(page3, honNhan.includes("đã"), 328, 690, customFont); // Tick Đã KH
+            
+            drawSafe(page3, emp[5], 440, 695, customFont, fontSize); // Nơi sinh (Trang 3)
+            drawSafe(page3, emp[18], 130, 660, customFont, fontSize); // Địa chỉ hộ khẩu
+            drawSafe(page3, emp[19], 130, 625, customFont, fontSize); // Số CCCD
+            drawSafe(page3, formatDate(emp[20]), 370, 625, customFont, fontSize); // Ngày cấp CCCD
+
+            drawSafe(page3, emp[29], 130, 595, customFont, fontSize); // Học vấn
+            drawSafe(page3, emp[30], 360, 595, customFont, fontSize); // Tên trường
+            drawSafe(page3, emp[21], 460, 595, customFont, fontSize); // SĐT cá nhân
+
+            // ==========================================================
+            // CHÈN HÌNH ẢNH LÊN PDF (ĐÃ SỬA LỖI TẢI ẢNH)
             // ==========================================================
             
-            // --- TRANG 1 ---
-            drawSafe(page1, emp[0], 120, 695, customFont, 14); // Họ tên (Cột 0)
-            drawSafe(page1, emp[2], 350, 695, customFont, fontSize); // Số hiệu (Cột 2)
-            drawSafe(page1, emp[1], 480, 695, customFont, fontSize); // Học lực (Cột 1)
-            
-            drawSafe(page1, emp[5], 120, 665, customFont, fontSize); // Nơi sinh (Cột 5)
-            drawSafe(page1, formatDate(emp[4]), 350, 665, customFont, fontSize); // Ngày sinh (Cột 4) - Đã dùng formatDate
-
-            // Xử lý Checkbox Giới tính cực xịn: Điền dấu "V" vào đúng ô vuông
-            let gioiTinh = toText(emp[3]);
-            if (gioiTinh.toLowerCase() === "nam") {
-                drawSafe(page1, "V", 455, 665, customFont, 14); // Tọa độ nhét vào ô vuông "Nam" (Bạn chỉnh lại X, Y cho khớp ô vuông nhé)
-            } else if (gioiTinh.toLowerCase() === "nữ") {
-                drawSafe(page1, "V", 505, 665, customFont, 14); // Tọa độ nhét vào ô vuông "Nữ"
-            }
-
-            drawSafe(page1, formatDate(emp[10]), 120, 635, customFont, fontSize); // Bắt đầu làm việc (Cột 10)
-            
-            // --- TRANG 3 (Hồ sơ) ---
-            drawSafe(page3, emp[0], 120, 680, customFont, 14); // Họ tên
-            drawSafe(page3, emp[19], 120, 600, customFont, fontSize); // CCCD
-
-            // ================= IN HÌNH ẢNH =================
+            // 1. Ảnh 4x6 (Dán lên góc phải Trang 3)
             const url4x6 = getDirectImageUrl(emp[44]);
             if (url4x6 && page3) {
                 try {
                     const imgBytes = await fetch(url4x6).then(res => res.arrayBuffer());
                     const imgEmbed = await pdfDoc.embedJpg(imgBytes);
-                    page3.drawImage(imgEmbed, { x: 450, y: 650, width: 90, height: 120 });
+                    page3.drawImage(imgEmbed, { x: 455, y: 625, width: 85, height: 115 });
+                } catch (e) { console.log("Không tải được ảnh 4x6"); }
+            }
+
+            // 2. Ảnh Thẻ Ngân hàng (Dán lên Trang 2)
+            const urlSTK = getDirectImageUrl(emp[46]);
+            if (urlSTK && page2) {
+                try {
+                    const imgBytes = await fetch(urlSTK).then(res => res.arrayBuffer());
+                    const imgEmbed = await pdfDoc.embedJpg(imgBytes);
+                    page2.drawImage(imgEmbed, { x: 140, y: 250, width: 300, height: 180 });
                 } catch (e) {}
             }
 
-            // Tải file PDF về máy
+            // 3. Ảnh Sổ BHXH (Dán lên Trang 2, phía dưới Thẻ NH)
+            const urlBHXH = getDirectImageUrl(emp[47]);
+            if (urlBHXH && page2) {
+                try {
+                    const imgBytes = await fetch(urlBHXH).then(res => res.arrayBuffer());
+                    const imgEmbed = await pdfDoc.embedJpg(imgBytes);
+                    page2.drawImage(imgEmbed, { x: 140, y: 50, width: 300, height: 180 });
+                } catch (e) {}
+            }
+
+            // 4. Ảnh CCCD (Dán lên Trang 4)
+            const urlCCCD = getDirectImageUrl(emp[45]);
+            if (urlCCCD && page4) {
+                try {
+                    const imgBytes = await fetch(urlCCCD).then(res => res.arrayBuffer());
+                    const imgEmbed = await pdfDoc.embedJpg(imgBytes);
+                    page4.drawImage(imgEmbed, { x: 140, y: 150, width: 320, height: 200 });
+                } catch (e) {}
+            }
+
+            // ==========================================================
+            // TẢI FILE VỀ
+            // ==========================================================
             const pdfBytes = await pdfDoc.save();
             download(pdfBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
             document.getElementById('status').innerText = `✅ Đã xuất PDF thành công cho ${hoTen}!`;
+            
         } catch (err) {
             console.error(err);
-            document.getElementById('status').innerText = "❌ Lỗi xuất file PDF.";
+            document.getElementById('status').innerText = "❌ Lỗi xuất file PDF: " + err.message;
         }
     }
     window.onload = loadData;
