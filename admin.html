@@ -1,69 +1,67 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8"><title>QUẢN TRỊ XUẤT PDF - THỦ CÔNG & CHÍNH XÁC</title>
+<html lang="vi"><head><meta charset="UTF-8"><title>QUẢN TRỊ XUẤT PDF - LIVE PREVIEW</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
 <style>
 body{font-family:Arial;background:#f4f7f6; margin:0; padding:20px;}
 .container{max-width:1200px;background:#fff;padding:20px;margin:auto;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
-table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left;}
-th{background:#0056b3;color:#fff}.btn{background:#0056b3;color:#fff;border:none;padding:8px 15px;cursor:pointer;font-weight:bold;border-radius:4px;}
-.btn-xem{background:#17a2b8;} .btn-dl{background:#28a745; margin-bottom: 5px; font-size: 12px; padding: 5px 10px;}
+table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left; vertical-align:middle;}
+th{background:#0056b3;color:#fff}
+.btn{color:#fff;border:none;padding:8px 12px;cursor:pointer;font-weight:bold;border-radius:4px; font-size:13px; margin-right:5px;}
+.btn-dl{background:#28a745;} .btn-dl:disabled{background:#888;}
+.btn-xem{background:#17a2b8;}
 .badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
-.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);backdrop-filter:blur(3px);}
-.modal-content{background-color:#fff;margin:5% auto;padding:20px;border:1px solid #888;width:80%;max-width:800px;border-radius:8px;position:relative;}
-.close{position:absolute;right:20px;top:15px;color:#aaa;font-size:28px;font-weight:bold;cursor:pointer;}
-.close:hover{color:black;}
-.grid-img{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px;border-top:2px solid #eee;padding-top:15px;}
-.img-box{background:#f9f9f9;padding:10px;border:1px dashed #ccc;border-radius:5px;}
-.img-box h4{margin:0 0 10px 0; color:#333; font-size: 14px;}
-.img-box input{width:100%; font-size: 13px;}
-#modalStatus{margin-top:15px;padding:10px;background:#fff3cd;font-weight:bold;display:none;color:#856404;border-radius:5px;}
-.btn-export-big{background:#dc3545;color:white;width:100%;padding:15px;font-size:18px;font-weight:bold;border:none;border-radius:5px;cursor:pointer;margin-top:20px;}
+
+/* Modal Full màn hình */
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
+.modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
+.close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
+
+/* Khu vực Control panel bên trái */
+.panel-left{flex:1; background:#f9f9f9; padding:20px; overflow-y:auto; border-right:2px solid #ddd; display:flex; flex-direction:column;}
+.panel-left h3{margin-top:0; color:#0056b3; border-bottom:2px solid #0056b3; padding-bottom:10px;}
+.upload-box{background:#fff; border:1px dashed #aaa; padding:15px; margin-bottom:15px; border-radius:5px;}
+.upload-box h4{margin:0 0 10px 0; font-size:14px;}
+.upload-box input{width:100%; font-size:13px; cursor:pointer;}
+.btn-export-big{background:#dc3545;color:white;width:100%;padding:15px;font-size:16px;font-weight:bold;border:none;border-radius:5px;cursor:pointer; margin-top:auto;}
+
+/* Khu vực PDF bên phải */
+.panel-right{flex:2.5; background:#525659; position:relative;}
+#pdfFrame{width:100%; height:100%; border:none;}
+.loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;color:#0056b3; z-index:10; display:none;}
 </style></head>
 <body>
+
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (CHẾ ĐỘ THỦ CÔNG)</h2>
+    <h2>QUẢN TRỊ XUẤT PDF</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
     </table>
 </div>
 
+<span class="close" id="btnClose" onclick="closeModal()" style="display:none;">&times;</span>
 <div id="myModal" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <h2 id="modalTitle" style="margin-top:0; color:#0056b3;">HỒ SƠ: </h2>
-    <div id="modalStatus"></div>
-    
-    <div class="grid-img">
-        <div class="img-box">
-            <h4>1. Ảnh 4x6 (Khung 45)</h4>
-            <button class="btn btn-dl" onclick="dlImg(0, 'Anh_4x6')">⬇️ Tải ảnh gốc từ mạng</button>
-            <input type="file" id="up45" accept="image/*">
-        </div>
-        <div class="img-box">
-            <h4>2. CCCD Mặt Trước (Khung 46)</h4>
-            <button class="btn btn-dl" onclick="dlImg(1, 'CCCD_Truoc')">⬇️ Tải ảnh gốc từ mạng</button>
-            <input type="file" id="up46" accept="image/*">
-        </div>
-        <div class="img-box">
-            <h4>3. CCCD Mặt Sau (Khung 47)</h4>
-            <button class="btn btn-dl" onclick="dlImg(2, 'CCCD_Sau')">⬇️ Tải ảnh gốc từ mạng</button>
-            <input type="file" id="up47" accept="image/*">
-        </div>
-        <div class="img-box">
-            <h4>4. Thẻ Ngân Hàng (Khung 48)</h4>
-            <button class="btn btn-dl" onclick="dlImg(3, 'NganHang')">⬇️ Tải ảnh gốc từ mạng</button>
-            <input type="file" id="up48" accept="image/*">
-        </div>
-        <div class="img-box">
-            <h4>5. Bìa Sổ BHXH (Khung 49)</h4>
-            <button class="btn btn-dl" onclick="dlImg(4, 'BHXH')">⬇️ Tải ảnh gốc từ mạng</button>
-            <input type="file" id="up49" accept="image/*">
-        </div>
-    </div>
-    <button class="btn-export-big" onclick="exportPDF()">🚀 BƠM ẢNH & XUẤT PDF</button>
+      
+      <div class="panel-left">
+          <h3 id="modalTitle">GHÉP ẢNH</h3>
+          <p style="font-size:13px; color:#555;">Bấm chọn ảnh ở đây, PDF bên phải sẽ tự động cập nhật.</p>
+          
+          <div class="upload-box"><h4>1. Ảnh 4x6</h4><input type="file" id="up45" accept="image/*" onchange="refreshPDF()"></div>
+          <div class="upload-box"><h4>2. CCCD Trước</h4><input type="file" id="up46" accept="image/*" onchange="refreshPDF()"></div>
+          <div class="upload-box"><h4>3. CCCD Sau</h4><input type="file" id="up47" accept="image/*" onchange="refreshPDF()"></div>
+          <div class="upload-box"><h4>4. Ngân Hàng</h4><input type="file" id="up48" accept="image/*" onchange="refreshPDF()"></div>
+          <div class="upload-box"><h4>5. Sổ BHXH</h4><input type="file" id="up49" accept="image/*" onchange="refreshPDF()"></div>
+          
+          <button class="btn-export-big" onclick="downloadFinalPDF()">💾 XUẤT & LƯU PDF</button>
+      </div>
+
+      <div class="panel-right">
+          <div id="loadingPDF" class="loading-overlay">⏳ Đang load PDF...</div>
+          <iframe id="pdfFrame"></iframe>
+      </div>
   </div>
 </div>
 
@@ -71,9 +69,8 @@ th{background:#0056b3;color:#fff}.btn{background:#0056b3;color:#fff;border:none;
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 let empData = [];
 let currentIndex = -1;
-let currentLinks = [];
+let currentPDFBytes = null; // Lưu bản nháp PDF
 
-// Lấy danh sách đã xuất từ LocalStorage (Lưu theo CCCD)
 let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
 
 window.onload = async () => {
@@ -95,51 +92,67 @@ function renderTable() {
             <td><b>${emp[0]}</b></td>
             <td>${emp[19]||''}</td>
             <td>${statusHtml}</td>
-            <td><button class="btn btn-xem" onclick="openModal(${idx})">👁️ XEM & TẢI ẢNH</button></td>
+            <td>
+                <button id="btn-dl-${idx}" class="btn btn-dl" onclick="downloadAllImages(${idx})">⬇️ Tải 1 Cục Ảnh</button>
+                <button class="btn btn-xem" onclick="openModal(${idx})">👁️ Xem & Ghép</button>
+            </td>
         </tr>`;
     });
     document.getElementById('tableBody').innerHTML = html;
 }
 
-function openModal(idx) {
-    currentIndex = idx;
-    let emp = empData[idx];
-    document.getElementById('modalTitle').innerText = "HỒ SƠ: " + emp[0];
-    document.getElementById('modalStatus').style.display = 'none';
-    
-    currentLinks = [];
-    emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) currentLinks.push(cell); });
-    
-    ['45','46','47','48','49'].forEach(id => document.getElementById('up'+id).value = '');
-    document.getElementById('myModal').style.display = "block";
+// 1. CHỨC NĂNG TẢI 1 LẦN VỀ HẾT ẢNH
+async function getGasImg(url) {
+    if(!url) return null; 
+    let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if(!idMatch) return null;
+    try {
+        let res = await fetch(SCRIPT_URL + "?action=getImage&id=" + idMatch[1]); 
+        let json = await res.json();
+        if(json.ok && json.data){ 
+            let bin = window.atob(json.data.split(',')[1]); 
+            let b = new Uint8Array(bin.length); 
+            for(let i=0; i<bin.length; i++) b[i]=bin.charCodeAt(i); 
+            return b.buffer; 
+        } 
+    } catch(e){}
+    return null;
 }
 
-function closeModal() { document.getElementById('myModal').style.display = "none"; }
-
-async function dlImg(linkIndex, tenFile) {
-    let st = document.getElementById('modalStatus');
-    if(!currentLinks[linkIndex]){
-        st.style.display = 'block'; st.innerHTML = "⚠️ Người này không có ảnh ở vị trí này!"; return;
-    }
-    st.style.display = 'block'; st.innerHTML = `⏳ Đang kéo ${tenFile} từ Drive về...`;
+async function downloadAllImages(idx) {
+    let emp = empData[idx];
+    let links = [];
+    emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) links.push(cell); });
     
-    let url = currentLinks[linkIndex];
-    let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if(idMatch) {
-        try {
-            let res = await fetch(SCRIPT_URL + "?action=getImage&id=" + idMatch[1]); 
-            let json = await res.json();
-            if(json.ok && json.data){ 
-                let bin = window.atob(json.data.split(',')[1]); 
-                let b = new Uint8Array(bin.length); 
-                for(let i=0; i<bin.length; i++) b[i]=bin.charCodeAt(i); 
-                download(b.buffer, empData[currentIndex][0] + "_" + tenFile + ".jpg", "image/jpeg");
-                st.innerHTML = `✅ Đã tải xong <b>${tenFile}</b> xuống máy tính!`;
-                return;
-            }
-        } catch(e){}
+    if(links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
+    
+    let btn = document.getElementById('btn-dl-' + idx);
+    let oldText = btn.innerHTML;
+    btn.innerHTML = '⏳ Đang kéo...'; btn.disabled = true;
+
+    for(let i=0; i<links.length; i++) {
+        let b = await getGasImg(links[i]);
+        if(b) download(b, `${emp[0]}_Anh_${i+1}.jpg`, "image/jpeg");
     }
-    st.innerHTML = `❌ Không lấy được ảnh. Mày tự bấm vào link này tải tay nhé: <a href="${url}" target="_blank">Link ẢNH</a>`;
+    
+    btn.innerHTML = '✅ Tải xong';
+    setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
+}
+
+// 2. MỞ CỬA SỔ XEM & GHÉP
+function openModal(idx) {
+    currentIndex = idx;
+    document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
+    ['45','46','47','48','49'].forEach(id => document.getElementById('up'+id).value = ''); // Xóa file cũ
+    document.getElementById('myModal').style.display = "block";
+    document.getElementById('btnClose').style.display = "block";
+    refreshPDF(); // Bắt đầu load PDF
+}
+
+function closeModal() { 
+    document.getElementById('myModal').style.display = "none"; 
+    document.getElementById('btnClose').style.display = "none";
+    document.getElementById('pdfFrame').src = '';
 }
 
 function readFileAsBuffer(file) {
@@ -155,10 +168,10 @@ function formatSal(v){
     if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
 }
 
-async function exportPDF() {
+// 3. CODE TẠO PDF (CHẠY LIVE)
+async function refreshPDF() {
     let emp = empData[currentIndex]; 
-    let st = document.getElementById('modalStatus'); 
-    st.style.display='block'; st.innerHTML=`🔄 <b>ĐANG ĐO TỌA ĐỘ KHUNG VÀ ÉP ẢNH...</b>`;
+    document.getElementById('loadingPDF').style.display = 'flex';
     
     try {
         const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
@@ -166,7 +179,7 @@ async function exportPDF() {
         const font = await doc.embedFont(await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer()));
         const form = doc.getForm();
 
-        // 1. Điền chữ
+        // Điền chữ
         for(let i=0; i<=44; i++){
             if([4,17,18,25,26,27,30].includes(i)) continue;
             let val = emp[i] ? String(emp[i]) : "";
@@ -187,10 +200,11 @@ async function exportPDF() {
             }
         });
 
+        // Checkbox
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        // 2. ĐO TỌA ĐỘ VÀ GHI NHỚ LẠI TRƯỚC KHI ÉP FORM
+        // ĐO TỌA ĐỘ VÀ GHI NHỚ LẠI
         let inputs = [ {id:'up45', field:'45'}, {id:'up46', field:'46'}, {id:'up47', field:'47'}, {id:'up48', field:'48'}, {id:'up49', field:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -209,10 +223,10 @@ async function exportPDF() {
             }
         }
 
-        // 3. ÉP PHẲNG MẶT GIẤY (Lúc này các khung sẽ biến mất)
+        // ÉP PHẲNG MẶT GIẤY
         form.flatten();
 
-        // 4. VẼ ẢNH VÀO TỌA ĐỘ ĐÃ NHỚ
+        // VẼ ẢNH VÀO TỌA ĐỘ
         for(let task of drawTasks) {
             if(task.pageIndex >= 0) {
                 const page = doc.getPages()[task.pageIndex];
@@ -221,16 +235,34 @@ async function exportPDF() {
             }
         }
 
-        download(await doc.save(), `HoSo_${emp[0]}.pdf`, "application/pdf");
-        st.innerHTML = `🎉 <b>HOÀN TẤT!</b> Đã xuất PDF có đầy đủ ảnh.`;
+        // LƯU RA BLOB VÀ HIỂN THỊ LÊN IFRAME
+        currentPDFBytes = await doc.save();
+        const blob = new Blob([currentPDFBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
         
-        let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
-        exportedList[cccd] = true;
-        localStorage.setItem('exportedData', JSON.stringify(exportedList));
-        renderTable(); 
-        
-        setTimeout(() => closeModal(), 2000); 
-        
-    } catch(e) { st.innerHTML = `❌ LỖI RỒI: ${e.message}`; }
+        document.getElementById('pdfFrame').src = url;
+        document.getElementById('loadingPDF').style.display = 'none';
+
+    } catch(e) { 
+        alert("Lỗi tải PDF: " + e.message); 
+        document.getElementById('loadingPDF').style.display = 'none';
+    }
+}
+
+// 4. LƯU PDF XUỐNG MÁY & ĐÁNH DẤU HOÀN TẤT
+function downloadFinalPDF() {
+    if(!currentPDFBytes) return;
+    let emp = empData[currentIndex];
+    
+    // Tải file về máy
+    download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
+    
+    // Đánh dấu đã xuất
+    let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
+    exportedList[cccd] = true;
+    localStorage.setItem('exportedData', JSON.stringify(exportedList));
+    renderTable(); 
+    
+    closeModal();
 }
 </script></body></html>
