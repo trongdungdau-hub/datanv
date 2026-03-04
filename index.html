@@ -180,7 +180,7 @@
     </div>
 
     <div class="section-title">3) Ảnh/giấy tờ (tùy chọn)</div>
-    <p class="muted">Khuyến nghị ảnh JPG/PNG, dung lượng mỗi ảnh ≤ 3MB.</p>
+    <p class="muted">Hệ thống sẽ tự động nén ảnh và chuyển sang JPG chuẩn.</p>
     <div class="grid">
       <div>
         <label>Ảnh thẻ 4x6</label>
@@ -236,7 +236,6 @@
 <script>
 /** ================== CONFIG ================== **/
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-const MAX_MB = 3;
 
 const $ = (id)=>document.getElementById(id);
 
@@ -260,16 +259,31 @@ function todayVN(){
   return `${dd}/${mm}/${yy}`;
 }
 
+// CÔNG NGHỆ CHUẨN HÓA ẢNH: Tự ép JPG và thu gọn kích thước chống nặng file
 async function fileToDataUrl(file){
   if (!file) return "";
-  const sizeMB = file.size / (1024*1024);
-  if (sizeMB > MAX_MB){
-    throw new Error(`File "${file.name}" vượt ${MAX_MB}MB (${sizeMB.toFixed(2)}MB).`);
-  }
-  return await new Promise((resolve, reject)=>{
+  return await new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = ()=>resolve(reader.result);
-    reader.onerror = ()=>reject(new Error("Đọc file lỗi."));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width, h = img.height;
+        const maxSize = 1200; // Nén ảnh để Google Apps Script không bị quá tải
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round((h * maxSize) / w); w = maxSize; }
+          else { w = Math.round((w * maxSize) / h); h = maxSize; }
+        }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        // Ép 100% định dạng đầu ra là JPG
+        resolve(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.onerror = () => resolve(e.target.result); // Fallback
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("Đọc file lỗi."));
     reader.readAsDataURL(file);
   });
 }
@@ -286,14 +300,12 @@ function collectFields(){
     ngayCapCccd: toText($("ngayCapCccd").value),
     sdt: toText($("sdt").value),
     hocLuc: toText($("hocLuc").value),
-
     boPhan: toText($("boPhan").value),
     viTri: toText($("viTri").value),
     ngayVaoLam: toText($("ngayVaoLam").value),
     mucLuong: toText($("mucLuong").value),
     nganhNghe: toText($("nganhNghe").value),
     daiHoc: toText($("daiHoc").value),
-
     ghiChu: toText($("ghiChu").value),
     ngayNop: todayVN()
   };
@@ -340,9 +352,8 @@ async function buildPreview(){
     const d = collectFields();
     validateBasic(d);
 
-    showStatus("⏳ Đang tạo preview...");
+    showStatus("⏳ Đang tối ưu hóa hình ảnh...");
 
-    // đọc ảnh để preview (dataURL)
     const files = {
       anhThe: $("anhThe").files[0],
       anhSTK: $("anhSTK").files[0],
@@ -382,12 +393,8 @@ async function buildPreview(){
     const thumbs = $("thumbs");
     thumbs.innerHTML = "";
     const labels = {
-      anhThe:"Ảnh thẻ",
-      anhSTK:"Ảnh STK",
-      anhSoBHXH:"Ảnh sổ BHXH",
-      cccdFront:"CCCD trước",
-      cccdBack:"CCCD sau",
-      dinhDanh:"Định danh",
+      anhThe:"Ảnh thẻ", anhSTK:"Ảnh STK", anhSoBHXH:"Ảnh sổ BHXH",
+      cccdFront:"CCCD trước", cccdBack:"CCCD sau", dinhDanh:"Định danh",
     };
     for (const [k,url] of Object.entries(imgs)){
       thumbs.innerHTML += `
@@ -398,11 +405,10 @@ async function buildPreview(){
       `;
     }
 
-    // lưu payload tạm để submit
     window.__payload__ = { ...d, images: imgs };
 
     $("previewBox").style.display = "block";
-    showStatus("✅ Preview OK. Kéo xuống cuối để bấm GỬI.");
+    showStatus("✅ Đã xử lý xong. Kéo xuống cuối để bấm GỬI.");
     setTimeout(()=>hideStatus(), 1500);
     $("previewBox").scrollIntoView({behavior:"smooth"});
 
@@ -420,7 +426,8 @@ async function submitData(){
 
     const res = await fetch(`${SCRIPT_URL}?action=submit`, {
       method: "POST",
-      headers: { "Content-Type":"application/json" },
+      // SỬA LỖI CORS: Đổi Content-Type để lách tường lửa của Google
+      headers: { "Content-Type":"text/plain;charset=utf-8" },
       body: JSON.stringify(payload)
     });
 
@@ -436,7 +443,6 @@ async function submitData(){
     }
 
     showStatus("🎉 Gửi thành công! Admin sẽ thấy hồ sơ ở trang quản trị.");
-    // reset sau 1 chút
     setTimeout(()=>resetForm(), 1200);
 
   }catch(e){
