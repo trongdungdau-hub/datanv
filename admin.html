@@ -50,44 +50,40 @@
 
     let employeesData = [];
 
-    // HÀM LẤY ẢNH CHỐNG TREO MÁY VÀ ÉP KIỂU JPG
+    // HÀM LẤY ẢNH CHỐNG TREO MÁY
     async function fetchImageBytes(driveUrl) {
         if (!driveUrl) return null;
         let match = driveUrl.match(/id=([a-zA-Z0-9_-]+)/) || driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (!match) return null;
         let id = match[1];
 
-        // API Thumbnail: Ép mọi loại ảnh (kể cả HEIC) thành JPG xịn
-        let targetUrl = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+        let targetUrl = `https://drive.google.com/uc?export=download&id=${id}`;
 
-        let urls = [
+        let proxyUrls = [
             `https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl),
             `https://corsproxy.io/?` + encodeURIComponent(targetUrl),
             `https://api.codetabs.com/v1/proxy?quest=` + encodeURIComponent(targetUrl)
         ];
 
-        for (let url of urls) {
+        for (let url of proxyUrls) {
             try {
-                // Đếm ngược 10 giây, nếu mạng lag sẽ tự động cắt để không bị treo web
+                // Đếm ngược 12 giây, mạng lag sẽ tự động cắt để không treo màn hình
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
                 
                 let res = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
 
                 if (res.ok) {
-                    let blob = await res.blob();
-                    let arrayBuffer = await blob.arrayBuffer();
+                    let arrayBuffer = await res.arrayBuffer();
                     let arr = new Uint8Array(arrayBuffer);
                     
-                    // Kiểm tra mã nhị phân: Chỉ nhận ảnh JPG (FF D8) hoặc PNG (89 50)
+                    // Quét mã nhị phân ảnh chuẩn JPG/PNG (Được index.html tạo ra)
                     if ((arr[0] === 255 && arr[1] === 216) || (arr[0] === 137 && arr[1] === 80)) {
                         return arrayBuffer; 
                     }
                 }
-            } catch (e) {
-                // Im lặng bỏ qua lỗi và thử link dự phòng
-            }
+            } catch (e) { } // Thử link proxy tiếp theo
         }
         return null;
     }
@@ -148,7 +144,7 @@
         } catch (e) {}
     }
 
-    // HÀM IN ẢNH VÀ XÓA BỎ KHUNG TRẮNG
+    // HÀM IN ẢNH VÀ XÓA KHUNG NỀN TRẮNG
     async function stampImage(form, pdfDoc, fieldName, driveUrl, pageIndex, tenAnh) {
         let st = document.getElementById('status');
         if (!driveUrl || driveUrl.toString().trim() === "") {
@@ -171,19 +167,19 @@
                 try { img = await pdfDoc.embedJpg(imgBytes); }
                 catch(e) {
                     try { img = await pdfDoc.embedPng(imgBytes); }
-                    catch(e2) { st.innerHTML += ` <span class="error-log">❌ Lỗi: Bytes không phải ảnh hợp lệ.</span>`; return; }
+                    catch(e2) { st.innerHTML += ` <span class="error-log">❌ Lỗi: Định dạng không hợp lệ.</span>`; return; }
                 }
 
-                // Tiêu diệt khung nền trắng che mờ ảnh
+                // Tiêu diệt khung nền trắng che ảnh
                 form.removeField(fieldName);
 
-                // Dán ảnh lọt khe
+                // Dán ảnh
                 const page = pdfDoc.getPages()[pageIndex];
                 page.drawImage(img, { x: rect.x, y: rect.y, width: rect.width, height: rect.height });
                 
                 st.innerHTML += ` <span style="color:#155724;"><b>✅ Thành công!</b></span>`;
             } else {
-                st.innerHTML += ` <span class="error-log">❌ Thất bại: Không lấy được ảnh.</span>`;
+                st.innerHTML += ` <span class="error-log">❌ Thất bại: Không kết nối được tới ảnh.</span>`;
             }
         } catch (e) { 
             st.innerHTML += ` <span class="error-log">❌ Lỗi xử lý PDF.</span>`;
@@ -232,7 +228,7 @@
                 if (gioiTinh === 'nữ') form.getCheckBox('Nữ').check();
             } catch(e) {}
 
-            // ĐIỀN ẢNH VÀ HỦY KHUNG TRẮNG (Bỏ qua nếu bị lỗi mà không làm sập tiến trình)
+            // ĐIỀN ẢNH VÀ HỦY KHUNG TRẮNG
             await stampImage(form, pdfDoc, 'Ảnh cá nhân_af_image', emp[44], 2, 'Ảnh thẻ 4x6'); 
             await stampImage(form, pdfDoc, 'Ảnh STK _af_image', emp[46], 1, 'Ảnh Thẻ Ngân hàng');    
             await stampImage(form, pdfDoc, 'Ảnh SoBHXH_af_image', emp[47], 1, 'Ảnh Sổ BHXH');  
