@@ -1,254 +1,85 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản Trị Nhân Sự - Xuất PDF (Bản Vá Lỗi Tuyệt Đối)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f4f7f6; }
-        .container { max-width: 1200px; background: white; padding: 20px; border-radius: 8px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h2 { color: #0056b3; text-align: center; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px;}
-        th { background-color: #0056b3; color: white; }
-        .btn-export { background-color: #d9534f; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-export:hover { background-color: #c9302c; }
-        .btn-reload { background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 10px;}
-        #status { color: #155724; font-weight: bold; margin-top: 15px; white-space: pre-wrap; background: #fff3cd; padding: 15px; border-radius: 5px; display: none; line-height: 1.6; border: 1px solid #ffeeba;}
-        .error-log { color: #721c24; font-weight: bold; }
-    </style>
-</head>
+<html lang="vi"><head><meta charset="UTF-8"><title>XUẤT PDF TỰ ĐỘNG</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+<style>body{font-family:Arial;background:#f4f7f6}.container{max-width:1200px;background:#fff;padding:20px;margin:auto;}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:10px}th{background:#0056b3;color:#fff}.btn{background:#d9534f;color:#fff;border:none;padding:8px;cursor:pointer;font-weight:bold}#status{color:#155724;font-weight:bold;margin-top:15px;background:#fff3cd;padding:15px;display:none;white-space:pre-wrap}</style></head>
 <body>
-
-<div class="container">
-    <h2>HỆ THỐNG QUẢN TRỊ - XUẤT HỒ SƠ PDF</h2>
-    <button class="btn-reload" onclick="loadData()">🔄 Tải Lại Dữ Liệu Bảng Tính</button>
-    <div id="status"></div>
-    <table>
-        <thead>
-            <tr>
-                <th>Ngày nộp</th>
-                <th>Họ Tên</th>
-                <th>Nơi sinh</th>
-                <th>CCCD</th>
-                <th>SĐT</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <tr><td colspan="6" style="text-align:center;">Bấm "Tải Lại Dữ Liệu" để hiển thị...</td></tr>
-        </tbody>
-    </table>
+<div class="container"><h2>QUẢN TRỊ XUẤT PDF</h2><div id="status"></div>
+<table><thead><tr><th>Họ Tên</th><th>CCCD</th><th>Thao tác</th></tr></thead><tbody id="tableBody"></tbody></table>
 </div>
-
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-    const PDF_TEMPLATE_URL = "template.pdf"; 
-    const FONT_URL = "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
+let empData = [];
 
-    let employeesData = [];
-
-    // HÀM LỌC ẢNH SIÊU CẤP (Xử lý được cả dạng Base64 mới và link Google Drive cũ)
-    async function fetchAndPurifyImage(imageUrl) {
-        if (!imageUrl) return null;
-        imageUrl = imageUrl.toString().trim();
-        let blob;
-
-        if (imageUrl.startsWith('data:image')) {
-            // Trường hợp 1: Dữ liệu là chuỗi mã hóa (Được gửi từ file index.html mới)
-            try {
-                let res = await fetch(imageUrl);
-                blob = await res.blob();
-            } catch(e) { return null; }
-        } else {
-            // Trường hợp 2: Dữ liệu là link Drive (Hồ sơ cũ)
-            let match = imageUrl.match(/id=([a-zA-Z0-9_-]+)/) || imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (!match) return null;
-            let id = match[1];
-            let proxyUrls = [
-                `https://corsproxy.io/?` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`),
-                `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://drive.google.com/uc?export=download&id=${id}`)
-            ];
-            for (let url of proxyUrls) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000);
-                    let res = await fetch(url, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    if (res.ok) { blob = await res.blob(); break; }
-                } catch (e) {}
-            }
-        }
-
-        if (!blob) return null;
-
-        // Dùng Canvas ẩn để rửa sạch mã độc/WebP, nhả ra file JPG tinh khiết 100% cho PDF
-        return await new Promise((resolve) => {
-            let img = new Image();
-            img.crossOrigin = "Anonymous";
-            img.onload = () => {
-                let canvas = document.createElement("canvas");
-                canvas.width = img.width; canvas.height = img.height;
-                let ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0);
-                canvas.toBlob(async (jpgBlob) => { resolve(await jpgBlob.arrayBuffer()); }, "image/jpeg", 0.9);
-            };
-            img.onerror = () => resolve(null);
-            img.src = URL.createObjectURL(blob);
-        });
-    }
-
-    function toText(value) { return (value === null || value === undefined) ? "" : String(value).trim(); }
-    function formatDate(dateStr) {
-        if (!dateStr) return "";
-        let d = new Date(dateStr);
-        if (isNaN(d.getTime())) return toText(dateStr); 
-        return `${("0" + d.getDate()).slice(-2)}/${("0" + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`;
-    }
-
-    async function loadData() {
-        let st = document.getElementById('status');
-        st.style.display = 'block'; st.innerText = "⏳ Đang tải dữ liệu...";
-        try {
-            let res = await fetch(SCRIPT_URL);
-            employeesData = await res.json();
-            renderTable();
-            st.innerText = "✅ Tải dữ liệu thành công!";
-            setTimeout(() => { st.style.display = 'none'; }, 2000);
-        } catch (e) { st.innerText = "❌ Lỗi kết nối: " + e; }
-    }
-
-    function renderTable() {
+window.onload = async () => {
+    try {
+        let res = await fetch(SCRIPT_URL); empData = await res.json();
         let html = '';
-        employeesData.slice().reverse().forEach((emp, revIndex) => {
-            let actualIndex = employeesData.length - 1 - revIndex; 
-            if (!emp[0]) return; 
-            html += `<tr>
-                <td>${formatDate(emp[48])}</td>
-                <td><b>${toText(emp[0])}</b></td>
-                <td>${toText(emp[2])}</td> 
-                <td>${toText(emp[19])}</td>
-                <td>${toText(emp[21])}</td>
-                <td><button class="btn-export" onclick="generatePDF(${actualIndex})">📄 XUẤT PDF</button></td>
-            </tr>`;
+        empData.slice().reverse().forEach((emp, revIdx) => {
+            if(!emp[0]) return; let idx = empData.length - 1 - revIdx;
+            html += `<tr><td><b>${emp[0]}</b></td><td>${emp[19]||''}</td><td><button class="btn" onclick="exportPDF(${idx})">📄 XUẤT PDF</button></td></tr>`;
         });
-        document.getElementById('tableBody').innerHTML = html || '<tr><td colspan="6">Chưa có dữ liệu.</td></tr>';
-    }
+        document.getElementById('tableBody').innerHTML = html;
+    } catch(e) {}
+};
 
-    function fillField(form, fieldName, value, customFont) {
-        try {
-            const field = form.getTextField(fieldName);
-            if (field && value) { field.setText(value); field.updateAppearances(customFont); }
-        } catch (e) {}
-    }
+async function getGasImg(url) {
+    if(!url) return null; let match = url.match(/id=([a-zA-Z0-9_-]+)/); if(!match) return null;
+    let res = await fetch(SCRIPT_URL+"?action=getImage&id="+match[1]); let json = await res.json();
+    if(json.ok){ let bin = window.atob(json.data.split(',')[1]); let b = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i); return b.buffer; } return null;
+}
 
-    async function generatePDF(index) {
-        const emp = employeesData[index]; 
-        const hoTen = toText(emp[0]) || 'NhanVien';
-        
-        let st = document.getElementById('status');
-        st.style.display = 'block';
-        st.innerHTML = `🔄 <b>ĐANG XỬ LÝ HỒ SƠ CHO [${hoTen}]...</b><br>-------------------------------------------------`;
+function formatSal(v){
+    if(!v) return ""; let s = String(v).toUpperCase().trim(); let m = s.replace(/[,.]/g,'').match(/\d+/);
+    if(!m) return s; let n = parseInt(m[0],10); let f = n.toLocaleString('vi-VN');
+    return (s.includes('USD') || n<100000) ? `${f} USD` : `${f} VND`;
+}
 
-        try {
-            const existingPdfBytes = await fetch(PDF_TEMPLATE_URL + "?v=" + new Date().getTime()).then(res => res.arrayBuffer());
-            const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-            pdfDoc.registerFontkit(window.fontkit);
-            const fontBytes = await fetch(FONT_URL).then(res => res.arrayBuffer());
-            const customFont = await pdfDoc.embedFont(fontBytes);
-            const form = pdfDoc.getForm();
+async function exportPDF(idx) {
+    let emp = empData[idx]; let st = document.getElementById('status'); st.style.display='block'; st.innerHTML=`🔄 Đang xử lý [${emp[0]}]...`;
+    try {
+        const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Date.now()).then(r=>r.arrayBuffer()));
+        doc.registerFontkit(window.fontkit);
+        const font = await doc.embedFont(await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer()));
+        const form = doc.getForm();
 
-            // BƯỚC 1: ĐI TÌM VÀ ĐO ĐẠC CÁC Ô ẢNH TRƯỚC (Rất quan trọng, để Tự động xác định số trang)
-            let imageJobs = [
-                { field: 'Ảnh cá nhân_af_image', url: emp[44], name: 'Ảnh thẻ 4x6' },
-                { field: 'Ảnh STK _af_image', url: emp[46], name: 'Ảnh Thẻ Ngân hàng' },
-                { field: 'Ảnh SoBHXH_af_image', url: emp[47], name: 'Ảnh Sổ BHXH' },
-                { field: 'CCCC_ANH_1_af_image', url: emp[45], name: 'Ảnh CCCD Mặt trước' }
-            ];
-            let imagePlacements = [];
-
-            for (let job of imageJobs) {
-                if (!job.url || job.url.toString().trim() === "") continue;
-                try {
-                    const pdfField = form.getField(job.field);
-                    if (pdfField) {
-                        const widgets = pdfField.acroField.getWidgets();
-                        if (widgets && widgets.length > 0) {
-                            const rect = widgets[0].getRectangle();
-                            
-                            // Thuật toán quét tìm xem cái ô này đang nằm ở Trang thứ mấy (Hoàn toàn tự động!)
-                            const pageRef = widgets[0].getP();
-                            let detectedPageIdx = 0;
-                            const pages = pdfDoc.getPages();
-                            for (let i = 0; i < pages.length; i++) {
-                                if (pages[i].ref === pageRef) { detectedPageIdx = i; break; }
-                            }
-
-                            imagePlacements.push({ rect: rect, url: job.url, pageIndex: detectedPageIdx, name: job.name });
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            // BƯỚC 2: BƠM CHỮ VÀO CÁC Ô TEXT
-            fillField(form, 'Họ Tên', emp[0], customFont);
-            fillField(form, 'MSNV', emp[2], customFont); 
-            fillField(form, 'Học Lực', emp[1], customFont);
-            fillField(form, 'Nơi Sinh', emp[5], customFont);
-            fillField(form, 'Ngày sinh', formatDate(emp[3]), customFont);
-            fillField(form, 'Ngày_sinh', formatDate(emp[3]), customFont); 
-            fillField(form, 'Ngày vào làm', formatDate(emp[10]), customFont);
-            fillField(form, 'Bộ phận', emp[6], customFont);
-            fillField(form, 'Vị trí', emp[7], customFont); 
-            fillField(form, 'Mức lương căn bản', emp[9], customFont);
-            fillField(form, 'Tỉnh', emp[18], customFont);
-            fillField(form, 'CCCD', emp[19], customFont);
-            fillField(form, 'Ngày cấp CCCD', formatDate(emp[20]), customFont);
-            fillField(form, 'SDT', emp[21], customFont);
-            fillField(form, 'Ngành nghề', emp[29], customFont);
-            fillField(form, 'Đại học', emp[30], customFont); 
-
-            try {
-                let gioiTinh = toText(emp[4]).toLowerCase();
-                if (gioiTinh === 'nam') form.getCheckBox('Nam').check();
-                if (gioiTinh === 'nữ') form.getCheckBox('Nữ').check();
-            } catch(e) {}
-
-            // BƯỚC 3: "PHẲNG HÓA" TOÀN BỘ PDF. (Lệnh chốt hạ tiêu diệt mọi khung trắng, mọi lỗi removeField)
-            form.flatten();
-
-            // BƯỚC 4: DÁN ẢNH LÊN MẶT TRÊN CÙNG CỦA TỜ GIẤY
-            for (let placement of imagePlacements) {
-                st.innerHTML += `<br>⏳ Đang nhúng [${placement.name}]...`;
-                try {
-                    const imgBytes = await fetchAndPurifyImage(placement.url);
-                    if (imgBytes) {
-                        const img = await pdfDoc.embedJpg(imgBytes);
-                        const page = pdfDoc.getPages()[placement.pageIndex];
-                        // Dán ảnh lọt thỏm vào tọa độ đã đo trước đó
-                        page.drawImage(img, { x: placement.rect.x, y: placement.rect.y, width: placement.rect.width, height: placement.rect.height });
-                        st.innerHTML += ` <span style="color:#155724;"><b>✅ Lọt khung!</b></span>`;
-                    } else {
-                        st.innerHTML += ` <span class="error-log">❌ Dữ liệu rỗng hoặc không tải được.</span>`;
-                    }
-                } catch (e) {
-                    st.innerHTML += ` <span class="error-log">❌ Lỗi in: ${e.message}</span>`;
-                }
-            }
-
-            const pdfBytes = await pdfDoc.save();
-            download(pdfBytes, `HoSo_${hoTen}.pdf`, "application/pdf");
-            
-            st.innerHTML += `<br>-------------------------------------------------<br>🎉 <b>HOÀN TẤT! File PDF đã tải về máy tính thành công mỹ mãn.</b>`;
-            
-        } catch (err) {
-            console.error(err);
-            st.innerHTML += `<br><span class="error-log">❌ Lỗi hệ thống: ` + err.message + `</span>`;
+        // 1. Điền chữ 
+        for(let i=0; i<=44; i++){
+            if([4,17,25,26,27,30].includes(i)) continue; // Bỏ qua Checkbox & Cột Học Vấn
+            let val = emp[i] ? String(emp[i]) : "";
+            if([3,5,20,41].includes(i) && val){ let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; }
+            if(i===9 || i===12) val = formatSal(val);
+            try{ let f=form.getTextField(i.toString()); if(f&&val){ f.setText(val); f.updateAppearances(font); } }catch(e){}
         }
-    }
-    window.onload = loadData;
-</script>
-</body>
-</html>
+
+        // 2. Tách Học Vấn (Thời gian | Tên trường)
+        [25,26,27,30].forEach(i => {
+            if(emp[i]){
+                let p = String(emp[i]).split('|');
+                try{ form.getTextField(`${i}_thoigian`).setText(p[0]||''); form.getTextField(`${i}_thoigian`).updateAppearances(font); }catch(e){}
+                try{ form.getTextField(`${i}_tentruong`).setText(p[1]||''); form.getTextField(`${i}_tentruong`).updateAppearances(font); }catch(e){}
+            }
+        });
+
+        // 3. Checkbox (Giới tính & Hôn nhân)
+        try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else if(gt.includes('nữ')||gt.includes('nu')) form.getCheckBox('Nu').check(); }catch(e){}
+        try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); }catch(e){}
+
+        // 4. Đo & Ép ảnh (45 đến 49)
+        let imgs = [ {f:'45',u:emp[45]}, {f:'46',u:emp[46]}, {f:'47',u:emp[47]}, {f:'48',u:emp[48]}, {f:'49',u:emp[49]} ];
+        let draw = [];
+        imgs.forEach(t => { if(t.u) { try{ let field=form.getField(t.f); if(field){ draw.push({r:field.acroField.getWidgets()[0].getRectangle(), u:t.u, p:doc.getPages().findIndex(p=>p.ref===field.acroField.getWidgets()[0].getP())}); } }catch(e){} } });
+        
+        form.flatten(); // Ép phẳng mặt giấy
+
+        for(let d of draw){
+            let b = await getGasImg(d.u);
+            if(b){ let img=await doc.embedJpg(b).catch(()=>doc.embedPng(b)); doc.getPages()[d.p].drawImage(img,{x:d.r.x,y:d.r.y,width:d.r.width,height:d.r.height}); }
+        }
+
+        download(await doc.save(), `HoSo_${emp[0]}.pdf`, "application/pdf");
+        st.innerHTML += `<br>🎉 HOÀN TẤT! Đã tải file.`;
+    } catch(e) { st.innerHTML += `<br>❌ Lỗi: ${e.message}`; }
+}
+</script></body></html>
