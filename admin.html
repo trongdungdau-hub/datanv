@@ -168,7 +168,7 @@ function formatSal(v){
     if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
 }
 
-// 3. CODE TẠO PDF (CHẠY LIVE)
+// 3. CODE TẠO PDF (CHẠY LIVE) - ĐÃ SỬA LỖI getP()
 async function refreshPDF() {
     let emp = empData[currentIndex]; 
     document.getElementById('loadingPDF').style.display = 'flex';
@@ -204,7 +204,7 @@ async function refreshPDF() {
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        // ĐO TỌA ĐỘ VÀ GHI NHỚ LẠI
+        // ĐO TỌA ĐỘ VÀ GHI NHỚ LẠI - ĐÃ SỬA LỖI getP()
         let inputs = [ {id:'up45', field:'45'}, {id:'up46', field:'46'}, {id:'up47', field:'47'}, {id:'up48', field:'48'}, {id:'up49', field:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -214,11 +214,20 @@ async function refreshPDF() {
             if(fileInput.files.length > 0) {
                 let buffer = await readFileAsBuffer(fileInput.files[0]);
                 const targetField = allFields.find(f => f.getName().trim() === item.field);
-                if(targetField){
-                    const rect = targetField.acroField.getWidgets()[0].getRectangle();
-                    const pRef = targetField.acroField.getWidgets()[0].getP();
-                    const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
-                    drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
+                if(targetField) {
+                    const widgets = targetField.acroField.getWidgets();
+                    if(widgets.length > 0) {
+                        const widget = widgets[0];
+                        const rect = widget.getRectangle();
+                        // SỬA LỖI: dùng P() thay vì getP()
+                        const pRef = widget.P(); 
+                        if(pRef) {
+                            const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
+                            if(pageIndex >= 0) {
+                                drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
+                            }
+                        }
+                    }
                 }
             }
         }
