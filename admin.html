@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8"><title>XUẤT PDF TỰ ĐỘNG - BẢN ĐÃ SỬA LỖI</title>
+<html lang="vi"><head><meta charset="UTF-8"><title>XUẤT PDF TỰ ĐỘNG - DIỆT LỖI TẬN GỐC</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
@@ -58,29 +58,19 @@ async function exportPDF(idx) {
         const font = await doc.embedFont(await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer()));
         const form = doc.getForm();
 
-        // 1. ĐIỀN CHỮ BÌNH THƯỜNG (Từ 0 đến 44)
+        // 1. ĐIỀN CHỮ BÌNH THƯỜNG
         for(let i=0; i<=44; i++){
-            if([4,17,18,25,26,27,30].includes(i)) continue; // Bỏ qua checkbox, học vấn và địa chỉ 18
+            if([4,17,18,25,26,27,30].includes(i)) continue; 
             let val = emp[i] ? String(emp[i]) : "";
-            
-            // Xử lý ngày tháng an toàn
-            if([3,5,20,41].includes(i) && val){ 
-                try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} 
-            }
+            if([3,5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
             if(i===9 || i===12) val = formatSal(val);
-
-            try{ 
-                let f = form.getTextField(i.toString()); 
-                if(f && val){ f.setText(val); f.updateAppearances(font); } 
-            } catch(e){ console.log("Lỗi điền ô số " + i); }
+            try{ let f = form.getTextField(i.toString()); if(f && val){ f.setText(val); f.updateAppearances(font); } } catch(e){}
         }
 
-        // 2. XỬ LÝ ĐỊA CHỈ 18 BỊ CẮT NHỎ (18_tinh, 18_phuong, 18_chitiet)
-        if(emp[18]){
-            try{ form.getTextField('18_chitiet').setText(String(emp[18])); form.getTextField('18_chitiet').updateAppearances(font); } catch(e){}
-        }
+        // 2. XỬ LÝ ĐỊA CHỈ 18 BỊ CẮT NHỎ
+        if(emp[18]){ try{ form.getTextField('18_chitiet').setText(String(emp[18])); form.getTextField('18_chitiet').updateAppearances(font); } catch(e){} }
 
-        // 3. TÁCH HỌC VẤN (Thời gian | Tên trường)
+        // 3. TÁCH HỌC VẤN
         [25,26,27,30].forEach(i => {
             if(emp[i]){
                 let p = String(emp[i]).split('|');
@@ -89,39 +79,32 @@ async function exportPDF(idx) {
             }
         });
 
-        // 4. CHECKBOX (Nam / Nữ / Đã kết hôn / Chưa kết hôn)
-        try { 
-            let gt=String(emp[4]||'').toLowerCase(); 
-            if(gt.includes('nam')) form.getCheckBox('Nam').check(); 
-            else if(gt.includes('nữ')||gt.includes('nu')) form.getCheckBox('Nữ').check(); // Đã sửa thành Nữ
-        } catch(e){}
-        try { 
-            let hn=String(emp[17]||'').toLowerCase(); 
-            if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); 
-            else form.getCheckBox('ChuaKetHon').check(); 
-        } catch(e){}
+        // 4. CHECKBOX
+        try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else if(gt.includes('nữ')||gt.includes('nu')) form.getCheckBox('Nữ').check(); } catch(e){}
+        try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        // 5. ĐO TỌA ĐỘ VÀ IN ẢNH (BẮT LỖI CỰC GẮT)
+        // 5. ĐO TỌA ĐỘ VÀ IN ẢNH BẰNG THUẬT TOÁN QUÉT TOÀN DIỆN (CHẤP MỌI LOẠI Ô)
         let imgs = [ {f:'45',u:emp[45], n:'Ảnh 4x6'}, {f:'46',u:emp[46], n:'CCCD Trước'}, {f:'47',u:emp[47], n:'CCCD Sau'}, {f:'48',u:emp[48], n:'Ngân hàng'}, {f:'49',u:emp[49], n:'Sổ BHXH'} ];
         let draw = [];
+        let allFields = form.getFields(); // Lấy sạch sành sanh tất cả các ô có trên giấy
         
         for(let t of imgs){
             if(t.u) {
                 try {
-                    let field = form.getTextField(t.f); // Chuyên trị các ô r mà bạn đã tạo
+                    let field = allFields.find(f => f.getName() === t.f); // Tìm đích danh tên ô, bất chấp loại ô
                     if(field){
                         let rect = field.acroField.getWidgets()[0].getRectangle();
                         let pRef = field.acroField.getWidgets()[0].getP();
                         let pIdx = doc.getPages().findIndex(p=>p.ref===pRef);
                         draw.push({r:rect, u:t.u, p:pIdx, name: t.n});
+                    } else {
+                        st.innerHTML += `<br>⚠️ <i>Cảnh báo: Form PDF trên Github hiện tại không có ô tên [${t.f}]</i>`;
                     }
-                } catch(e) {
-                    st.innerHTML += `<br>⚠️ <i>Cảnh báo: Không tìm thấy khung [${t.f}] cho ${t.n} trên form PDF.</i>`;
-                }
+                } catch(e) {}
             }
         }
         
-        form.flatten(); // Ép phẳng mặt giấy
+        form.flatten(); // Ép phẳng
 
         for(let d of draw){
             st.innerHTML += `<br>⏳ Đang rút <b>${d.name}</b> từ Drive...`;
@@ -131,18 +114,12 @@ async function exportPDF(idx) {
                     let img = await doc.embedJpg(b).catch(()=>doc.embedPng(b)); 
                     doc.getPages()[d.p].drawImage(img,{x:d.r.x, y:d.r.y, width:d.r.width, height:d.r.height}); 
                     st.innerHTML += ` <span style="color:green">✅ THÀNH CÔNG!</span>`;
-                } else { 
-                    st.innerHTML += ` <span style="color:red">❌ THẤT BẠI: Google chặn quyền tải ảnh.</span>`; 
-                }
-            } catch(imgErr) {
-                st.innerHTML += ` <span style="color:red">❌ LỖI VẼ ẢNH: ${imgErr.message}</span>`;
-            }
+                } else { st.innerHTML += ` <span style="color:red">❌ Lỗi tải ảnh.</span>`; }
+            } catch(imgErr) { st.innerHTML += ` <span style="color:red">❌ LỖI VẼ ẢNH</span>`; }
         }
 
         download(await doc.save(), `HoSo_${emp[0]}.pdf`, "application/pdf");
         st.innerHTML += `<br><br>🎉 <b>ĐÃ XUẤT XONG FILE PDF!</b> Mở file tải về để kiểm tra nhé.`;
-    } catch(e) { 
-        st.innerHTML += `<br><br><span style="color:red">❌ LỖI HỆ THỐNG: ${e.message}</span>`; 
-    }
+    } catch(e) { st.innerHTML += `<br><br><span style="color:red">❌ LỖI: ${e.message}</span>`; }
 }
 </script></body></html>
