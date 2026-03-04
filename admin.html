@@ -101,26 +101,21 @@ function renderTable() {
     document.getElementById('tableBody').innerHTML = html;
 }
 
-// MỞ POPUP
 function openModal(idx) {
     currentIndex = idx;
     let emp = empData[idx];
     document.getElementById('modalTitle').innerText = "HỒ SƠ: " + emp[0];
     document.getElementById('modalStatus').style.display = 'none';
     
-    // Tìm các link Drive trong dữ liệu người này
     currentLinks = [];
     emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) currentLinks.push(cell); });
     
-    // Làm sạch file input cũ
     ['45','46','47','48','49'].forEach(id => document.getElementById('up'+id).value = '');
-    
     document.getElementById('myModal').style.display = "block";
 }
 
 function closeModal() { document.getElementById('myModal').style.display = "none"; }
 
-// HÀM TẢI ẢNH GỐC TỪ DRIVE VỀ MÁY TÍNH
 async function dlImg(linkIndex, tenFile) {
     let st = document.getElementById('modalStatus');
     if(!currentLinks[linkIndex]){
@@ -138,7 +133,6 @@ async function dlImg(linkIndex, tenFile) {
                 let bin = window.atob(json.data.split(',')[1]); 
                 let b = new Uint8Array(bin.length); 
                 for(let i=0; i<bin.length; i++) b[i]=bin.charCodeAt(i); 
-                // Tự động tải file xuống máy
                 download(b.buffer, empData[currentIndex][0] + "_" + tenFile + ".jpg", "image/jpeg");
                 st.innerHTML = `✅ Đã tải xong <b>${tenFile}</b> xuống máy tính!`;
                 return;
@@ -148,7 +142,6 @@ async function dlImg(linkIndex, tenFile) {
     st.innerHTML = `❌ Không lấy được ảnh. Mày tự bấm vào link này tải tay nhé: <a href="${url}" target="_blank">Link ẢNH</a>`;
 }
 
-// Đọc file ảnh từ máy tính
 function readFileAsBuffer(file) {
     return new Promise((resolve) => {
         let reader = new FileReader();
@@ -162,11 +155,10 @@ function formatSal(v){
     if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
 }
 
-// XUẤT PDF
 async function exportPDF() {
     let emp = empData[currentIndex]; 
     let st = document.getElementById('modalStatus'); 
-    st.style.display='block'; st.innerHTML=`🔄 <b>ĐANG ÉP ẢNH & XUẤT PDF...</b>`;
+    st.style.display='block'; st.innerHTML=`🔄 <b>ĐANG ĐO TỌA ĐỘ KHUNG VÀ ÉP ẢNH...</b>`;
     
     try {
         const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
@@ -174,7 +166,7 @@ async function exportPDF() {
         const font = await doc.embedFont(await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer()));
         const form = doc.getForm();
 
-        // 1. Điền chữ (ÉP FONT TIẾNG VIỆT 100%)
+        // 1. Điền chữ
         for(let i=0; i<=44; i++){
             if([4,17,18,25,26,27,30].includes(i)) continue;
             let val = emp[i] ? String(emp[i]) : "";
@@ -183,7 +175,6 @@ async function exportPDF() {
             try{ let f = form.getTextField(i.toString()); if(f && val) { f.setText(val); f.updateAppearances(font); } } catch(e){}
         }
         
-        // 2. Điền Khẩn cấp & Học vấn (ÉP FONT TIẾNG VIỆT TỪNG Ô MỘT)
         try{ let f22 = form.getTextField('22'); if(f22 && emp[22]){ f22.setText(String(emp[22])); f22.updateAppearances(font); } } catch(e){}
         try{ let f23 = form.getTextField('23'); if(f23 && emp[23]){ f23.setText(String(emp[23])); f23.updateAppearances(font); } } catch(e){}
         if(emp[18]){ try{ let f18 = form.getTextField('18_chitiet'); if(f18){ f18.setText(String(emp[18])); f18.updateAppearances(font); } } catch(e){} }
@@ -196,14 +187,13 @@ async function exportPDF() {
             }
         });
 
-        // 3. Checkbox
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        // 4. LẤY ẢNH TỪ FILE INPUT CỦA MÁY TÍNH
+        // 2. ĐO TỌA ĐỘ VÀ GHI NHỚ LẠI TRƯỚC KHI ÉP FORM
         let inputs = [ {id:'up45', field:'45'}, {id:'up46', field:'46'}, {id:'up47', field:'47'}, {id:'up48', field:'48'}, {id:'up49', field:'49'} ];
         const allFields = form.getFields();
-        form.flatten(); // Ép form
+        let drawTasks = [];
 
         for(let item of inputs) {
             let fileInput = document.getElementById(item.id);
@@ -212,17 +202,28 @@ async function exportPDF() {
                 const targetField = allFields.find(f => f.getName().trim() === item.field);
                 if(targetField){
                     const rect = targetField.acroField.getWidgets()[0].getRectangle();
-                    const page = doc.getPages()[doc.getPages().findIndex(p => p.ref === targetField.acroField.getWidgets()[0].getP())];
-                    const img = await doc.embedJpg(buffer).catch(() => doc.embedPng(buffer));
-                    page.drawImage(img, { x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+                    const pRef = targetField.acroField.getWidgets()[0].getP();
+                    const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
+                    drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
                 }
             }
         }
 
+        // 3. ÉP PHẲNG MẶT GIẤY (Lúc này các khung sẽ biến mất)
+        form.flatten();
+
+        // 4. VẼ ẢNH VÀO TỌA ĐỘ ĐÃ NHỚ
+        for(let task of drawTasks) {
+            if(task.pageIndex >= 0) {
+                const page = doc.getPages()[task.pageIndex];
+                const img = await doc.embedJpg(task.buffer).catch(() => doc.embedPng(task.buffer));
+                page.drawImage(img, { x: task.rect.x, y: task.rect.y, width: task.rect.width, height: task.rect.height });
+            }
+        }
+
         download(await doc.save(), `HoSo_${emp[0]}.pdf`, "application/pdf");
-        st.innerHTML = `🎉 <b>HOÀN TẤT!</b> Đã xuất PDF.`;
+        st.innerHTML = `🎉 <b>HOÀN TẤT!</b> Đã xuất PDF có đầy đủ ảnh.`;
         
-        // LƯU LẠI TRẠNG THÁI "ĐÃ XUẤT"
         let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
         exportedList[cccd] = true;
         localStorage.setItem('exportedData', JSON.stringify(exportedList));
@@ -230,6 +231,6 @@ async function exportPDF() {
         
         setTimeout(() => closeModal(), 2000); 
         
-    } catch(e) { st.innerHTML = `❌ LỖI: ${e.message}`; }
+    } catch(e) { st.innerHTML = `❌ LỖI RỒI: ${e.message}`; }
 }
 </script></body></html>
