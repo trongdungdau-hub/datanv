@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8"><title>XUẤT PDF TỰ ĐỘNG</title>
+<html lang="vi"><head><meta charset="UTF-8"><title>XUẤT PDF TỰ ĐỘNG (BẢN CHỐT)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
@@ -9,6 +9,7 @@
 <table><thead><tr><th>Họ Tên</th><th>CCCD</th><th>Thao tác</th></tr></thead><tbody id="tableBody"></tbody></table>
 </div>
 <script>
+// ĐIỀN LINK APPS SCRIPT CỦA BẠN VÀO ĐÂY
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 let empData = [];
 
@@ -24,10 +25,22 @@ window.onload = async () => {
     } catch(e) {}
 };
 
+// CÔNG NGHỆ BẮT LINK DRIVE SIÊU NHẠY
 async function getGasImg(url) {
-    if(!url) return null; let match = url.match(/id=([a-zA-Z0-9_-]+)/); if(!match) return null;
-    let res = await fetch(SCRIPT_URL+"?action=getImage&id="+match[1]); let json = await res.json();
-    if(json.ok){ let bin = window.atob(json.data.split(',')[1]); let b = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i); return b.buffer; } return null;
+    if(!url) return null; 
+    let match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/); 
+    if(!match) return null;
+    try {
+        let res = await fetch(SCRIPT_URL+"?action=getImage&id="+match[1]); 
+        let json = await res.json();
+        if(json.ok){ 
+            let bin = window.atob(json.data.split(',')[1]); 
+            let b = new Uint8Array(bin.length); 
+            for(let i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i); 
+            return b.buffer; 
+        } 
+    } catch(e){}
+    return null;
 }
 
 function formatSal(v){
@@ -74,8 +87,10 @@ async function exportPDF(idx) {
         form.flatten(); // Ép phẳng mặt giấy
 
         for(let d of draw){
+            st.innerHTML += `<br>⏳ Đang rút ảnh từ Drive...`;
             let b = await getGasImg(d.u);
-            if(b){ let img=await doc.embedJpg(b).catch(()=>doc.embedPng(b)); doc.getPages()[d.p].drawImage(img,{x:d.r.x,y:d.r.y,width:d.r.width,height:d.r.height}); }
+            if(b){ let img=await doc.embedJpg(b).catch(()=>doc.embedPng(b)); doc.getPages()[d.p].drawImage(img,{x:d.r.x,y:d.r.y,width:d.r.width,height:d.r.height}); st.innerHTML += ` ✅ Xong!`;}
+            else { st.innerHTML += ` ❌ Lỗi link.`; }
         }
 
         download(await doc.save(), `HoSo_${emp[0]}.pdf`, "application/pdf");
