@@ -15,7 +15,7 @@ th{background:#0056b3;color:#fff}
 .btn-xem{background:#17a2b8;}
 .badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
 
-/* Modal chính (ghép ảnh) */
+/* Modal chính */
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
 .modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
 .close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
@@ -48,7 +48,7 @@ th{background:#0056b3;color:#fff}
 <body>
 
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (ĐÃ BỎ DÒNG TIÊU ĐỀ)</h2>
+    <h2>QUẢN TRỊ XUẤT PDF (BẢN CHUẨN - SẠCH SẼ 100%)</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
@@ -116,7 +116,6 @@ th{background:#0056b3;color:#fff}
 <script>
 // ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-const FONT_URL = "https://unpkg.com/liberation-fonts-ttf@2.1.5/LiberationSerif-Regular.ttf";
 
 let empData = [];
 let currentIndex = -1;
@@ -141,25 +140,37 @@ window.onload = async () => {
     } catch(e) {}
 };
 
-// ĐÃ THÊM .slice(1) Ở ĐÂY ĐỂ BỎ QUA DÒNG TIÊU ĐỀ TỪ GOOGLE SHEET
+// =========================================================
+// HÀM RENDER BẢNG (ĐÃ FIX: QUÉT SẠCH DÒNG TIÊU ĐỀ RÁC)
+// =========================================================
 function renderTable() {
     let html = '';
-    empData.slice(1).reverse().forEach((emp, revIdx) => {
-        if(!emp[0]) return; 
-        let idx = empData.length - 1 - revIdx; // Giữ nguyên index trỏ đúng vào mảng gốc
-        let cccd = emp[19] || ('NO_CCCD_' + idx);
+    
+    // Lặp ngược từ cuối mảng về đầu
+    for (let i = empData.length - 1; i >= 0; i--) {
+        let emp = empData[i];
+        if (!emp || !emp[0]) continue;
+        
+        // BỘ LỌC THÉP: Giết chết bất kỳ dòng nào chứa chữ "Họ và Tên" hoặc "Viết hoa"
+        let nameStr = String(emp[0]).toLowerCase();
+        if (nameStr.includes("họ và tên") || nameStr.includes("họ tên") || nameStr.includes("viết hoa")) {
+            continue; // Bỏ qua dòng rác này luôn
+        }
+        
+        let cccd = emp[19] || ('NO_CCCD_' + i);
         let statusHtml = exportedList[cccd] ? '<span class="badge">✅ Đã xuất</span>' : '<span style="color:#888">Chưa xuất</span>';
         
+        // Nút bấm dùng chỉ số "i" gốc của mảng, đảm bảo không bao giờ trỏ lộn người
         html += `<tr>
             <td><b>${emp[0]}</b></td>
             <td>${emp[19]||''}</td>
             <td>${statusHtml}</td>
             <td>
-                <button id="btn-dl-${idx}" class="btn btn-dl" onclick="downloadAllImages(${idx})">⬇️ Tải 1 Cục Ảnh</button>
-                <button class="btn btn-xem" onclick="openModal(${idx})">👁️ Xem & Ghép</button>
+                <button id="btn-dl-${i}" class="btn btn-dl" onclick="downloadAllImages(${i})">⬇️ Tải 1 Cục Ảnh</button>
+                <button class="btn btn-xem" onclick="openModal(${i})">👁️ Xem & Ghép</button>
             </td>
         </tr>`;
-    });
+    }
     document.getElementById('tableBody').innerHTML = html;
 }
 
@@ -184,7 +195,6 @@ async function downloadAllImages(idx) {
     let emp = empData[idx];
     let links = [];
     emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) links.push(cell); });
-    
     if(links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
     
     let btn = document.getElementById('btn-dl-' + idx);
@@ -195,7 +205,6 @@ async function downloadAllImages(idx) {
         let b = await getGasImg(links[i]);
         if(b) download(b, `${emp[0]}_Anh_${i+1}.jpg`, "image/jpeg");
     }
-    
     btn.innerHTML = '✅ Tải xong';
     setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
 }
@@ -211,7 +220,7 @@ function openModal(idx) {
             croppedImages[id] = { blob: null, original: null };
         }
     });
-    document.getElementById('myModal').style.display = "block";
+    document.getElementById('myModal').style.display = "flex";
     document.getElementById('btnClose').style.display = "block";
     refreshPDF(); 
 }
@@ -241,7 +250,6 @@ function handleFileSelect(fieldId) {
 function openCropModal(fieldId) {
     const input = document.getElementById('up'+fieldId);
     if(!input.files.length) return;
-    
     currentCropField = fieldId;
     const file = input.files[0];
     const reader = new FileReader();
@@ -268,7 +276,6 @@ function saveCrop() {
         maxWidth: 1024, maxHeight: 1024, fillColor: '#fff',
         imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
     });
-    
     canvas.toBlob((blob) => {
         const blobUrl = URL.createObjectURL(blob);
         const reader = new FileReader();
@@ -303,13 +310,15 @@ function formatSal(v){
     if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
 }
 
-function fillField(form, fieldName, value, customFont) {
+// -----------------------------------------------------------
+// HÀM BƠM CHỮ (ĐÃ XÓA SẠCH VỤ GỌI FONT CỦA TAO)
+// -----------------------------------------------------------
+function fillField(form, fieldName, value) {
     try {
         let field = form.getTextField(fieldName);
         if (field && value) {
             field.setText(String(value));
-            field.setFontSize(10); 
-            field.updateAppearances({ font: customFont });
+            field.setFontSize(10); // LUÔN LUÔN SIZE 10
         }
     } catch(e) {}
 }
@@ -317,27 +326,31 @@ function fillField(form, fieldName, value, customFont) {
 async function refreshPDF() {
     if(currentIndex === -1) return;
     let emp = empData[currentIndex]; 
-    document.getElementById('loadingPDF').style.display = 'flex';
+    let loadingDiv = document.getElementById('loadingPDF');
+    loadingDiv.style.display = 'flex';
+    loadingDiv.innerText = "⏳ Đang tải file Template.pdf...";
     
     try {
-        const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
-        doc.registerFontkit(window.fontkit);
-        
-        const fontRes = await fetch(FONT_URL);
-        const fontBytes = await fontRes.arrayBuffer();
-        const font = await doc.embedFont(fontBytes);
+        // TẢI TEMPLATE TỪ GITHUB
+        let templateRes = await fetch("template.pdf?v="+Math.random());
+        if(!templateRes.ok) throw new Error("Mất file 'template.pdf' rồi sếp ơi!");
+        const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
         const form = doc.getForm();
 
+        loadingDiv.innerText = "⏳ Đang điền dữ liệu...";
+
+        // 1. Điền text fields bình thường và ép size 10
         for(let i=0; i<=44; i++){
             if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
-            
             let val = emp[i] ? String(emp[i]) : "";
+            
             if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
             if(i===9 || i===12) val = formatSal(val);
             
-            fillField(form, i.toString(), val, font);
+            fillField(form, i.toString(), val);
         }
         
+        // 2. XỬ LÝ NGÀY SINH (TÁCH ĐÚNG 3_nam, 3_thang, 3_ngay)
         let dobRaw = emp[3];
         if (dobRaw) {
             let d = new Date(dobRaw);
@@ -350,13 +363,14 @@ async function refreshPDF() {
                 let mm = ("0" + (d.getMonth() + 1)).slice(-2);
                 let yyyy = d.getFullYear().toString();
                 
-                fillField(form, '3', `${dd}/${mm}/${yyyy}`, font);
-                fillField(form, '3_nam', yyyy, font);
-                fillField(form, '3_thang', mm, font);
-                fillField(form, '3_ngay', dd, font);
+                fillField(form, '3', `${dd}/${mm}/${yyyy}`);
+                fillField(form, '3_nam', yyyy);
+                fillField(form, '3_thang', mm);
+                fillField(form, '3_ngay', dd);
             }
         }
 
+        // 3. XỬ LÝ ĐỊA CHỈ (Ô 18, 22, 23)
         let addr18 = emp[18];
         if (addr18) {
             let parts = String(addr18).split('|');
@@ -365,28 +379,29 @@ async function refreshPDF() {
             let chitiet = parts[2] || '';
             
             let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
-            fillField(form, '18', full18, font); 
-            fillField(form, '18_tinh', tinh, font); 
-            fillField(form, '18_phuong', phuong, font);
-            fillField(form, '18_chitiet', chitiet, font);
+            fillField(form, '18', full18); 
+            fillField(form, '18_tinh', tinh); 
+            fillField(form, '18_phuong', phuong);
+            fillField(form, '18_chitiet', chitiet);
         }
-        
-        fillField(form, '22', String(emp[22]||''), font);
-        fillField(form, '23', String(emp[23]||''), font);
+        fillField(form, '22', String(emp[22]||''));
+        fillField(form, '23', String(emp[23]||''));
 
+        // 4. Xử lý học vấn 
         [25,26,27,30].forEach(i => {
             if(emp[i]){
                 let p = String(emp[i]).split('|');
-                fillField(form, `${i}_thoigian`, p[0]||'', font);
-                fillField(form, `${i}_tentruong`, p[1]||'', font);
+                fillField(form, `${i}_thoigian`, p[0]||'');
+                fillField(form, `${i}_tentruong`, p[1]||'');
             }
         });
 
+        // 5. Checkbox
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        form.updateFieldAppearances(font);
-
+        // 6. Vẽ ảnh
+        loadingDiv.innerText = "⏳ Đang ghép ảnh vào form...";
         let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -429,26 +444,24 @@ async function refreshPDF() {
         const url = URL.createObjectURL(blob);
         
         document.getElementById('pdfFrame').src = url;
-        document.getElementById('loadingPDF').style.display = 'none';
+        loadingDiv.style.display = 'none';
 
     } catch(e) { 
-        alert("Lỗi tải PDF: " + e.message); 
+        alert("LỖI: " + e.message); 
         console.error(e);
-        document.getElementById('loadingPDF').style.display = 'none';
+        loadingDiv.style.display = 'none';
     }
 }
 
 function downloadFinalPDF() {
     if(!currentPDFBytes) return;
     let emp = empData[currentIndex];
-    
     download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
     
     let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
     exportedList[cccd] = true;
     localStorage.setItem('exportedData', JSON.stringify(exportedList));
     renderTable(); 
-    
     closeModal();
 }
 </script></body></html>
