@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <style>
+/* Giữ nguyên style cũ và thêm một số style mới */
 body{font-family:Arial;background:#f4f7f6; margin:0; padding:20px;}
 .container{max-width:1200px;background:#fff;padding:20px;margin:auto;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
 table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left; vertical-align:middle;}
@@ -48,7 +49,7 @@ th{background:#0056b3;color:#fff}
 <body>
 
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (ĐÃ FIX LỖI FONT)</h2>
+    <h2>QUẢN TRỊ XUẤT PDF - SIZE 10 & TÁCH NGÀY THÁNG</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
@@ -116,14 +117,12 @@ th{background:#0056b3;color:#fff}
 <script>
 // ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-// Link thẳng tới Font Times New Roman cực chuẩn của Google (Không bao giờ lỗi)
-const DIRECT_FONT_URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/tinos/Tinos-Regular.ttf";
-
 let empData = [];
 let currentIndex = -1;
 let currentPDFBytes = null;
 let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
 
+// Object lưu ảnh đã cắt (dạng blob URL) và file gốc (ArrayBuffer) cho từng field
 let croppedImages = {
     '45': { blob: null, original: null },
     '46': { blob: null, original: null },
@@ -135,6 +134,7 @@ let croppedImages = {
 let currentCropField = null;
 let cropper = null;
 
+// ==================== HÀM CHÍNH ====================
 window.onload = async () => {
     try {
         let res = await fetch(SCRIPT_URL); empData = await res.json();
@@ -163,6 +163,7 @@ function renderTable() {
     document.getElementById('tableBody').innerHTML = html;
 }
 
+// Tải ảnh từ Drive 
 async function getGasImg(url) {
     if(!url) return null; 
     let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -184,6 +185,7 @@ async function downloadAllImages(idx) {
     let emp = empData[idx];
     let links = [];
     emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) links.push(cell); });
+    
     if(links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
     
     let btn = document.getElementById('btn-dl-' + idx);
@@ -199,6 +201,7 @@ async function downloadAllImages(idx) {
     setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
 }
 
+// Mở modal chính
 function openModal(idx) {
     currentIndex = idx;
     document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
@@ -210,7 +213,7 @@ function openModal(idx) {
             croppedImages[id] = { blob: null, original: null };
         }
     });
-    document.getElementById('myModal').style.display = "flex";
+    document.getElementById('myModal').style.display = "block";
     document.getElementById('btnClose').style.display = "block";
     refreshPDF(); 
 }
@@ -250,7 +253,12 @@ function openCropModal(fieldId) {
         document.getElementById('cropModal').style.display = 'flex';
         if(cropper) cropper.destroy();
         setTimeout(() => {
-            cropper = new Cropper(img, { aspectRatio: NaN, viewMode: 1, autoCropArea: 1, responsive: true });
+            cropper = new Cropper(img, {
+                aspectRatio: NaN, 
+                viewMode: 1,
+                autoCropArea: 1,
+                responsive: true,
+            });
         }, 100);
     };
     reader.readAsDataURL(file);
@@ -258,13 +266,17 @@ function openCropModal(fieldId) {
 
 function closeCropModal() {
     document.getElementById('cropModal').style.display = 'none';
-    if(cropper) { cropper.destroy(); cropper = null; }
+    if(cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
 }
 
 function saveCrop() {
     if(!cropper || !currentCropField) return;
     const canvas = cropper.getCroppedCanvas({
-        maxWidth: 1024, maxHeight: 1024, fillColor: '#fff',
+        maxWidth: 1024, maxHeight: 1024,
+        fillColor: '#fff',
         imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
     });
     
@@ -273,7 +285,9 @@ function saveCrop() {
         const reader = new FileReader();
         reader.onload = (e) => {
             const buffer = e.target.result;
-            if(croppedImages[currentCropField].blob) { URL.revokeObjectURL(croppedImages[currentCropField].blob); }
+            if(croppedImages[currentCropField].blob) {
+                URL.revokeObjectURL(croppedImages[currentCropField].blob);
+            }
             croppedImages[currentCropField] = { blob: blobUrl, original: buffer };
             refreshPDF();
         };
@@ -283,9 +297,13 @@ function saveCrop() {
 }
 
 async function getImageBufferForField(fieldId) {
-    if(croppedImages[fieldId] && croppedImages[fieldId].original) return croppedImages[fieldId].original;
+    if(croppedImages[fieldId] && croppedImages[fieldId].original) {
+        return croppedImages[fieldId].original;
+    }
     const input = document.getElementById('up'+fieldId);
-    if(input.files.length > 0) return await readFileAsBuffer(input.files[0]);
+    if(input.files.length > 0) {
+        return await readFileAsBuffer(input.files[0]);
+    }
     return null;
 }
 
@@ -302,15 +320,15 @@ function formatSal(v){
     if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
 }
 
-// -----------------------------------------------------------
-// HÀM BƠM CHỮ: ÉP CỠ CHỮ 10 CỐ ĐỊNH (TIMES NEW ROMAN)
-// -----------------------------------------------------------
+// =========================================================
+// HÀM ÉP CỠ CHỮ 10 CỐ ĐỊNH CHO MỌI TEXT FIELD
+// =========================================================
 function fillField(form, fieldName, value, customFont) {
     try {
         let field = form.getTextField(fieldName);
         if (field && value) {
             field.setText(String(value));
-            field.setFontSize(10); // CỐ ĐỊNH SIZE 10 THEO YÊU CẦU
+            field.setFontSize(10); // CỐ ĐỊNH CỠ CHỮ 10 TẠI ĐÂY
             field.updateAppearances({ font: customFont });
         }
     } catch(e) {}
@@ -322,32 +340,33 @@ async function refreshPDF() {
     document.getElementById('loadingPDF').style.display = 'flex';
     
     try {
-        // 1. Tải Template PDF
-        const templateRes = await fetch("template.pdf?v="+Math.random());
-        if(!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf' trên Github.");
-        const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
+        const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
         doc.registerFontkit(window.fontkit);
         
-        // 2. Tải Font trực tiếp từ máy chủ Google (Không lo lỗi font hay file lỗi nữa)
-        const fontRes = await fetch(DIRECT_FONT_URL);
-        if(!fontRes.ok) throw new Error("Lỗi tải Font chữ từ Google.");
-        const font = await doc.embedFont(await fontRes.arrayBuffer());
-        
+        // TRẢ LẠI LINK FONT CŨ CỦA MÀY ĐỂ ĐẢM BẢO KHÔNG BỊ LỖI CHẶN MẠNG
+        const font = await doc.embedFont(await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer()));
+        /* Ghi chú: Nếu mày KHĂNG KHĂNG muốn xài Times New Roman, mày phải tải file times.ttf bỏ lên github rồi thay dòng trên thành:
+           const font = await doc.embedFont(await fetch("times.ttf").then(r=>r.arrayBuffer())); 
+        */
+
         const form = doc.getForm();
 
-        // 3. Điền text fields bình thường
+        // 1. Điền text fields bình thường và ép size 10
         for(let i=0; i<=44; i++){
+            // Bỏ qua các ô cần xử lý riêng bên dưới
             if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
+            
             let val = emp[i] ? String(emp[i]) : "";
-            
-            // Xử lý các ô ngày tháng
             if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
-            
             if(i===9 || i===12) val = formatSal(val);
+            
+            // Dùng hàm fillField để điền chữ và ghim size 10
             fillField(form, i.toString(), val, font);
         }
         
-        // 4. XỬ LÝ TÁCH NGÀY THÁNG NĂM SINH VÀO ĐÚNG CÁC Ô ĐÃ ĐẶT TÊN
+        // ==========================================
+        // 2. XỬ LÝ NGÀY SINH (TÁCH ĐÚNG 3 Ô CỦA MÀY + SIZE 10)
+        // ==========================================
         let dobRaw = emp[3];
         if (dobRaw) {
             let d = new Date(dobRaw);
@@ -360,35 +379,34 @@ async function refreshPDF() {
                 let mm = ("0" + (d.getMonth() + 1)).slice(-2);
                 let yyyy = d.getFullYear().toString();
                 
-                // Form Ngày sinh Trang 1 (Gộp)
-                fillField(form, '3', `${yyyy} năm ${mm} tháng ${dd} ngày`, font);
+                // Form Ngày sinh Trang 1 (Gộp DD/MM/YYYY)
+                fillField(form, '3', `${dd}/${mm}/${yyyy}`, font);
                 
-                // Cắm đúng vào 3 lỗ ở Trang 3 theo tên mày đặt
+                // Bắn chính xác vào 3 lỗ mày vừa đặt tên (3_nam, 3_thang, 3_ngay)
                 fillField(form, '3_nam', yyyy, font);
                 fillField(form, '3_thang', mm, font);
                 fillField(form, '3_ngay', dd, font);
             }
         }
 
-        // 5. XỬ LÝ ĐỊA CHỈ (THƯỜNG TRÚ - 18)
+        // ==========================================
+        // 3. XỬ LÝ GỘP / TÁCH ĐỊA CHỈ & ÉP SIZE 10
+        // ==========================================
         let addr18 = emp[18];
         if (addr18) {
             let parts = String(addr18).split('|');
             let tinh = parts[0] || '';
             let phuong = parts[1] || '';
             let chitiet = parts[2] || '';
-            
             let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
-            fillField(form, '18', full18, font); // Nếu có 1 ô bự
-            fillField(form, '18_tinh', tinh, font); // Nếu xẻ 3 ô
+            
+            fillField(form, '18', full18, font);
+            fillField(form, '18_tinh', tinh, font);
             fillField(form, '18_phuong', phuong, font);
             fillField(form, '18_chitiet', chitiet, font);
         }
         
-        fillField(form, '22', String(emp[22]||''), font);
-        fillField(form, '23', String(emp[23]||''), font);
-
-        // Xử lý học vấn
+        // 4. Xử lý học vấn (Tách và ép size 10)
         [25,26,27,30].forEach(i => {
             if(emp[i]){
                 let p = String(emp[i]).split('|');
@@ -397,11 +415,11 @@ async function refreshPDF() {
             }
         });
 
-        // Xử lý Checkbox
+        // 5. Checkbox (Nam/Nữ, Kết hôn)
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        // 6. VẼ ẢNH
+        // 6. Vẽ ảnh
         let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -428,13 +446,17 @@ async function refreshPDF() {
             }
         }
 
-        form.flatten(); // Ép phẳng form PDF
+        form.flatten(); // Flatten form trước khi vẽ ảnh
 
         for(let task of drawTasks) {
             if(task.pageIndex >= 0) {
                 const page = doc.getPages()[task.pageIndex];
                 let img;
-                try { img = await doc.embedJpg(task.buffer); } catch { img = await doc.embedPng(task.buffer); }
+                try {
+                    img = await doc.embedJpg(task.buffer);
+                } catch {
+                    img = await doc.embedPng(task.buffer);
+                }
                 page.drawImage(img, { x: task.rect.x, y: task.rect.y, width: task.rect.width, height: task.rect.height });
             }
         }
@@ -447,20 +469,23 @@ async function refreshPDF() {
         document.getElementById('loadingPDF').style.display = 'none';
 
     } catch(e) { 
-        alert(e.message); 
+        alert("Lỗi tải PDF: " + e.message); 
         document.getElementById('loadingPDF').style.display = 'none';
     }
 }
 
+// Xuất PDF và đánh dấu đã xử lý
 function downloadFinalPDF() {
     if(!currentPDFBytes) return;
     let emp = empData[currentIndex];
+    
     download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
     
     let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
     exportedList[cccd] = true;
     localStorage.setItem('exportedData', JSON.stringify(exportedList));
     renderTable(); 
+    
     closeModal();
 }
 </script></body></html>
