@@ -92,10 +92,12 @@
         .tools-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .btn-dl-all { background: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .btn-dl-all:hover { background: #059669; }
+        
         .upload-box { background: #fff; border: 1px dashed #aaa; padding: 12px; margin-bottom: 12px; border-radius: 5px; }
         .upload-box h4 { margin: 0 0 8px 0; font-size: 13px; }
         .upload-box input { width: 65%; font-size: 12px; cursor: pointer; display: inline-block; }
         .upload-box .crop-btn { background: #ffc107; color: #000; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; margin-left: 5px; font-weight: bold; }
+        .upload-box .crop-btn:disabled { background: #ccc; cursor: not-allowed; }
         .btn-export-big { background: #dc3545; color: white; width: 100%; padding: 15px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin-top: auto;}
         
         .panel-right { flex: 2.8; background: #525659; position: relative; }
@@ -392,14 +394,12 @@
 
         function openAddModal() {
             document.getElementById('formModalTitle').innerHTML = '<i class="fas fa-user-plus"></i> THÊM MỚI NHÂN VIÊN';
-            document.getElementById('emp_idx').value = -1; // -1 nghĩa là thêm mới
-            // Xóa rỗng form
+            document.getElementById('emp_idx').value = -1; 
             document.querySelectorAll('#employeeFormModal input').forEach(inp => inp.value = '');
-            document.getElementById('fm_quoctich').value = ''; // Để trống
+            document.getElementById('fm_quoctich').value = ''; 
             document.getElementById('employeeFormModal').style.display = 'flex';
         }
 
-        // Hàm giúp convert chuỗi ISO Date thành định dạng cho thẻ <input type="date">
         function formatDateForInput(dateStr) {
             if(!dateStr) return '';
             try {
@@ -427,19 +427,19 @@
             document.getElementById('fm_bhxh').value = emp[33] || '';
             document.getElementById('fm_mst').value = emp[35] || '';
             document.getElementById('fm_tamtru').value = emp[38] || '';
-            document.getElementById('fm_quoctich').value = ''; // Giữ trống
+            document.getElementById('fm_quoctich').value = ''; 
             
             document.getElementById('employeeFormModal').style.display = 'flex';
         }
 
         function closeFormModal() { document.getElementById('employeeFormModal').style.display = 'none'; }
 
-        function saveEmployeeData() {
+        // HÀM SAVE ĐÃ ĐƯỢC FIX LỖI KẾT NỐI API 
+        async function saveEmployeeData() {
             let idx = parseInt(document.getElementById('emp_idx').value);
             let isNew = (idx === -1);
-            let emp = isNew ? new Array(40).fill('') : empData[idx];
+            let emp = isNew ? new Array(45).fill('') : [...empData[idx]];
 
-            // Gán dữ liệu từ form vào mảng (Lưu ý: Chỉ đang lưu trên giao diện Web)
             emp[0] = document.getElementById('fm_hoten').value;
             emp[3] = document.getElementById('fm_ngaysinh').value;
             emp[4] = document.getElementById('fm_gioitinh').value;
@@ -454,20 +454,51 @@
             emp[35] = document.getElementById('fm_mst').value;
             emp[38] = document.getElementById('fm_tamtru').value;
 
-            if (isNew) {
-                empData.push(emp); // Nếu là nhân viên mới thì đẩy vào cuối mảng
-            }
+            let btnSave = document.querySelector('.btn-save');
+            let oldBtnHtml = btnSave.innerHTML;
+            btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+            btnSave.disabled = true;
+            document.getElementById('formMsg').innerText = "Đang đẩy dữ liệu lên Google Sheet...";
 
-            // Render lại bảng để thấy kết quả
-            renderTable();
-            closeFormModal();
-            
-            alert("Đã cập nhật trên giao diện! (Lưu ý: Cần kết nối Backend để lưu vĩnh viễn vào Google Sheet)");
+            let payload = {
+                action: isNew ? 'add' : 'edit',
+                rowData: emp,
+                sheetRow: isNew ? null : (idx + 1)
+            };
+
+            try {
+                let response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    redirect: "follow", // Sửa lỗi CORS bị block
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8",
+                    }
+                });
+
+                if (isNew) {
+                    empData.push(emp);
+                } else {
+                    empData[idx] = emp;
+                }
+                
+                renderTable();
+                closeFormModal();
+                alert("✅ Đã lưu dữ liệu thành công vào Google Sheet!");
+
+            } catch (e) {
+                document.getElementById('formMsg').innerText = "❌ Lỗi: Không thể kết nối với Google Sheet!";
+                console.error(e);
+            } finally {
+                btnSave.innerHTML = oldBtnHtml;
+                btnSave.disabled = false;
+                document.getElementById('formMsg').innerText = "";
+            }
         }
 
 
         // ==============================================
-        // 4. LOGIC TRANG XUẤT PDF (GIỮ NGUYÊN GỐC KHÔNG LỖI)
+        // 4. LOGIC TRANG XUẤT PDF 
         // ==============================================
         function openPDFManager(idx) {
             currentIndex = idx;
@@ -498,7 +529,6 @@
                 const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
                 doc.registerFontkit(window.fontkit);
                 
-                // VẪN GỌI FONT LOCAL (FONT.TTF) Ở GITHUB ĐỂ DIỆT WINANSI VÀ FAILED TO FETCH
                 const fontBytes = await fetch("font.ttf?v="+Math.random()).then(r=>r.arrayBuffer());
                 const customFont = await doc.embedFont(fontBytes);
                 const form = doc.getForm();
@@ -529,7 +559,7 @@
                     let parts = String(addr18).split('|'); let tinh = parts[0] || ''; let phuong = parts[1] || ''; let chitiet = parts[2] || ''; let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
                     fillField(form, '18', full18, customFont); fillField(form, '18_tinh', tinh, customFont); fillField(form, '18_phuong', phuong, customFont); fillField(form, '18_chitiet', chitiet, customFont);
                 }
-                fillField(form, '22', String(emp[38]||''), customFont); // Tạm trú map vào ô 22 
+                fillField(form, '22', String(emp[38]||''), customFont); 
 
                 [25,26,27,30].forEach(i => { if(emp[i]){ let p = String(emp[i]).split('|'); fillField(form, `${i}_thoigian`, p[0]||'', customFont); fillField(form, `${i}_tentruong`, p[1]||'', customFont); } });
                 try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
@@ -559,7 +589,6 @@
             let cccd = emp[19] || ('NO_CCCD_' + currentIndex); exportedList[cccd] = true; localStorage.setItem('exportedData', JSON.stringify(exportedList)); renderTable(); goBackToEmployeeSection();
         }
 
-        // Global exports
         window.login = login; window.register = register; window.resetPassword = resetPassword; window.logout = logout;
         window.showLogin = showLogin; window.showRegister = showRegister; window.showForgot = showForgot;
         window.goToEmployeeSection = goToEmployeeSection; window.goBackToDashboard = goBackToDashboard; window.goBackToEmployeeSection = goBackToEmployeeSection; 
