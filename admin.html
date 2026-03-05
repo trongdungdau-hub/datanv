@@ -2,13 +2,14 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>QUẢN TRỊ XUẤT PDF - CẮT ẢNH (ĐÃ SỬA FONT)</title>
+    <title>QUẢN TRỊ XUẤT PDF - CẮT ẢNH (FIX LỖI FONT + TEMPLATE)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
     <style>
+        /* Giữ nguyên CSS như cũ */
         body{font-family:Arial;background:#f4f7f6; margin:0; padding:20px;}
         .container{max-width:1200px;background:#fff;padding:20px;margin:auto;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
         table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left; vertical-align:middle;}
@@ -17,13 +18,9 @@
         .btn-dl{background:#28a745;} .btn-dl:disabled{background:#888;}
         .btn-xem{background:#17a2b8;}
         .badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
-
-        /* Modal chính (ghép ảnh) */
         .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
         .modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
         .close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
-
-        /* Panel trái */
         .panel-left{flex:1; background:#f9f9f9; padding:20px; overflow-y:auto; border-right:2px solid #ddd; display:flex; flex-direction:column;}
         .panel-left h3{margin-top:0; color:#0056b3; border-bottom:2px solid #0056b3; padding-bottom:10px;}
         .upload-box{background:#fff; border:1px dashed #aaa; padding:15px; margin-bottom:15px; border-radius:5px;}
@@ -32,13 +29,9 @@
         .upload-box .crop-btn{background:#ffc107; color:#000; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:12px; margin-left:5px;}
         .upload-box .crop-btn:disabled{background:#ccc; cursor:not-allowed;}
         .btn-export-big{background:#dc3545;color:white;width:100%;padding:15px;font-size:16px;font-weight:bold;border:none;border-radius:5px;cursor:pointer; margin-top:auto;}
-
-        /* Panel phải */
         .panel-right{flex:2.5; background:#525659; position:relative;}
         #pdfFrame{width:100%; height:100%; border:none;}
         .loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;color:#0056b3; z-index:10; display:none;}
-
-        /* Modal cắt ảnh */
         .crop-modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8); align-items:center; justify-content:center;}
         .crop-modal-content{background:#fff; padding:20px; border-radius:8px; width:90%; max-width:800px; max-height:90vh; overflow:auto; position:relative;}
         .crop-modal-close{float:right; font-size:28px; font-weight:bold; cursor:pointer;}
@@ -52,7 +45,7 @@
 <body>
 
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (ĐÃ FIX LỖI FONT)</h2>
+    <h2>QUẢN TRỊ XUẤT PDF (ĐÃ FIX LỖI FONT & TEMPLATE)</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
@@ -120,7 +113,6 @@
 <script>
     // ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-    // Link thẳng tới Font Times New Roman cực chuẩn của Google (Không bao giờ lỗi)
     const DIRECT_FONT_URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/tinos/Tinos-Regular.ttf";
 
     let empData = [];
@@ -146,7 +138,7 @@
             renderTable();
         } catch (e) {
             console.error('Lỗi tải dữ liệu:', e);
-            alert('Không thể tải dữ liệu từ Google Sheets!');
+            alert('Không thể tải dữ liệu từ Google Sheets! Hãy kiểm tra kết nối và SCRIPT_URL.');
         }
     };
 
@@ -333,7 +325,6 @@
             if (field && value) {
                 field.setText(String(value));
                 field.setFontSize(10);
-                // QUAN TRỌNG: truyền cả fontSize vào updateAppearances
                 field.updateAppearances({ font: customFont, fontSize: 10 });
             }
         } catch (e) {
@@ -347,9 +338,17 @@
         document.getElementById('loadingPDF').style.display = 'flex';
 
         try {
-            // 1. Tải Template PDF
-            const templateRes = await fetch("template.pdf?v=" + Math.random());
-            if (!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf'.");
+            // 1. Tải Template PDF với kiểm tra lỗi chi tiết
+            let templateRes;
+            try {
+                templateRes = await fetch("template.pdf?v=" + Math.random());
+            } catch (fetchError) {
+                // Lỗi mạng, CORS, hoặc đang chạy file://
+                throw new Error(`Không thể kết nối tới file template.pdf. Nguyên nhân: ${fetchError.message}. Hãy đảm bảo bạn đang chạy trang web qua HTTP (dùng Live Server) và file template.pdf tồn tại trong cùng thư mục.`);
+            }
+            if (!templateRes.ok) {
+                throw new Error(`Không tìm thấy file 'template.pdf' (HTTP ${templateRes.status}). Hãy đặt file template.pdf cùng thư mục với trang HTML.`);
+            }
             const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
 
             // 2. Kiểm tra fontkit
@@ -391,7 +390,7 @@
                 fillField(form, i.toString(), val, font);
             }
 
-            // 5. XỬ LÝ TÁCH NGÀY THÁNG NĂM SINH VÀO ĐÚNG CÁC Ô ĐÃ ĐẶT TÊN
+            // 5. XỬ LÝ TÁCH NGÀY THÁNG NĂM SINH
             let dobRaw = emp[3];
             if (dobRaw) {
                 let d = new Date(dobRaw);
@@ -404,17 +403,14 @@
                     let mm = ("0" + (d.getMonth() + 1)).slice(-2);
                     let yyyy = d.getFullYear().toString();
 
-                    // Form Ngày sinh Trang 1 (Gộp)
                     fillField(form, '3', `${yyyy} năm ${mm} tháng ${dd} ngày`, font);
-
-                    // Cắm đúng vào 3 lỗ ở Trang 3 theo tên mày đặt
                     fillField(form, '3_nam', yyyy, font);
                     fillField(form, '3_thang', mm, font);
                     fillField(form, '3_ngay', dd, font);
                 }
             }
 
-            // 6. XỬ LÝ ĐỊA CHỈ (THƯỜNG TRÚ - 18)
+            // 6. XỬ LÝ ĐỊA CHỈ
             let addr18 = emp[18];
             if (addr18) {
                 let parts = String(addr18).split('|');
@@ -423,8 +419,8 @@
                 let chitiet = parts[2] || '';
 
                 let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
-                fillField(form, '18', full18, font); // Nếu có 1 ô bự
-                fillField(form, '18_tinh', tinh, font); // Nếu xẻ 3 ô
+                fillField(form, '18', full18, font);
+                fillField(form, '18_tinh', tinh, font);
                 fillField(form, '18_phuong', phuong, font);
                 fillField(form, '18_chitiet', chitiet, font);
             }
@@ -441,7 +437,7 @@
                 }
             });
 
-            // Xử lý Checkbox
+            // Checkbox
             try {
                 let gt = String(emp[4] || '').toLowerCase();
                 if (gt.includes('nam')) form.getCheckBox('Nam').check();
@@ -480,7 +476,7 @@
                 }
             }
 
-            form.flatten(); // Ép phẳng form PDF
+            form.flatten();
 
             for (let task of drawTasks) {
                 if (task.pageIndex >= 0) {
@@ -509,7 +505,7 @@
 
         } catch (e) {
             console.error('Lỗi tạo PDF:', e);
-            alert(`Lỗi tạo PDF: ${e.message}`);
+            alert(`❌ Lỗi tạo PDF: ${e.message}`);
             document.getElementById('loadingPDF').style.display = 'none';
         }
     }
