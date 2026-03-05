@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="UTF-8"><title>QUẢN TRỊ XUẤT PDF - CẮT ẢNH</title>
-<!-- pdf-lib, fontkit, downloadjs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
-<!-- Cropper.js -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <style>
-/* Giữ nguyên style cũ và thêm một số style mới */
 body{font-family:Arial;background:#f4f7f6; margin:0; padding:20px;}
 .container{max-width:1200px;background:#fff;padding:20px;margin:auto;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
 table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left; vertical-align:middle;}
@@ -58,17 +55,14 @@ th{background:#0056b3;color:#fff}
     </table>
 </div>
 
-<!-- Nút đóng modal chính -->
 <span class="close" id="btnClose" onclick="closeModal()" style="display:none;">&times;</span>
 
-<!-- MODAL GHÉP ẢNH -->
 <div id="myModal" class="modal">
   <div class="modal-content">
       <div class="panel-left">
           <h3 id="modalTitle">GHÉP ẢNH</h3>
           <p style="font-size:13px; color:#555;">Bấm chọn ảnh, có thể cắt trước khi ghép.</p>
           
-          <!-- 5 ô upload kèm nút cắt -->
           <div class="upload-box">
               <h4>1. Ảnh 4x6</h4>
               <input type="file" id="up45" accept="image/*" onchange="handleFileSelect('45')">
@@ -105,7 +99,6 @@ th{background:#0056b3;color:#fff}
   </div>
 </div>
 
-<!-- MODAL CẮT ẢNH -->
 <div id="cropModal" class="crop-modal">
     <div class="crop-modal-content">
         <span class="crop-modal-close" onclick="closeCropModal()">&times;</span>
@@ -122,13 +115,13 @@ th{background:#0056b3;color:#fff}
 
 <script>
 // ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
+// Thay URL Apps Script của mày vào đây nếu cần thiết
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 let empData = [];
 let currentIndex = -1;
 let currentPDFBytes = null;
 let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
 
-// Object lưu ảnh đã cắt (dạng blob URL) và file gốc (ArrayBuffer) cho từng field
 let croppedImages = {
     '45': { blob: null, original: null },
     '46': { blob: null, original: null },
@@ -137,7 +130,6 @@ let croppedImages = {
     '49': { blob: null, original: null }
 };
 
-// Biến cho crop modal
 let currentCropField = null;
 let cropper = null;
 
@@ -170,7 +162,6 @@ function renderTable() {
     document.getElementById('tableBody').innerHTML = html;
 }
 
-// Tải ảnh từ Drive (giữ nguyên)
 async function getGasImg(url) {
     if(!url) return null; 
     let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -208,15 +199,12 @@ async function downloadAllImages(idx) {
     setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
 }
 
-// Mở modal chính
 function openModal(idx) {
     currentIndex = idx;
     document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
-    // Reset tất cả input file và cropped images
     ['45','46','47','48','49'].forEach(id => {
         document.getElementById('up'+id).value = '';
         document.getElementById('crop'+id).disabled = true;
-        // Xóa blob cũ nếu có
         if(croppedImages[id].blob) {
             URL.revokeObjectURL(croppedImages[id].blob);
             croppedImages[id] = { blob: null, original: null };
@@ -224,37 +212,31 @@ function openModal(idx) {
     });
     document.getElementById('myModal').style.display = "block";
     document.getElementById('btnClose').style.display = "block";
-    refreshPDF(); // Load PDF với dữ liệu mới (chưa có ảnh)
+    refreshPDF();
 }
 
 function closeModal() { 
     document.getElementById('myModal').style.display = "none"; 
     document.getElementById('btnClose').style.display = "none";
     document.getElementById('pdfFrame').src = '';
-    // Đóng crop modal nếu đang mở
     closeCropModal();
 }
 
-// Khi chọn file
 function handleFileSelect(fieldId) {
     const input = document.getElementById('up'+fieldId);
     const cropBtn = document.getElementById('crop'+fieldId);
     if(input.files.length > 0) {
         cropBtn.disabled = false;
-        // Xóa ảnh cắt cũ
         if(croppedImages[fieldId].blob) {
             URL.revokeObjectURL(croppedImages[fieldId].blob);
             croppedImages[fieldId] = { blob: null, original: null };
         }
-        // Đọc file gốc để dùng cho crop (sẽ đọc sau nếu cần)
     } else {
         cropBtn.disabled = true;
     }
-    // Tự động cập nhật PDF khi chọn file mới
     refreshPDF();
 }
 
-// Mở modal cắt ảnh
 function openCropModal(fieldId) {
     const input = document.getElementById('up'+fieldId);
     if(!input.files.length) return;
@@ -266,11 +248,10 @@ function openCropModal(fieldId) {
         const img = document.getElementById('cropImage');
         img.src = e.target.result;
         document.getElementById('cropModal').style.display = 'flex';
-        // Khởi tạo cropper sau khi ảnh load
         if(cropper) cropper.destroy();
         setTimeout(() => {
             cropper = new Cropper(img, {
-                aspectRatio: NaN, // tự do
+                aspectRatio: NaN, 
                 viewMode: 1,
                 autoCropArea: 1,
                 responsive: true,
@@ -282,62 +263,37 @@ function openCropModal(fieldId) {
 
 function closeCropModal() {
     document.getElementById('cropModal').style.display = 'none';
-    if(cropper) {
-        cropper.destroy();
-        cropper = null;
-    }
+    if(cropper) { cropper.destroy(); cropper = null; }
 }
 
-// Lưu ảnh đã cắt
 function saveCrop() {
     if(!cropper || !currentCropField) return;
-    
-    // Lấy canvas đã cắt
     const canvas = cropper.getCroppedCanvas({
-        maxWidth: 1024, // giới hạn kích thước tránh quá lớn
-        maxHeight: 1024,
+        maxWidth: 1024, maxHeight: 1024,
         fillColor: '#fff',
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high',
+        imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
     });
     
     canvas.toBlob((blob) => {
-        // Tạo blob URL để hiển thị (không dùng trực tiếp)
         const blobUrl = URL.createObjectURL(blob);
-        
-        // Đọc blob thành ArrayBuffer để dùng trong PDF
         const reader = new FileReader();
         reader.onload = (e) => {
             const buffer = e.target.result;
-            // Lưu vào croppedImages
             if(croppedImages[currentCropField].blob) {
                 URL.revokeObjectURL(croppedImages[currentCropField].blob);
             }
-            croppedImages[currentCropField] = {
-                blob: blobUrl,
-                original: buffer
-            };
-            
-            // Kích hoạt refresh PDF với ảnh mới
+            croppedImages[currentCropField] = { blob: blobUrl, original: buffer };
             refreshPDF();
         };
         reader.readAsArrayBuffer(blob);
-        
         closeCropModal();
     }, 'image/jpeg', 0.95);
 }
 
-// Đọc file thành ArrayBuffer (hỗ trợ cả file gốc và ảnh cắt)
 async function getImageBufferForField(fieldId) {
-    // Ưu tiên ảnh đã cắt
-    if(croppedImages[fieldId] && croppedImages[fieldId].original) {
-        return croppedImages[fieldId].original;
-    }
-    // Nếu không, dùng file gốc
+    if(croppedImages[fieldId] && croppedImages[fieldId].original) return croppedImages[fieldId].original;
     const input = document.getElementById('up'+fieldId);
-    if(input.files.length > 0) {
-        return await readFileAsBuffer(input.files[0]);
-    }
+    if(input.files.length > 0) return await readFileAsBuffer(input.files[0]);
     return null;
 }
 
@@ -349,37 +305,90 @@ function readFileAsBuffer(file) {
     });
 }
 
-// Format lương (giữ nguyên)
 function formatSal(v){
     if(!v) return ""; let s = String(v).toUpperCase().trim(); let m = s.replace(/[,.]/g,'').match(/\d+/);
     if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
 }
 
-// Tạo PDF (sửa lỗi getP và tích hợp ảnh đã cắt)
+// TẠO PDF VÀ XỬ LÝ DỮ LIỆU
 async function refreshPDF() {
     if(currentIndex === -1) return;
     let emp = empData[currentIndex]; 
     document.getElementById('loadingPDF').style.display = 'flex';
     
     try {
+        // LOAD FILE TEMPLATE.PDF TRÊN GITHUB CỦA MÀY (PHẢI CÓ FILE TÊN template.pdf)
         const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
         doc.registerFontkit(window.fontkit);
-        const font = await doc.embedFont(await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer()));
+        
+        // FIX LỖI FONT CHỮ NHẬT KANJI BỊ VUÔNG:
+        // Đã đổi sang load file font.ttf để hỗ trợ Kanji. Mày bắt buộc phải có file tên 'font.ttf' trên Github nhé!
+        let fontBytes;
+        try {
+            fontBytes = await fetch("font.ttf").then(r => r.arrayBuffer());
+        } catch (e) {
+            // Backup nếu không có font.ttf thì xài Roboto (Nhưng sẽ lỗi Kanji)
+            fontBytes = await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer());
+        }
+        const font = await doc.embedFont(fontBytes);
         const form = doc.getForm();
 
-        // Điền text fields (giữ nguyên)
+        // 1. ĐIỀN TỰ ĐỘNG CÁC Ô CHỮ BÌNH THƯỜNG
         for(let i=0; i<=44; i++){
-            if([4,17,18,25,26,27,30].includes(i)) continue;
+            if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue; // Bỏ qua mấy ô cần xào nấu
             let val = emp[i] ? String(emp[i]) : "";
-            if([3,5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
+            if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
             if(i===9 || i===12) val = formatSal(val);
             try{ let f = form.getTextField(i.toString()); if(f && val) { f.setText(val); f.updateAppearances(font); } } catch(e){}
+        }
+
+        // ==========================================
+        // 2. XỬ LÝ NGÀY SINH KANJI (Ô SỐ 3 VÀ TRANG 3)
+        // ==========================================
+        let dobRaw = emp[3];
+        if (dobRaw) {
+            let d = new Date(dobRaw);
+            if (String(dobRaw).includes('/')) {
+                let parts = String(dobRaw).split('/');
+                if(parts[0].length === 2) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            }
+            if (!isNaN(d)) {
+                let dd = ("0" + d.getDate()).slice(-2);
+                let mm = ("0" + (d.getMonth() + 1)).slice(-2);
+                let yyyy = d.getFullYear().toString();
+                
+                // Form Ngày sinh Trang 1: 1995 年năm 02 月tháng 01 日ngày
+                let formatTrang1 = `${yyyy} 年năm ${mm} 月tháng ${dd} 日ngày`;
+                try{ let f3 = form.getTextField('3'); if(f3){ f3.setText(formatTrang1); f3.updateAppearances(font); } } catch(e){}
+                
+                // Chẻ Trang 3
+                try{ let fNgay = form.getTextField('日ngày'); if(fNgay){ fNgay.setText(dd); fNgay.updateAppearances(font); } } catch(e){}
+                try{ let fThang = form.getTextField('月tháng'); if(fThang){ fThang.setText(mm); fThang.updateAppearances(font); } } catch(e){}
+                try{ let fNam = form.getTextField('年năm'); if(fNam){ fNam.setText(yyyy); fNam.updateAppearances(font); } } catch(e){}
+            }
+        }
+
+        // ==========================================
+        // 3. XỬ LÝ TÁCH/GỘP ĐỊA CHỈ (Ô 18, 24, 38, 43)
+        // ==========================================
+        let addr18 = emp[18];
+        if (addr18) {
+            let parts = String(addr18).split('|');
+            let tinh = parts[0] || '';
+            let phuong = parts[1] || '';
+            let chitiet = parts[2] || '';
+            let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
+            
+            try{ let f18 = form.getTextField('18'); if(f18){ f18.setText(full18); f18.updateAppearances(font); } } catch(e){}
+            try{ let f18t = form.getTextField('18_tinh'); if(f18t){ f18t.setText(tinh); f18t.updateAppearances(font); } } catch(e){}
+            try{ let f18p = form.getTextField('18_phuong'); if(f18p){ f18p.setText(phuong); f18p.updateAppearances(font); } } catch(e){}
+            try{ let f18c = form.getTextField('18_chitiet'); if(f18c){ f18c.setText(chitiet); f18c.updateAppearances(font); } } catch(e){}
         }
         
         try{ let f22 = form.getTextField('22'); if(f22 && emp[22]){ f22.setText(String(emp[22])); f22.updateAppearances(font); } } catch(e){}
         try{ let f23 = form.getTextField('23'); if(f23 && emp[23]){ f23.setText(String(emp[23])); f23.updateAppearances(font); } } catch(e){}
-        if(emp[18]){ try{ let f18 = form.getTextField('18_chitiet'); if(f18){ f18.setText(String(emp[18])); f18.updateAppearances(font); } } catch(e){} }
-        
+
+        // Xử lý học vấn
         [25,26,27,30].forEach(i => {
             if(emp[i]){
                 let p = String(emp[i]).split('|');
@@ -388,11 +397,13 @@ async function refreshPDF() {
             }
         });
 
-        // Checkbox
+        // Xử lý Checkbox Nam Nữ / Kết hôn
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        // Đo tọa độ và vẽ ảnh (dùng ảnh đã cắt hoặc file gốc)
+        // ==========================================
+        // 4. VẼ ẢNH VÀO LỖ TRÊN PDF
+        // ==========================================
         let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -408,30 +419,23 @@ async function refreshPDF() {
                 if(widgets.length > 0) {
                     const widget = widgets[0];
                     const rect = widget.getRectangle();
-                    const pRef = widget.P(); // sửa lỗi: dùng P()
+                    const pRef = widget.P(); 
                     if(pRef) {
                         const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
-                        if(pageIndex >= 0) {
-                            drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
-                        }
+                        if(pageIndex >= 0) drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
                     }
                 }
             }
         }
 
-        // Flatten form trước khi vẽ ảnh (giữ nguyên)
-        form.flatten();
+        form.flatten(); // Ép phẳng chữ
 
-        // Vẽ ảnh
         for(let task of drawTasks) {
             if(task.pageIndex >= 0) {
                 const page = doc.getPages()[task.pageIndex];
                 let img;
-                try {
-                    img = await doc.embedJpg(task.buffer);
-                } catch {
-                    img = await doc.embedPng(task.buffer);
-                }
+                try { img = await doc.embedJpg(task.buffer); } 
+                catch { img = await doc.embedPng(task.buffer); }
                 page.drawImage(img, { x: task.rect.x, y: task.rect.y, width: task.rect.width, height: task.rect.height });
             }
         }
@@ -444,23 +448,21 @@ async function refreshPDF() {
         document.getElementById('loadingPDF').style.display = 'none';
 
     } catch(e) { 
-        alert("Lỗi tải PDF: " + e.message); 
+        alert("Lỗi tải PDF: Hãy đảm bảo mày đã úp file 'template.pdf' và 'font.ttf' lên cùng thư mục trên Github! Chi tiết lỗi: " + e.message); 
         document.getElementById('loadingPDF').style.display = 'none';
     }
 }
 
-// Xuất PDF và đánh dấu đã xử lý
+// XUẤT FILE & LƯU LỊCH SỬ
 function downloadFinalPDF() {
     if(!currentPDFBytes) return;
     let emp = empData[currentIndex];
-    
     download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
     
     let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
     exportedList[cccd] = true;
     localStorage.setItem('exportedData', JSON.stringify(exportedList));
     renderTable(); 
-    
     closeModal();
 }
 </script></body></html>
