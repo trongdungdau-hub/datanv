@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Quản lý Nhân sự</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <!-- Font Awesome cho icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -21,6 +17,9 @@
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* ========== AUTH FORM ========== */
@@ -31,7 +30,6 @@
             width: 400px;
             max-width: 90%;
             padding: 40px;
-            margin: 50px auto;
             transition: 0.3s;
         }
 
@@ -146,6 +144,7 @@
             margin-left: 15px;
         }
 
+        /* Grid 8 ô vuông */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -175,6 +174,15 @@
         .card:hover {
             transform: translateY(-10px) scale(1.02);
             box-shadow: 0 25px 40px rgba(0,0,0,0.2);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0% { transform: translateY(-10px) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(2deg); }
+            50% { transform: translateY(-10px) rotate(-2deg); }
+            75% { transform: translateY(-10px) rotate(1deg); }
+            100% { transform: translateY(-10px) rotate(0deg); }
         }
 
         .card i {
@@ -194,80 +202,24 @@
             font-size: 14px;
         }
 
-        /* ========== SECTION CON (THÔNG TIN NHÂN VIÊN) ========== */
-        .employee-section {
-            background: #f5f7fa;
-            min-height: 100vh;
-            width: 100%;
-            padding: 20px;
-            display: none;
-        }
-
-        .back-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            font-size: 16px;
-        }
-
-        .back-btn i {
-            margin-right: 8px;
-        }
-
-        .container {
-            max-width: 1200px;
-            background: #fff;
-            padding: 20px;
-            margin: auto;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
-        th { background: #0056b3; color: #fff; }
-        .btn { color: #fff; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 13px; margin-right: 5px; }
-        .btn-dl { background: #28a745; }
-        .btn-dl:disabled { background: #888; }
-        .btn-xem { background: #17a2b8; }
-        .badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-
-        /* Modal chính (ghép ảnh) */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); }
-        .modal-content { display: flex; background-color: #fff; margin: 2% auto; width: 96%; height: 90vh; border-radius: 8px; overflow: hidden; }
-        .close { position: absolute; right: 25px; top: 15px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 1001; }
-        .panel-left { flex: 1; background: #f9f9f9; padding: 20px; overflow-y: auto; border-right: 2px solid #ddd; display: flex; flex-direction: column; }
-        .panel-left h3 { margin-top: 0; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
-        .upload-box { background: #fff; border: 1px dashed #aaa; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-        .upload-box h4 { margin: 0 0 10px 0; font-size: 14px; }
-        .upload-box input { width: 70%; font-size: 13px; cursor: pointer; display: inline-block; }
-        .upload-box .crop-btn { background: #ffc107; color: #000; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; margin-left: 5px; }
-        .upload-box .crop-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-export-big { background: #dc3545; color: white; width: 100%; padding: 15px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin-top: auto; }
-        .panel-right { flex: 2.5; background: #525659; position: relative; }
-        #pdfFrame { width: 100%; height: 100%; border: none; }
-        .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: #0056b3; z-index: 10; display: none; }
-        .crop-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
-        .crop-modal-content { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 800px; max-height: 90vh; overflow: auto; position: relative; }
-        .crop-modal-close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .crop-preview { max-width: 100%; max-height: 60vh; margin: 20px 0; }
-        .crop-actions { text-align: right; }
-        .crop-actions button { padding: 8px 16px; margin-left: 10px; border: none; border-radius: 4px; cursor: pointer; }
-        .crop-save { background: #28a745; color: #fff; }
-        .crop-cancel { background: #6c757d; color: #fff; }
-
+        /* Responsive */
         @media (max-width: 768px) {
-            .grid-container { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-            .modal-content { flex-direction: column; }
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
         }
-        @media (max-width: 480px) { .grid-container { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- ========== PHẦN ĐĂNG NHẬP / ĐĂNG KÝ ========== -->
     <div id="authContainer" class="auth-container">
+        <!-- Form đăng nhập -->
         <div id="loginForm">
             <h2>Đăng nhập</h2>
             <input type="text" id="loginUsername" placeholder="Tên đăng nhập" required>
@@ -283,6 +235,7 @@
             <div id="loginMessage" class="message"></div>
         </div>
 
+        <!-- Form đăng ký -->
         <div id="registerForm" style="display: none;">
             <h2>Đăng ký</h2>
             <input type="text" id="regUsername" placeholder="Tên đăng nhập" required>
@@ -295,6 +248,7 @@
             <div id="registerMessage" class="message"></div>
         </div>
 
+        <!-- Form quên mật khẩu -->
         <div id="forgotForm" style="display: none;">
             <h2>Quên mật khẩu</h2>
             <input type="text" id="forgotUsername" placeholder="Tên đăng nhập" required>
@@ -308,6 +262,7 @@
         </div>
     </div>
 
+    <!-- ========== DASHBOARD CHÍNH ========== -->
     <div id="dashboard" class="dashboard">
         <div class="user-info">
             Xin chào, <span id="usernameDisplay"></span>
@@ -315,120 +270,58 @@
         </div>
         <h1>Hệ thống Quản lý Nhân sự</h1>
         <div class="grid-container">
-            <div class="card" onclick="goToEmployeeSection()">
+            <!-- Ô 1: Thông Tin Nhân Viên - Chuyển hướng đến trang admin -->
+            <div class="card" onclick="window.location.href='https://trongdungdau-hub.github.io/datanv/admin.html'">
                 <i class="fas fa-users"></i>
-                <h3>Thông Tin Nhân viên</h3>
+                <h3>Thông Tin Nhân Viên</h3>
                 <p>Quản lý hồ sơ nhân viên</p>
             </div>
+            <!-- Ô 2: Chấm Công -->
             <div class="card" onclick="alert('Chức năng Chấm Công đang phát triển')">
                 <i class="fas fa-clock"></i>
                 <h3>Chấm Công</h3>
                 <p>Theo dõi giờ làm việc</p>
             </div>
+            <!-- Ô 3: Bảo Hiểm -->
             <div class="card" onclick="alert('Chức năng Bảo Hiểm đang phát triển')">
                 <i class="fas fa-shield-alt"></i>
                 <h3>Bảo Hiểm</h3>
                 <p>Quản lý bảo hiểm xã hội</p>
             </div>
+            <!-- Ô 4: Tính Lương -->
             <div class="card" onclick="alert('Chức năng Tính Lương đang phát triển')">
                 <i class="fas fa-calculator"></i>
                 <h3>Tính Lương</h3>
                 <p>Tính toán lương thưởng</p>
             </div>
+            <!-- Ô 5: Thuế -->
             <div class="card" onclick="alert('Chức năng Thuế đang phát triển')">
                 <i class="fas fa-file-invoice"></i>
                 <h3>Thuế</h3>
                 <p>Quản lý thuế thu nhập</p>
             </div>
+            <!-- Ô 6: Trống -->
             <div class="card" onclick="alert('Chức năng đang phát triển')">
                 <i class="fas fa-box-open"></i>
                 <h3>Trống</h3>
                 <p>Chưa có chức năng</p>
             </div>
+            <!-- Ô 7: Trống -->
             <div class="card" onclick="alert('Chức năng đang phát triển')">
                 <i class="fas fa-box-open"></i>
                 <h3>Trống</h3>
                 <p>Chưa có chức năng</p>
             </div>
+            <!-- Ô 8: Trống -->
             <div class="card" onclick="alert('Chức năng đang phát triển')">
                 <i class="fas fa-box-open"></i>
                 <h3>Trống</h3>
                 <p>Chưa có chức năng</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="employeeSection" class="employee-section">
-        <button class="back-btn" onclick="goBackFromEmployee()"><i class="fas fa-arrow-left"></i> Quay lại Dashboard</button>
-        <div class="container">
-            <h2>DANH SÁCH HỒ SƠ NHÂN VIÊN</h2>
-            <table>
-                <thead>
-                    <tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <span class="close" id="btnClose" onclick="closeModal()" style="display:none;">&times;</span>
-        <div id="myModal" class="modal">
-            <div class="modal-content">
-                <div class="panel-left">
-                    <h3 id="modalTitle">GHÉP ẢNH</h3>
-                    <p style="font-size:13px; color:#555;">Bấm chọn ảnh, có thể cắt trước khi ghép.</p>
-                    <div class="upload-box">
-                        <h4>1. Ảnh 4x6</h4>
-                        <input type="file" id="up45" accept="image/*" onchange="handleFileSelect('45')">
-                        <button class="crop-btn" id="crop45" onclick="openCropModal('45')" disabled>✂️ Cắt</button>
-                    </div>
-                    <div class="upload-box">
-                        <h4>2. CCCD Trước</h4>
-                        <input type="file" id="up46" accept="image/*" onchange="handleFileSelect('46')">
-                        <button class="crop-btn" id="crop46" onclick="openCropModal('46')" disabled>✂️ Cắt</button>
-                    </div>
-                    <div class="upload-box">
-                        <h4>3. CCCD Sau</h4>
-                        <input type="file" id="up47" accept="image/*" onchange="handleFileSelect('47')">
-                        <button class="crop-btn" id="crop47" onclick="openCropModal('47')" disabled>✂️ Cắt</button>
-                    </div>
-                    <div class="upload-box">
-                        <h4>4. Ngân Hàng</h4>
-                        <input type="file" id="up48" accept="image/*" onchange="handleFileSelect('48')">
-                        <button class="crop-btn" id="crop48" onclick="openCropModal('48')" disabled>✂️ Cắt</button>
-                    </div>
-                    <div class="upload-box">
-                        <h4>5. Sổ BHXH</h4>
-                        <input type="file" id="up49" accept="image/*" onchange="handleFileSelect('49')">
-                        <button class="crop-btn" id="crop49" onclick="openCropModal('49')" disabled>✂️ Cắt</button>
-                    </div>
-                    <button class="btn-export-big" onclick="downloadFinalPDF()">💾 XUẤT & LƯU PDF</button>
-                </div>
-                <div class="panel-right">
-                    <div id="loadingPDF" class="loading-overlay">⏳ Đang load PDF...</div>
-                    <iframe id="pdfFrame"></iframe>
-                </div>
-            </div>
-        </div>
-
-        <div id="cropModal" class="crop-modal">
-            <div class="crop-modal-content">
-                <span class="crop-modal-close" onclick="closeCropModal()">&times;</span>
-                <h3 id="cropModalTitle">Cắt ảnh</h3>
-                <div>
-                    <img id="cropImage" class="crop-preview" src="" alt="Ảnh gốc">
-                </div>
-                <div class="crop-actions">
-                    <button class="crop-cancel" onclick="closeCropModal()">Hủy</button>
-                    <button class="crop-save" onclick="saveCrop()">Lưu cắt</button>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== CẤU HÌNH CHUNG ==========
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-
         // ========== QUẢN LÝ NGƯỜI DÙNG (LOCALSTORAGE) ==========
         if (!localStorage.getItem('users')) {
             localStorage.setItem('users', JSON.stringify([]));
@@ -470,6 +363,7 @@
             document.getElementById('forgotMessage').innerText = '';
         }
 
+        // ========== ĐĂNG KÝ ==========
         function register() {
             const username = document.getElementById('regUsername').value.trim();
             const password = document.getElementById('regPassword').value;
@@ -495,6 +389,7 @@
             setTimeout(() => showLogin(), 1500);
         }
 
+        // ========== ĐĂNG NHẬP ==========
         function login() {
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -511,6 +406,7 @@
                 return;
             }
 
+            // Xử lý ghi nhớ
             if (remember) {
                 localStorage.setItem('rememberedUser', JSON.stringify({ username, password }));
             } else {
@@ -520,6 +416,7 @@
             showDashboard(username);
         }
 
+        // ========== QUÊN MẬT KHẨU ==========
         function resetPassword() {
             const username = document.getElementById('forgotUsername').value.trim();
             const newPass = document.getElementById('forgotNewPassword').value;
@@ -546,60 +443,27 @@
             setTimeout(() => showLogin(), 1500);
         }
 
+        // ========== ĐĂNG XUẤT ==========
         function logout() {
             sessionStorage.removeItem('currentUser');
+            localStorage.removeItem('rememberedUser');
             document.getElementById('authContainer').style.display = 'block';
             document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('employeeSection').style.display = 'none';
+            // Reset form
             document.getElementById('loginUsername').value = '';
             document.getElementById('loginPassword').value = '';
             document.getElementById('rememberMe').checked = false;
             showLogin();
         }
 
+        // ========== HIỂN THỊ DASHBOARD ==========
         function showDashboard(username) {
             document.getElementById('authContainer').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('employeeSection').style.display = 'none';
             document.getElementById('usernameDisplay').innerText = username;
-            history.pushState({ page: 'dashboard' }, '', '#dashboard');
         }
 
-        function goToEmployeeSection() {
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('employeeSection').style.display = 'block';
-            if (typeof empData === 'undefined' || empData.length === 0) {
-                loadEmployeeData();
-            } else {
-                renderTable();
-            }
-            history.pushState({ page: 'employee' }, '', '#nhanvien');
-        }
-
-        function goBackFromEmployee() {
-            document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('employeeSection').style.display = 'none';
-            closeModal();
-            history.pushState({ page: 'dashboard' }, '', '#dashboard');
-        }
-
-        window.onpopstate = function(event) {
-            if (event.state) {
-                if (event.state.page === 'dashboard') {
-                    document.getElementById('dashboard').style.display = 'block';
-                    document.getElementById('employeeSection').style.display = 'none';
-                    closeModal();
-                } else if (event.state.page === 'employee') {
-                    document.getElementById('dashboard').style.display = 'none';
-                    document.getElementById('employeeSection').style.display = 'block';
-                }
-            } else {
-                document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('employeeSection').style.display = 'none';
-                closeModal();
-            }
-        };
-
+        // ========== KIỂM TRA ĐĂNG NHẬP KHI TẢI TRANG ==========
         window.onload = function() {
             const remembered = localStorage.getItem('rememberedUser');
             if (remembered) {
@@ -608,355 +472,31 @@
                     document.getElementById('loginUsername').value = username;
                     document.getElementById('loginPassword').value = password;
                     document.getElementById('rememberMe').checked = true;
+                    // Tự động đăng nhập nếu có remember
                     login();
                 } catch (e) {}
             } else {
                 const currentUser = sessionStorage.getItem('currentUser');
-                if (currentUser) showDashboard(currentUser);
-                else showLogin();
+                if (currentUser) {
+                    showDashboard(currentUser);
+                } else {
+                    showLogin();
+                }
             }
 
+            // Gán sự kiện Enter cho form đăng nhập
             const inputs = document.querySelectorAll('#loginForm input');
             inputs.forEach(input => {
                 input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') { e.preventDefault(); login(); }
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        login();
+                    }
                 });
             });
         };
 
-        // ========== CODE QUẢN LÝ NHÂN VIÊN PDF ==========
-        let empData = [];
-        let currentIndex = -1;
-        let currentPDFBytes = null;
-        let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
-        let croppedImages = { '45': { blob: null, original: null }, '46': { blob: null, original: null }, '47': { blob: null, original: null }, '48': { blob: null, original: null }, '49': { blob: null, original: null } };
-        let currentCropField = null;
-        let cropper = null;
-
-        async function loadEmployeeData() {
-            try {
-                let res = await fetch(SCRIPT_URL);
-                empData = await res.json();
-                renderTable();
-            } catch (e) {
-                alert('Lỗi tải dữ liệu nhân viên: ' + e.message);
-            }
-        }
-
-        function renderTable() {
-            let html = '';
-            // slice(1) giúp bỏ dòng tiêu đề Google Sheet
-            empData.slice(1).reverse().forEach((emp, revIdx) => {
-                if (!emp[0]) return;
-                let idx = empData.length - 1 - revIdx;
-                let cccd = emp[19] || ('NO_CCCD_' + idx);
-                let statusHtml = exportedList[cccd] ? '<span class="badge">✅ Đã xuất</span>' : '<span style="color:#888">Chưa xuất</span>';
-                html += `<tr>
-                    <td><b>${emp[0]}</b></td>
-                    <td>${emp[19] || ''}</td>
-                    <td>${statusHtml}</td>
-                    <td>
-                        <button id="btn-dl-${idx}" class="btn btn-dl" onclick="downloadAllImages(${idx})">⬇️ Tải 1 Cục Ảnh</button>
-                        <button class="btn btn-xem" onclick="openModal(${idx})">👁️ Xem & Ghép</button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('tableBody').innerHTML = html;
-        }
-
-        async function getGasImg(url) {
-            if (!url) return null;
-            let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (!idMatch) return null;
-            try {
-                let res = await fetch(SCRIPT_URL + "?action=getImage&id=" + idMatch[1]);
-                let json = await res.json();
-                if (json.ok && json.data) {
-                    let bin = window.atob(json.data.split(',')[1]);
-                    let b = new Uint8Array(bin.length);
-                    for (let i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
-                    return b.buffer;
-                }
-            } catch (e) {}
-            return null;
-        }
-
-        async function downloadAllImages(idx) {
-            let emp = empData[idx];
-            let links = [];
-            emp.forEach(cell => { if (cell && String(cell).includes('drive.google.com')) links.push(cell); });
-            if (links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
-            let btn = document.getElementById('btn-dl-' + idx);
-            let oldText = btn.innerHTML;
-            btn.innerHTML = '⏳ Đang kéo...'; btn.disabled = true;
-            for (let i = 0; i < links.length; i++) {
-                let b = await getGasImg(links[i]);
-                if (b) download(b, `${emp[0]}_Anh_${i + 1}.jpg`, "image/jpeg");
-            }
-            btn.innerHTML = '✅ Tải xong';
-            setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
-        }
-
-        function openModal(idx) {
-            currentIndex = idx;
-            document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
-            ['45', '46', '47', '48', '49'].forEach(id => {
-                document.getElementById('up' + id).value = '';
-                document.getElementById('crop' + id).disabled = true;
-                if (croppedImages[id].blob) {
-                    URL.revokeObjectURL(croppedImages[id].blob);
-                    croppedImages[id] = { blob: null, original: null };
-                }
-            });
-            document.getElementById('myModal').style.display = "flex";
-            document.getElementById('btnClose').style.display = "block";
-            refreshPDF();
-        }
-
-        function closeModal() {
-            document.getElementById('myModal').style.display = "none";
-            document.getElementById('btnClose').style.display = "none";
-            document.getElementById('pdfFrame').src = '';
-            closeCropModal();
-        }
-
-        function handleFileSelect(fieldId) {
-            const input = document.getElementById('up' + fieldId);
-            const cropBtn = document.getElementById('crop' + fieldId);
-            if (input.files.length > 0) {
-                cropBtn.disabled = false;
-                if (croppedImages[fieldId].blob) {
-                    URL.revokeObjectURL(croppedImages[fieldId].blob);
-                    croppedImages[fieldId] = { blob: null, original: null };
-                }
-            } else {
-                cropBtn.disabled = true;
-            }
-            refreshPDF();
-        }
-
-        function openCropModal(fieldId) {
-            const input = document.getElementById('up' + fieldId);
-            if (!input.files.length) return;
-            currentCropField = fieldId;
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.getElementById('cropImage');
-                img.src = e.target.result;
-                document.getElementById('cropModal').style.display = 'flex';
-                if (cropper) cropper.destroy();
-                setTimeout(() => {
-                    cropper = new Cropper(img, { aspectRatio: NaN, viewMode: 1, autoCropArea: 1, responsive: true });
-                }, 100);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function closeCropModal() {
-            document.getElementById('cropModal').style.display = 'none';
-            if (cropper) { cropper.destroy(); cropper = null; }
-        }
-
-        function saveCrop() {
-            if (!cropper || !currentCropField) return;
-            const canvas = cropper.getCroppedCanvas({
-                maxWidth: 1024, maxHeight: 1024, fillColor: '#fff',
-                imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
-            });
-            canvas.toBlob((blob) => {
-                const blobUrl = URL.createObjectURL(blob);
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const buffer = e.target.result;
-                    if (croppedImages[currentCropField].blob) { URL.revokeObjectURL(croppedImages[currentCropField].blob); }
-                    croppedImages[currentCropField] = { blob: blobUrl, original: buffer };
-                    refreshPDF();
-                };
-                reader.readAsArrayBuffer(blob);
-                closeCropModal();
-            }, 'image/jpeg', 0.95);
-        }
-
-        async function getImageBufferForField(fieldId) {
-            if (croppedImages[fieldId] && croppedImages[fieldId].original) return croppedImages[fieldId].original;
-            const input = document.getElementById('up' + fieldId);
-            if (input.files.length > 0) return await readFileAsBuffer(input.files[0]);
-            return null;
-        }
-
-        function readFileAsBuffer(file) {
-            return new Promise((resolve) => {
-                let reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.readAsArrayBuffer(file);
-            });
-        }
-
-        function formatSal(v) {
-            if (!v) return "";
-            let s = String(v).toUpperCase().trim();
-            let m = s.replace(/[,.]/g, '').match(/\d+/);
-            if (!m) return s;
-            let n = parseInt(m[0], 10);
-            return (s.includes('USD') || n < 100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
-        }
-
-        // HÀM ĐIỀN CHỮ: BỎ HẲN CÁI GỌI FONT ĐI, CHỈ CÒN LẠI ÉP CỠ 10
-        function fillField(form, fieldName, value) {
-            try {
-                let field = form.getTextField(fieldName);
-                if (field && value) {
-                    field.setText(String(value));
-                    field.setFontSize(10); // Cố định cỡ 10
-                }
-            } catch (e) {}
-        }
-
-        async function refreshPDF() {
-            if (currentIndex === -1) return;
-            let emp = empData[currentIndex];
-            let loadingDiv = document.getElementById('loadingPDF');
-            loadingDiv.style.display = 'flex';
-            loadingDiv.innerText = "⏳ Đang tải Template PDF...";
-
-            try {
-                // Thêm try-catch riêng ở đây để nếu lỗi Failed to fetch mày sẽ biết
-                let templateRes;
-                try {
-                    templateRes = await fetch("template.pdf?v=" + Math.random());
-                } catch(e) {
-                    throw new Error("Không thể load file template.pdf (Có thể do đang mở file trên máy tính bằng C://. Hãy up lên Github web).");
-                }
-                
-                if (!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf' bên cạnh file này.");
-                
-                const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
-                const form = doc.getForm();
-
-                loadingDiv.innerText = "⏳ Đang điền dữ liệu...";
-
-                for (let i = 0; i <= 44; i++) {
-                    if ([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
-                    let val = emp[i] ? String(emp[i]) : "";
-                    if ([5, 20, 41].includes(i) && val) {
-                        try { let d = new Date(val); if (!isNaN(d)) val = `${("0" + d.getDate()).slice(-2)}/${("0" + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`; } catch (e) { }
-                    }
-                    if (i === 9 || i === 12) val = formatSal(val);
-                    fillField(form, i.toString(), val);
-                }
-
-                let dobRaw = emp[3];
-                if (dobRaw) {
-                    let d = new Date(dobRaw);
-                    if (String(dobRaw).includes('/')) {
-                        let parts = String(dobRaw).split('/');
-                        if (parts[0].length === 2) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                    }
-                    if (!isNaN(d)) {
-                        let dd = ("0" + d.getDate()).slice(-2);
-                        let mm = ("0" + (d.getMonth() + 1)).slice(-2);
-                        let yyyy = d.getFullYear().toString();
-                        fillField(form, '3', `${dd}/${mm}/${yyyy}`);
-                        fillField(form, '3_nam', yyyy);
-                        fillField(form, '3_thang', mm);
-                        fillField(form, '3_ngay', dd);
-                    }
-                }
-
-                let addr18 = emp[18];
-                if (addr18) {
-                    let parts = String(addr18).split('|');
-                    let tinh = parts[0] || '';
-                    let phuong = parts[1] || '';
-                    let chitiet = parts[2] || '';
-                    let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
-                    fillField(form, '18', full18);
-                    fillField(form, '18_tinh', tinh);
-                    fillField(form, '18_phuong', phuong);
-                    fillField(form, '18_chitiet', chitiet);
-                }
-                fillField(form, '22', String(emp[22] || ''));
-                fillField(form, '23', String(emp[23] || ''));
-
-                [25, 26, 27, 30].forEach(i => {
-                    if (emp[i]) {
-                        let p = String(emp[i]).split('|');
-                        fillField(form, `${i}_thoigian`, p[0] || '');
-                        fillField(form, `${i}_tentruong`, p[1] || '');
-                    }
-                });
-
-                try { let gt = String(emp[4] || '').toLowerCase(); if (gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch (e) { }
-                try { let hn = String(emp[17] || '').toLowerCase(); if (hn.includes('đã') || hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch (e) { }
-
-                loadingDiv.innerText = "⏳ Đang ghép ảnh vào form...";
-                let inputs = [{ id: '45' }, { id: '46' }, { id: '47' }, { id: '48' }, { id: '49' }];
-                const allFields = form.getFields();
-                let drawTasks = [];
-
-                for (let item of inputs) {
-                    const fieldId = item.id;
-                    const buffer = await getImageBufferForField(fieldId);
-                    if (!buffer) continue;
-                    const targetField = allFields.find(f => f.getName().trim() === fieldId);
-                    if (targetField) {
-                        const widgets = targetField.acroField.getWidgets();
-                        if (widgets.length > 0) {
-                            const widget = widgets[0];
-                            const rect = widget.getRectangle();
-                            const pRef = widget.P();
-                            if (pRef) {
-                                const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
-                                if (pageIndex >= 0) {
-                                    drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Nếu mày thiết kế PDF mà phần mềm yêu cầu flatten bị lỗi WinAnsi thì catch lỗi đó luôn để nó ko đứng hình
-                try {
-                    form.flatten();
-                } catch(e) {
-                    console.warn("Bỏ qua lỗi ép phẳng PDF (flatten) do font không hỗ trợ: ", e);
-                }
-
-                for (let task of drawTasks) {
-                    if (task.pageIndex >= 0) {
-                        const page = doc.getPages()[task.pageIndex];
-                        let img;
-                        try { img = await doc.embedJpg(task.buffer); } catch { img = await doc.embedPng(task.buffer); }
-                        page.drawImage(img, { x: task.rect.x, y: task.rect.y, width: task.rect.width, height: task.rect.height });
-                    }
-                }
-
-                currentPDFBytes = await doc.save();
-                const blob = new Blob([currentPDFBytes], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                document.getElementById('pdfFrame').src = url;
-                loadingDiv.style.display = 'none';
-
-            } catch (e) {
-                alert("Lỗi: " + e.message);
-                console.error(e);
-                loadingDiv.style.display = 'none';
-            }
-        }
-
-        function downloadFinalPDF() {
-            if (!currentPDFBytes) return;
-            let emp = empData[currentIndex];
-            download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
-            let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
-            exportedList[cccd] = true;
-            localStorage.setItem('exportedData', JSON.stringify(exportedList));
-            renderTable();
-            closeModal();
-        }
-
-        // Khai báo hàm cho scope toàn cục
+        // Export các hàm ra global để dùng trong onclick
         window.showRegister = showRegister;
         window.showLogin = showLogin;
         window.showForgot = showForgot;
@@ -964,16 +504,6 @@
         window.register = register;
         window.resetPassword = resetPassword;
         window.logout = logout;
-        window.goToEmployeeSection = goToEmployeeSection;
-        window.goBackFromEmployee = goBackFromEmployee;
-        window.downloadAllImages = downloadAllImages;
-        window.openModal = openModal;
-        window.closeModal = closeModal;
-        window.handleFileSelect = handleFileSelect;
-        window.openCropModal = openCropModal;
-        window.closeCropModal = closeCropModal;
-        window.saveCrop = saveCrop;
-        window.downloadFinalPDF = downloadFinalPDF;
     </script>
 </body>
 </html>
