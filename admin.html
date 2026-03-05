@@ -1,51 +1,54 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>QUẢN TRỊ XUẤT PDF - CẮT ẢNH (FIX FONT UNICODE)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-    <style>
-        /* Giữ nguyên CSS */
-        body{font-family:Arial;background:#f4f7f6; margin:0; padding:20px;}
-        .container{max-width:1200px;background:#fff;padding:20px;margin:auto;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
-        table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left; vertical-align:middle;}
-        th{background:#0056b3;color:#fff}
-        .btn{color:#fff;border:none;padding:8px 12px;cursor:pointer;font-weight:bold;border-radius:4px; font-size:13px; margin-right:5px;}
-        .btn-dl{background:#28a745;} .btn-dl:disabled{background:#888;}
-        .btn-xem{background:#17a2b8;}
-        .badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
-        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
-        .modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
-        .close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
-        .panel-left{flex:1; background:#f9f9f9; padding:20px; overflow-y:auto; border-right:2px solid #ddd; display:flex; flex-direction:column;}
-        .panel-left h3{margin-top:0; color:#0056b3; border-bottom:2px solid #0056b3; padding-bottom:10px;}
-        .upload-box{background:#fff; border:1px dashed #aaa; padding:15px; margin-bottom:15px; border-radius:5px;}
-        .upload-box h4{margin:0 0 10px 0; font-size:14px;}
-        .upload-box input{width:70%; font-size:13px; cursor:pointer; display:inline-block;}
-        .upload-box .crop-btn{background:#ffc107; color:#000; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:12px; margin-left:5px;}
-        .upload-box .crop-btn:disabled{background:#ccc; cursor:not-allowed;}
-        .btn-export-big{background:#dc3545;color:white;width:100%;padding:15px;font-size:16px;font-weight:bold;border:none;border-radius:5px;cursor:pointer; margin-top:auto;}
-        .panel-right{flex:2.5; background:#525659; position:relative;}
-        #pdfFrame{width:100%; height:100%; border:none;}
-        .loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;color:#0056b3; z-index:10; display:none;}
-        .crop-modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8); align-items:center; justify-content:center;}
-        .crop-modal-content{background:#fff; padding:20px; border-radius:8px; width:90%; max-width:800px; max-height:90vh; overflow:auto; position:relative;}
-        .crop-modal-close{float:right; font-size:28px; font-weight:bold; cursor:pointer;}
-        .crop-preview{max-width:100%; max-height:60vh; margin:20px 0;}
-        .crop-actions{text-align:right;}
-        .crop-actions button{padding:8px 16px; margin-left:10px; border:none; border-radius:4px; cursor:pointer;}
-        .crop-save{background:#28a745; color:#fff;}
-        .crop-cancel{background:#6c757d; color:#fff;}
-    </style>
-</head>
+<html lang="vi"><head><meta charset="UTF-8"><title>QUẢN TRỊ XUẤT PDF - CẮT ẢNH</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<style>
+body{font-family:Arial;background:#f4f7f6; margin:0; padding:20px;}
+.container{max-width:1200px;background:#fff;padding:20px;margin:auto;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
+table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left; vertical-align:middle;}
+th{background:#0056b3;color:#fff}
+.btn{color:#fff;border:none;padding:8px 12px;cursor:pointer;font-weight:bold;border-radius:4px; font-size:13px; margin-right:5px;}
+.btn-dl{background:#28a745;} .btn-dl:disabled{background:#888;}
+.btn-xem{background:#17a2b8;}
+.badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
+
+/* Modal chính (ghép ảnh) */
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
+.modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
+.close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
+
+/* Panel trái */
+.panel-left{flex:1; background:#f9f9f9; padding:20px; overflow-y:auto; border-right:2px solid #ddd; display:flex; flex-direction:column;}
+.panel-left h3{margin-top:0; color:#0056b3; border-bottom:2px solid #0056b3; padding-bottom:10px;}
+.upload-box{background:#fff; border:1px dashed #aaa; padding:15px; margin-bottom:15px; border-radius:5px;}
+.upload-box h4{margin:0 0 10px 0; font-size:14px;}
+.upload-box input{width:70%; font-size:13px; cursor:pointer; display:inline-block;}
+.upload-box .crop-btn{background:#ffc107; color:#000; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:12px; margin-left:5px;}
+.upload-box .crop-btn:disabled{background:#ccc; cursor:not-allowed;}
+.btn-export-big{background:#dc3545;color:white;width:100%;padding:15px;font-size:16px;font-weight:bold;border:none;border-radius:5px;cursor:pointer; margin-top:auto;}
+
+/* Panel phải */
+.panel-right{flex:2.5; background:#525659; position:relative;}
+#pdfFrame{width:100%; height:100%; border:none;}
+.loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;color:#0056b3; z-index:10; display:none;}
+
+/* Modal cắt ảnh */
+.crop-modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8); align-items:center; justify-content:center;}
+.crop-modal-content{background:#fff; padding:20px; border-radius:8px; width:90%; max-width:800px; max-height:90vh; overflow:auto; position:relative;}
+.crop-modal-close{float:right; font-size:28px; font-weight:bold; cursor:pointer;}
+.crop-preview{max-width:100%; max-height:60vh; margin:20px 0;}
+.crop-actions{text-align:right;}
+.crop-actions button{padding:8px 16px; margin-left:10px; border:none; border-radius:4px; cursor:pointer;}
+.crop-save{background:#28a745; color:#fff;}
+.crop-cancel{background:#6c757d; color:#fff;}
+</style></head>
 <body>
 
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (FIX FONT UNICODE)</h2>
+    <h2>QUẢN TRỊ XUẤT PDF (ĐÃ LỌC BỎ TIÊU ĐỀ RÁC)</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
@@ -55,45 +58,45 @@
 <span class="close" id="btnClose" onclick="closeModal()" style="display:none;">&times;</span>
 
 <div id="myModal" class="modal">
-    <div class="modal-content">
-        <div class="panel-left">
-            <h3 id="modalTitle">GHÉP ẢNH</h3>
-            <p style="font-size:13px; color:#555;">Bấm chọn ảnh, có thể cắt trước khi ghép.</p>
+  <div class="modal-content">
+      <div class="panel-left">
+          <h3 id="modalTitle">GHÉP ẢNH</h3>
+          <p style="font-size:13px; color:#555;">Bấm chọn ảnh, có thể cắt trước khi ghép.</p>
+          
+          <div class="upload-box">
+              <h4>1. Ảnh 4x6</h4>
+              <input type="file" id="up45" accept="image/*" onchange="handleFileSelect('45')">
+              <button class="crop-btn" id="crop45" onclick="openCropModal('45')" disabled>✂️ Cắt</button>
+          </div>
+          <div class="upload-box">
+              <h4>2. CCCD Trước</h4>
+              <input type="file" id="up46" accept="image/*" onchange="handleFileSelect('46')">
+              <button class="crop-btn" id="crop46" onclick="openCropModal('46')" disabled>✂️ Cắt</button>
+          </div>
+          <div class="upload-box">
+              <h4>3. CCCD Sau</h4>
+              <input type="file" id="up47" accept="image/*" onchange="handleFileSelect('47')">
+              <button class="crop-btn" id="crop47" onclick="openCropModal('47')" disabled>✂️ Cắt</button>
+          </div>
+          <div class="upload-box">
+              <h4>4. Ngân Hàng</h4>
+              <input type="file" id="up48" accept="image/*" onchange="handleFileSelect('48')">
+              <button class="crop-btn" id="crop48" onclick="openCropModal('48')" disabled>✂️ Cắt</button>
+          </div>
+          <div class="upload-box">
+              <h4>5. Sổ BHXH</h4>
+              <input type="file" id="up49" accept="image/*" onchange="handleFileSelect('49')">
+              <button class="crop-btn" id="crop49" onclick="openCropModal('49')" disabled>✂️ Cắt</button>
+          </div>
+          
+          <button class="btn-export-big" onclick="downloadFinalPDF()">💾 XUẤT & LƯU PDF</button>
+      </div>
 
-            <div class="upload-box">
-                <h4>1. Ảnh 4x6</h4>
-                <input type="file" id="up45" accept="image/*" onchange="handleFileSelect('45')">
-                <button class="crop-btn" id="crop45" onclick="openCropModal('45')" disabled>✂️ Cắt</button>
-            </div>
-            <div class="upload-box">
-                <h4>2. CCCD Trước</h4>
-                <input type="file" id="up46" accept="image/*" onchange="handleFileSelect('46')">
-                <button class="crop-btn" id="crop46" onclick="openCropModal('46')" disabled>✂️ Cắt</button>
-            </div>
-            <div class="upload-box">
-                <h4>3. CCCD Sau</h4>
-                <input type="file" id="up47" accept="image/*" onchange="handleFileSelect('47')">
-                <button class="crop-btn" id="crop47" onclick="openCropModal('47')" disabled>✂️ Cắt</button>
-            </div>
-            <div class="upload-box">
-                <h4>4. Ngân Hàng</h4>
-                <input type="file" id="up48" accept="image/*" onchange="handleFileSelect('48')">
-                <button class="crop-btn" id="crop48" onclick="openCropModal('48')" disabled>✂️ Cắt</button>
-            </div>
-            <div class="upload-box">
-                <h4>5. Sổ BHXH</h4>
-                <input type="file" id="up49" accept="image/*" onchange="handleFileSelect('49')">
-                <button class="crop-btn" id="crop49" onclick="openCropModal('49')" disabled>✂️ Cắt</button>
-            </div>
-
-            <button class="btn-export-big" onclick="downloadFinalPDF()">💾 XUẤT & LƯU PDF</button>
-        </div>
-
-        <div class="panel-right">
-            <div id="loadingPDF" class="loading-overlay">⏳ Đang load PDF...</div>
-            <iframe id="pdfFrame"></iframe>
-        </div>
-    </div>
+      <div class="panel-right">
+          <div id="loadingPDF" class="loading-overlay">⏳ Đang load PDF...</div>
+          <iframe id="pdfFrame"></iframe>
+      </div>
+  </div>
 </div>
 
 <div id="cropModal" class="crop-modal">
@@ -111,430 +114,372 @@
 </div>
 
 <script>
-    // ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-    // Sử dụng font Roboto từ Google Fonts (đường dẫn chắc chắn tồn tại)
-    const FONT_URL = "https://raw.githubusercontent.com/google/fonts/main/apache/roboto/Roboto-Regular.ttf";
+// ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 
-    let empData = [];
-    let currentIndex = -1;
-    let currentPDFBytes = null;
-    let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
+// Link font Liberation Serif (y hệt Times New Roman) siêu ổn định
+const FONT_URL = "https://unpkg.com/liberation-fonts-ttf@2.1.5/LiberationSerif-Regular.ttf";
 
-    let croppedImages = {
-        '45': { blob: null, original: null },
-        '46': { blob: null, original: null },
-        '47': { blob: null, original: null },
-        '48': { blob: null, original: null },
-        '49': { blob: null, original: null }
+let empData = [];
+let currentIndex = -1;
+let currentPDFBytes = null;
+let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
+
+let croppedImages = {
+    '45': { blob: null, original: null },
+    '46': { blob: null, original: null },
+    '47': { blob: null, original: null },
+    '48': { blob: null, original: null },
+    '49': { blob: null, original: null }
+};
+
+let currentCropField = null;
+let cropper = null;
+
+window.onload = async () => {
+    try {
+        let res = await fetch(SCRIPT_URL); empData = await res.json();
+        renderTable();
+    } catch(e) {}
+};
+
+function renderTable() {
+    let html = '';
+    
+    // ĐÃ THÊM .slice(1) ĐỂ CẮT BỎ DÒNG TIÊU ĐỀ RÁC
+    empData.slice(1).reverse().forEach((emp, revIdx) => {
+        if(!emp[0]) return; 
+        
+        // Tính toán lại index chính xác trỏ về mảng gốc
+        let idx = empData.length - 1 - revIdx;
+        
+        let cccd = emp[19] || ('NO_CCCD_' + idx);
+        let statusHtml = exportedList[cccd] ? '<span class="badge">✅ Đã xuất</span>' : '<span style="color:#888">Chưa xuất</span>';
+        
+        html += `<tr>
+            <td><b>${emp[0]}</b></td>
+            <td>${emp[19]||''}</td>
+            <td>${statusHtml}</td>
+            <td>
+                <button id="btn-dl-${idx}" class="btn btn-dl" onclick="downloadAllImages(${idx})">⬇️ Tải 1 Cục Ảnh</button>
+                <button class="btn btn-xem" onclick="openModal(${idx})">👁️ Xem & Ghép</button>
+            </td>
+        </tr>`;
+    });
+    document.getElementById('tableBody').innerHTML = html;
+}
+
+async function getGasImg(url) {
+    if(!url) return null; 
+    let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if(!idMatch) return null;
+    try {
+        let res = await fetch(SCRIPT_URL + "?action=getImage&id=" + idMatch[1]); 
+        let json = await res.json();
+        if(json.ok && json.data){ 
+            let bin = window.atob(json.data.split(',')[1]); 
+            let b = new Uint8Array(bin.length); 
+            for(let i=0; i<bin.length; i++) b[i]=bin.charCodeAt(i); 
+            return b.buffer; 
+        } 
+    } catch(e){}
+    return null;
+}
+
+async function downloadAllImages(idx) {
+    let emp = empData[idx];
+    let links = [];
+    emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) links.push(cell); });
+    if(links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
+    
+    let btn = document.getElementById('btn-dl-' + idx);
+    let oldText = btn.innerHTML;
+    btn.innerHTML = '⏳ Đang kéo...'; btn.disabled = true;
+
+    for(let i=0; i<links.length; i++) {
+        let b = await getGasImg(links[i]);
+        if(b) download(b, `${emp[0]}_Anh_${i+1}.jpg`, "image/jpeg");
+    }
+    btn.innerHTML = '✅ Tải xong';
+    setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
+}
+
+function openModal(idx) {
+    currentIndex = idx;
+    document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
+    ['45','46','47','48','49'].forEach(id => {
+        document.getElementById('up'+id).value = '';
+        document.getElementById('crop'+id).disabled = true;
+        if(croppedImages[id].blob) {
+            URL.revokeObjectURL(croppedImages[id].blob);
+            croppedImages[id] = { blob: null, original: null };
+        }
+    });
+    document.getElementById('myModal').style.display = "flex";
+    document.getElementById('btnClose').style.display = "block";
+    refreshPDF(); 
+}
+
+function closeModal() { 
+    document.getElementById('myModal').style.display = "none"; 
+    document.getElementById('btnClose').style.display = "none";
+    document.getElementById('pdfFrame').src = '';
+    closeCropModal();
+}
+
+function handleFileSelect(fieldId) {
+    const input = document.getElementById('up'+fieldId);
+    const cropBtn = document.getElementById('crop'+fieldId);
+    if(input.files.length > 0) {
+        cropBtn.disabled = false;
+        if(croppedImages[fieldId].blob) {
+            URL.revokeObjectURL(croppedImages[fieldId].blob);
+            croppedImages[fieldId] = { blob: null, original: null };
+        }
+    } else {
+        cropBtn.disabled = true;
+    }
+    refreshPDF();
+}
+
+function openCropModal(fieldId) {
+    const input = document.getElementById('up'+fieldId);
+    if(!input.files.length) return;
+    currentCropField = fieldId;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = document.getElementById('cropImage');
+        img.src = e.target.result;
+        document.getElementById('cropModal').style.display = 'flex';
+        if(cropper) cropper.destroy();
+        setTimeout(() => {
+            cropper = new Cropper(img, { aspectRatio: NaN, viewMode: 1, autoCropArea: 1, responsive: true });
+        }, 100);
     };
+    reader.readAsDataURL(file);
+}
 
-    let currentCropField = null;
-    let cropper = null;
+function closeCropModal() {
+    document.getElementById('cropModal').style.display = 'none';
+    if(cropper) { cropper.destroy(); cropper = null; }
+}
 
-    window.onload = async () => {
-        try {
-            let res = await fetch(SCRIPT_URL);
-            empData = await res.json();
-            renderTable();
-        } catch (e) {
-            console.error('Lỗi tải dữ liệu:', e);
-            alert('Không thể tải dữ liệu từ Google Sheets! Hãy kiểm tra kết nối và SCRIPT_URL.');
-        }
-    };
-
-    function renderTable() {
-        let html = '';
-        empData.slice().reverse().forEach((emp, revIdx) => {
-            if (!emp[0]) return;
-            let idx = empData.length - 1 - revIdx;
-            let cccd = emp[19] || ('NO_CCCD_' + idx);
-            let statusHtml = exportedList[cccd] ? '<span class="badge">✅ Đã xuất</span>' : '<span style="color:#888">Chưa xuất</span>';
-
-            html += `<tr>
-                <td><b>${emp[0]}</b></td>
-                <td>${emp[19] || ''}</td>
-                <td>${statusHtml}</td>
-                <td>
-                    <button id="btn-dl-${idx}" class="btn btn-dl" onclick="downloadAllImages(${idx})">⬇️ Tải 1 Cục Ảnh</button>
-                    <button class="btn btn-xem" onclick="openModal(${idx})">👁️ Xem & Ghép</button>
-                </td>
-            </tr>`;
-        });
-        document.getElementById('tableBody').innerHTML = html;
-    }
-
-    async function getGasImg(url) {
-        if (!url) return null;
-        let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (!idMatch) return null;
-        try {
-            let res = await fetch(SCRIPT_URL + "?action=getImage&id=" + idMatch[1]);
-            let json = await res.json();
-            if (json.ok && json.data) {
-                let bin = window.atob(json.data.split(',')[1]);
-                let b = new Uint8Array(bin.length);
-                for (let i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
-                return b.buffer;
-            }
-        } catch (e) {
-            console.error('Lỗi tải ảnh từ Drive:', e);
-        }
-        return null;
-    }
-
-    async function downloadAllImages(idx) {
-        let emp = empData[idx];
-        let links = [];
-        emp.forEach(cell => { if (cell && String(cell).includes('drive.google.com')) links.push(cell); });
-        if (links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
-
-        let btn = document.getElementById('btn-dl-' + idx);
-        let oldText = btn.innerHTML;
-        btn.innerHTML = '⏳ Đang kéo...'; btn.disabled = true;
-
-        for (let i = 0; i < links.length; i++) {
-            let b = await getGasImg(links[i]);
-            if (b) download(b, `${emp[0]}_Anh_${i + 1}.jpg`, "image/jpeg");
-        }
-
-        btn.innerHTML = '✅ Tải xong';
-        setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
-    }
-
-    function openModal(idx) {
-        currentIndex = idx;
-        document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
-        ['45', '46', '47', '48', '49'].forEach(id => {
-            document.getElementById('up' + id).value = '';
-            document.getElementById('crop' + id).disabled = true;
-            if (croppedImages[id].blob) {
-                URL.revokeObjectURL(croppedImages[id].blob);
-                croppedImages[id] = { blob: null, original: null };
-            }
-        });
-        document.getElementById('myModal').style.display = "flex";
-        document.getElementById('btnClose').style.display = "block";
-        refreshPDF();
-    }
-
-    function closeModal() {
-        document.getElementById('myModal').style.display = "none";
-        document.getElementById('btnClose').style.display = "none";
-        document.getElementById('pdfFrame').src = '';
-        closeCropModal();
-    }
-
-    function handleFileSelect(fieldId) {
-        const input = document.getElementById('up' + fieldId);
-        const cropBtn = document.getElementById('crop' + fieldId);
-        if (input.files.length > 0) {
-            cropBtn.disabled = false;
-            if (croppedImages[fieldId].blob) {
-                URL.revokeObjectURL(croppedImages[fieldId].blob);
-                croppedImages[fieldId] = { blob: null, original: null };
-            }
-        } else {
-            cropBtn.disabled = true;
-        }
-        refreshPDF();
-    }
-
-    function openCropModal(fieldId) {
-        const input = document.getElementById('up' + fieldId);
-        if (!input.files.length) return;
-
-        currentCropField = fieldId;
-        const file = input.files[0];
+function saveCrop() {
+    if(!cropper || !currentCropField) return;
+    const canvas = cropper.getCroppedCanvas({
+        maxWidth: 1024, maxHeight: 1024, fillColor: '#fff',
+        imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
+    });
+    canvas.toBlob((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
         const reader = new FileReader();
         reader.onload = (e) => {
-            const img = document.getElementById('cropImage');
-            img.src = e.target.result;
-            document.getElementById('cropModal').style.display = 'flex';
-            if (cropper) cropper.destroy();
-            setTimeout(() => {
-                cropper = new Cropper(img, {
-                    aspectRatio: NaN,
-                    viewMode: 1,
-                    autoCropArea: 1,
-                    responsive: true
-                });
-            }, 100);
+            const buffer = e.target.result;
+            if(croppedImages[currentCropField].blob) { URL.revokeObjectURL(croppedImages[currentCropField].blob); }
+            croppedImages[currentCropField] = { blob: blobUrl, original: buffer };
+            refreshPDF();
         };
-        reader.readAsDataURL(file);
-    }
+        reader.readAsArrayBuffer(blob);
+        closeCropModal();
+    }, 'image/jpeg', 0.95);
+}
 
-    function closeCropModal() {
-        document.getElementById('cropModal').style.display = 'none';
-        if (cropper) { cropper.destroy(); cropper = null; }
-    }
+async function getImageBufferForField(fieldId) {
+    if(croppedImages[fieldId] && croppedImages[fieldId].original) return croppedImages[fieldId].original;
+    const input = document.getElementById('up'+fieldId);
+    if(input.files.length > 0) return await readFileAsBuffer(input.files[0]);
+    return null;
+}
 
-    function saveCrop() {
-        if (!cropper || !currentCropField) return;
-        const canvas = cropper.getCroppedCanvas({
-            maxWidth: 1024,
-            maxHeight: 1024,
-            fillColor: '#fff',
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high',
-        });
+function readFileAsBuffer(file) {
+    return new Promise((resolve) => {
+        let reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsArrayBuffer(file);
+    });
+}
 
-        canvas.toBlob((blob) => {
-            const blobUrl = URL.createObjectURL(blob);
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const buffer = e.target.result;
-                if (croppedImages[currentCropField].blob) { URL.revokeObjectURL(croppedImages[currentCropField].blob); }
-                croppedImages[currentCropField] = { blob: blobUrl, original: buffer };
-                refreshPDF();
-            };
-            reader.readAsArrayBuffer(blob);
-            closeCropModal();
-        }, 'image/jpeg', 0.95);
-    }
+function formatSal(v){
+    if(!v) return ""; let s = String(v).toUpperCase().trim(); let m = s.replace(/[,.]/g,'').match(/\d+/);
+    if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
+}
 
-    async function getImageBufferForField(fieldId) {
-        if (croppedImages[fieldId] && croppedImages[fieldId].original) return croppedImages[fieldId].original;
-        const input = document.getElementById('up' + fieldId);
-        if (input.files.length > 0) return await readFileAsBuffer(input.files[0]);
-        return null;
-    }
-
-    function readFileAsBuffer(file) {
-        return new Promise((resolve) => {
-            let reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
-    function formatSal(v) {
-        if (!v) return "";
-        let s = String(v).toUpperCase().trim();
-        let m = s.replace(/[,.]/g, '').match(/\d+/);
-        if (!m) return s;
-        let n = parseInt(m[0], 10);
-        return (s.includes('USD') || n < 100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
-    }
-
-    function fillField(form, fieldName, value, font) {
-        try {
-            let field = form.getTextField(fieldName);
-            if (field && value) {
-                field.setText(String(value));
-                field.setFontSize(10);
-                // Kiểm tra font hợp lệ trước khi updateAppearances
-                if (font && typeof font === 'object' && font.constructor.name === 'PDFFont') {
-                    field.updateAppearances({ font, fontSize: 10 });
-                } else {
-                    console.error(`Font không hợp lệ tại field "${fieldName}"`);
-                }
-            }
-        } catch (e) {
-            console.error(`Lỗi fillField tại field "${fieldName}":`, e);
+// -----------------------------------------------------------
+// HÀM BƠM CHỮ: ÉP CỠ CHỮ 10 CỐ ĐỊNH CHO TẤT CẢ CÁC Ô
+// -----------------------------------------------------------
+function fillField(form, fieldName, value, customFont) {
+    try {
+        let field = form.getTextField(fieldName);
+        if (field && value) {
+            field.setText(String(value));
+            field.setFontSize(10); // CỐ ĐỊNH CHỮ SIZE 10
         }
-    }
+    } catch(e) {}
+}
 
-    async function refreshPDF() {
-        if (currentIndex === -1) return;
-        let emp = empData[currentIndex];
-        document.getElementById('loadingPDF').style.display = 'flex';
-
+async function refreshPDF() {
+    if(currentIndex === -1) return;
+    let emp = empData[currentIndex]; 
+    let loadingDiv = document.getElementById('loadingPDF');
+    loadingDiv.style.display = 'flex';
+    loadingDiv.innerText = "⏳ Đang tải Template PDF...";
+    
+    try {
+        // TẢI TEMPLATE TRÊN GITHUB
+        let templateRes = await fetch("template.pdf?v="+Math.random());
+        if(!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf'. Hãy up file template.pdf lên Github!");
+        const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
+        doc.registerFontkit(window.fontkit);
+        
+        loadingDiv.innerText = "⏳ Đang nạp Font chữ Times New Roman...";
+        
+        // TẢI FONT TRỰC TIẾP TỪ SERVER (Bypass mọi lỗi vớ vẩn)
+        let fontBytes;
         try {
-            // 1. Tải Template PDF
-            let templateRes;
-            try {
-                templateRes = await fetch("template.pdf?v=" + Math.random());
-            } catch (fetchError) {
-                throw new Error(`Không thể kết nối tới file template.pdf. Nguyên nhân: ${fetchError.message}. Hãy đảm bảo bạn đang chạy trang web qua HTTP (dùng Live Server) và file template.pdf tồn tại trong cùng thư mục.`);
+            let res = await fetch(FONT_URL);
+            fontBytes = await res.arrayBuffer();
+        } catch(e) {
+            // Nếu mạng siêu lởm, lấy font Roboto thần thánh làm backup cuối cùng
+            let res = await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf");
+            fontBytes = await res.arrayBuffer();
+        }
+        
+        const font = await doc.embedFont(fontBytes);
+        const form = doc.getForm();
+
+        // CHỐT CHẶN DIỆT WINANSI (ÉP TOÀN BỘ FORM SANG FONT TIẾNG VIỆT TRƯỚC KHI LÀM GÌ ĐÓ)
+        form.updateFieldAppearances(font);
+
+        loadingDiv.innerText = "⏳ Đang điền dữ liệu...";
+
+        // 1. Điền text fields bình thường và ép size 10
+        for(let i=0; i<=44; i++){
+            if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
+            let val = emp[i] ? String(emp[i]) : "";
+            
+            if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
+            if(i===9 || i===12) val = formatSal(val);
+            
+            fillField(form, i.toString(), val, font);
+        }
+        
+        // 2. XỬ LÝ NGÀY SINH (TÁCH ĐÚNG 3_nam, 3_thang, 3_ngay)
+        let dobRaw = emp[3];
+        if (dobRaw) {
+            let d = new Date(dobRaw);
+            if (String(dobRaw).includes('/')) {
+                let parts = String(dobRaw).split('/');
+                if(parts[0].length === 2) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
             }
-            if (!templateRes.ok) {
-                throw new Error(`Không tìm thấy file 'template.pdf' (HTTP ${templateRes.status}). Hãy đặt file template.pdf cùng thư mục với trang HTML.`);
+            if (!isNaN(d)) {
+                let dd = ("0" + d.getDate()).slice(-2);
+                let mm = ("0" + (d.getMonth() + 1)).slice(-2);
+                let yyyy = d.getFullYear().toString();
+                
+                fillField(form, '3', `${dd}/${mm}/${yyyy}`, font);
+                fillField(form, '3_nam', yyyy, font);
+                fillField(form, '3_thang', mm, font);
+                fillField(form, '3_ngay', dd, font);
             }
-            const templateBytes = await templateRes.arrayBuffer();
-            const doc = await PDFLib.PDFDocument.load(templateBytes);
+        }
 
-            // 2. Đăng ký fontkit nếu có
-            if (typeof window.fontkit !== 'undefined') {
-                doc.registerFontkit(window.fontkit);
-            } else {
-                console.warn('fontkit không được tải, font Unicode có thể không hoạt động.');
+        // 3. XỬ LÝ ĐỊA CHỈ (Ô 18)
+        let addr18 = emp[18];
+        if (addr18) {
+            let parts = String(addr18).split('|');
+            let tinh = parts[0] || '';
+            let phuong = parts[1] || '';
+            let chitiet = parts[2] || '';
+            
+            let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
+            fillField(form, '18', full18, font); 
+            fillField(form, '18_tinh', tinh, font); 
+            fillField(form, '18_phuong', phuong, font);
+            fillField(form, '18_chitiet', chitiet, font);
+        }
+        fillField(form, '22', String(emp[22]||''), font);
+        fillField(form, '23', String(emp[23]||''), font);
+
+        // 4. Xử lý học vấn 
+        [25,26,27,30].forEach(i => {
+            if(emp[i]){
+                let p = String(emp[i]).split('|');
+                fillField(form, `${i}_thoigian`, p[0]||'', font);
+                fillField(form, `${i}_tentruong`, p[1]||'', font);
             }
+        });
 
-            // 3. Tải font Unicode (Roboto)
-            let font;
-            try {
-                const fontRes = await fetch(FONT_URL);
-                if (!fontRes.ok) throw new Error(`HTTP ${fontRes.status}`);
-                const fontBytes = await fontRes.arrayBuffer();
-                font = await doc.embedFont(fontBytes);
-                console.log('Đã tải font Roboto thành công.');
-            } catch (fontError) {
-                console.error('Không thể tải font Roboto:', fontError);
-                // Thử fallback với font Noto Sans (dự phòng)
-                try {
-                    const fallbackFontUrl = "https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans-Regular.ttf";
-                    const fallbackRes = await fetch(fallbackFontUrl);
-                    if (!fallbackRes.ok) throw new Error(`HTTP ${fallbackRes.status}`);
-                    const fallbackBytes = await fallbackRes.arrayBuffer();
-                    font = await doc.embedFont(fallbackBytes);
-                    console.log('Đã tải font NotoSans dự phòng thành công.');
-                } catch (fallbackError) {
-                    console.error('Không thể tải font dự phòng:', fallbackError);
-                    throw new Error('Không thể tải bất kỳ font Unicode nào. Vui lòng kiểm tra kết nối mạng hoặc thay đổi nguồn font.');
-                }
-            }
+        // 5. Checkbox
+        try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
+        try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-            const form = doc.getForm();
+        // LÀM LẠI PHÁT NỮA CHO CHẮC ĂN TRƯỚC KHI VẼ ẢNH
+        form.updateFieldAppearances(font);
 
-            // 4. Điền text fields bình thường
-            for (let i = 0; i <= 44; i++) {
-                if ([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
-                let val = emp[i] ? String(emp[i]) : "";
+        // 6. Vẽ ảnh
+        loadingDiv.innerText = "⏳ Đang ghép ảnh vào form...";
+        let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
+        const allFields = form.getFields();
+        let drawTasks = [];
 
-                // Xử lý các ô ngày tháng
-                if ([5, 20, 41].includes(i) && val) {
-                    try {
-                        let d = new Date(val);
-                        if (!isNaN(d)) val = `${("0" + d.getDate()).slice(-2)}/${("0" + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`;
-                    } catch (e) { }
-                }
-
-                if (i === 9 || i === 12) val = formatSal(val);
-                fillField(form, i.toString(), val, font);
-            }
-
-            // 5. Xử lý ngày sinh
-            let dobRaw = emp[3];
-            if (dobRaw) {
-                let d = new Date(dobRaw);
-                if (String(dobRaw).includes('/')) {
-                    let parts = String(dobRaw).split('/');
-                    if (parts[0].length === 2) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                }
-                if (!isNaN(d)) {
-                    let dd = ("0" + d.getDate()).slice(-2);
-                    let mm = ("0" + (d.getMonth() + 1)).slice(-2);
-                    let yyyy = d.getFullYear().toString();
-
-                    fillField(form, '3', `${yyyy} năm ${mm} tháng ${dd} ngày`, font);
-                    fillField(form, '3_nam', yyyy, font);
-                    fillField(form, '3_thang', mm, font);
-                    fillField(form, '3_ngay', dd, font);
-                }
-            }
-
-            // 6. Xử lý địa chỉ
-            let addr18 = emp[18];
-            if (addr18) {
-                let parts = String(addr18).split('|');
-                let tinh = parts[0] || '';
-                let phuong = parts[1] || '';
-                let chitiet = parts[2] || '';
-
-                let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
-                fillField(form, '18', full18, font);
-                fillField(form, '18_tinh', tinh, font);
-                fillField(form, '18_phuong', phuong, font);
-                fillField(form, '18_chitiet', chitiet, font);
-            }
-
-            fillField(form, '22', String(emp[22] || ''), font);
-            fillField(form, '23', String(emp[23] || ''), font);
-
-            // Xử lý học vấn
-            [25, 26, 27, 30].forEach(i => {
-                if (emp[i]) {
-                    let p = String(emp[i]).split('|');
-                    fillField(form, `${i}_thoigian`, p[0] || '', font);
-                    fillField(form, `${i}_tentruong`, p[1] || '', font);
-                }
-            });
-
-            // Checkbox
-            try {
-                let gt = String(emp[4] || '').toLowerCase();
-                if (gt.includes('nam')) form.getCheckBox('Nam').check();
-                else form.getCheckBox('Nữ').check();
-            } catch (e) { }
-            try {
-                let hn = String(emp[17] || '').toLowerCase();
-                if (hn.includes('đã') || hn.includes('da ket')) form.getCheckBox('DaKetHon').check();
-                else form.getCheckBox('ChuaKetHon').check();
-            } catch (e) { }
-
-            // 7. Vẽ ảnh
-            let inputs = [{ id: '45' }, { id: '46' }, { id: '47' }, { id: '48' }, { id: '49' }];
-            const allFields = form.getFields();
-            let drawTasks = [];
-
-            for (let item of inputs) {
-                const fieldId = item.id;
-                const buffer = await getImageBufferForField(fieldId);
-                if (!buffer) continue;
-
-                const targetField = allFields.find(f => f.getName().trim() === fieldId);
-                if (targetField) {
-                    const widgets = targetField.acroField.getWidgets();
-                    if (widgets.length > 0) {
-                        const widget = widgets[0];
-                        const rect = widget.getRectangle();
-                        const pRef = widget.P();
-                        if (pRef) {
-                            const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
-                            if (pageIndex >= 0) {
-                                drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
-                            }
+        for(let item of inputs) {
+            const fieldId = item.id;
+            const buffer = await getImageBufferForField(fieldId);
+            if(!buffer) continue;
+            
+            const targetField = allFields.find(f => f.getName().trim() === fieldId);
+            if(targetField) {
+                const widgets = targetField.acroField.getWidgets();
+                if(widgets.length > 0) {
+                    const widget = widgets[0];
+                    const rect = widget.getRectangle();
+                    const pRef = widget.P(); 
+                    if(pRef) {
+                        const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
+                        if(pageIndex >= 0) {
+                            drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
                         }
                     }
                 }
             }
-
-            form.flatten();
-
-            for (let task of drawTasks) {
-                if (task.pageIndex >= 0) {
-                    const page = doc.getPages()[task.pageIndex];
-                    let img;
-                    try {
-                        img = await doc.embedJpg(task.buffer);
-                    } catch {
-                        img = await doc.embedPng(task.buffer);
-                    }
-                    page.drawImage(img, {
-                        x: task.rect.x,
-                        y: task.rect.y,
-                        width: task.rect.width,
-                        height: task.rect.height
-                    });
-                }
-            }
-
-            currentPDFBytes = await doc.save();
-            const blob = new Blob([currentPDFBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-
-            document.getElementById('pdfFrame').src = url;
-            document.getElementById('loadingPDF').style.display = 'none';
-
-        } catch (e) {
-            console.error('Lỗi tạo PDF:', e);
-            alert(`❌ Lỗi tạo PDF: ${e.message}`);
-            document.getElementById('loadingPDF').style.display = 'none';
         }
-    }
 
-    function downloadFinalPDF() {
-        if (!currentPDFBytes) return;
-        let emp = empData[currentIndex];
-        download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
+        // ĐOẠN NÀY LÀ ĐOẠN ĐANG GÂY ÁM ẢNH NHẤT - NAY ĐÃ BỊ BẮT CHẾT CÚ PHÁP
+        form.flatten(); 
 
-        let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
-        exportedList[cccd] = true;
-        localStorage.setItem('exportedData', JSON.stringify(exportedList));
-        renderTable();
-        closeModal();
+        for(let task of drawTasks) {
+            if(task.pageIndex >= 0) {
+                const page = doc.getPages()[task.pageIndex];
+                let img;
+                try { img = await doc.embedJpg(task.buffer); } catch { img = await doc.embedPng(task.buffer); }
+                page.drawImage(img, { x: task.rect.x, y: task.rect.y, width: task.rect.width, height: task.rect.height });
+            }
+        }
+
+        currentPDFBytes = await doc.save();
+        const blob = new Blob([currentPDFBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        
+        document.getElementById('pdfFrame').src = url;
+        loadingDiv.style.display = 'none';
+
+    } catch(e) { 
+        alert("Cảnh báo lỗi: " + e.message); 
+        console.error(e);
+        loadingDiv.style.display = 'none';
     }
-</script>
-</body>
-</html>
+}
+
+function downloadFinalPDF() {
+    if(!currentPDFBytes) return;
+    let emp = empData[currentIndex];
+    download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
+    
+    let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
+    exportedList[cccd] = true;
+    localStorage.setItem('exportedData', JSON.stringify(exportedList));
+    renderTable(); 
+    closeModal();
+}
+</script></body></html>
