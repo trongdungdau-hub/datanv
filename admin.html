@@ -12,9 +12,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
+        /* ========== STYLE TỔNG THỂ ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f4f7f6; min-height: 100vh; color: #333; }
 
+        /* ========== AUTH FORM (ĐĂNG NHẬP) ========== */
         .auth-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         .auth-container { background: white; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 400px; max-width: 90%; padding: 40px; }
         .auth-container h2 { text-align: center; color: #333; margin-bottom: 30px; font-weight: 600; }
@@ -27,6 +29,7 @@
         .remember-me input { width: auto; margin-right: 10px; }
         .message { text-align: center; margin-top: 15px; color: #e74c3c; font-size: 14px; }
 
+        /* ========== DASHBOARD CHÍNH ========== */
         .dashboard { padding: 40px 20px; display: none; }
         .dashboard h1 { text-align: center; color: #333; margin-bottom: 40px; font-size: 32px; font-weight: 600; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 30px auto; background: white; padding: 15px 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -37,6 +40,7 @@
         .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
         .card i { font-size: 40px; color: #667eea; margin-bottom: 15px; }
 
+        /* ========== BẢNG & NÚT ========== */
         .section-view { display: none; padding: 20px; max-width: 100%; margin: auto; }
         .back-btn { background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold; font-size: 15px;}
         .table-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.05); overflow-x: auto; max-width: 98vw; margin: 0 auto;}
@@ -60,7 +64,7 @@
         .btn-action { background: #28a745; }
         .badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
 
-        /* FORM MODAL */
+        /* ========== MODAL FORM THÊM/SỬA ========== */
         .form-modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
         .form-modal-content { background: #fff; padding: 30px; border-radius: 10px; width: 800px; max-width: 95%; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
         .form-modal-content h3 { color: #0056b3; margin-bottom: 20px; font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
@@ -73,7 +77,7 @@
         .btn-cancel { background: #6c757d; color: white; } 
         .btn-save { background: #2563eb; color: white; }
 
-        /* PDF MANAGER */
+        /* ========== PDF CONTAINER ========== */
         .pdf-manager-container { display: flex; background: #fff; height: 85vh; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #ddd; max-width: 1300px; margin: 0 auto;}
         .panel-left { flex: 1.2; background: #f9f9f9; padding: 20px; overflow-y: auto; border-right: 2px solid #ddd; display: flex; flex-direction: column; }
         .panel-left h3 { margin-top: 0; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; font-size: 18px;}
@@ -109,12 +113,8 @@
                 <div class="auth-links"><a onclick="showRegister()">Tạo tài khoản</a> <a onclick="showForgot()">Quên mật khẩu?</a></div>
                 <div id="loginMessage" class="message"></div>
             </div>
-            <div id="registerForm" style="display: none;">
-                <h2>Đăng ký</h2><input type="text" id="regUsername" placeholder="Tên đăng nhập"><input type="password" id="regPassword" placeholder="Mật khẩu"><input type="password" id="regConfirm" placeholder="Xác nhận"><button onclick="register()">Đăng ký</button><div class="auth-links"><a onclick="showLogin()">Trở lại</a></div><div id="registerMessage" class="message"></div>
-            </div>
-            <div id="forgotForm" style="display: none;">
-                <h2>Quên MK</h2><input type="text" id="forgotUsername" placeholder="Tên đăng nhập"><input type="password" id="forgotNewPassword" placeholder="MK mới"><input type="password" id="forgotConfirm" placeholder="Xác nhận"><button onclick="resetPassword()">Đổi MK</button><div class="auth-links"><a onclick="showLogin()">Trở lại</a></div><div id="forgotMessage" class="message"></div>
-            </div>
+            <div id="registerForm" style="display: none;"><h2>Đăng ký</h2><input type="text" id="regUsername" placeholder="Tên đăng nhập"><input type="password" id="regPassword" placeholder="Mật khẩu"><input type="password" id="regConfirm" placeholder="Xác nhận"><button onclick="register()">Đăng ký</button><div class="auth-links"><a onclick="showLogin()">Trở lại</a></div><div id="registerMessage" class="message"></div></div>
+            <div id="forgotForm" style="display: none;"><h2>Quên MK</h2><input type="text" id="forgotUsername" placeholder="Tên đăng nhập"><input type="password" id="forgotNewPassword" placeholder="MK mới"><input type="password" id="forgotConfirm" placeholder="Xác nhận"><button onclick="resetPassword()">Đổi MK</button><div class="auth-links"><a onclick="showLogin()">Trở lại</a></div><div id="forgotMessage" class="message"></div></div>
         </div>
     </div>
 
@@ -180,7 +180,7 @@
                 <div class="form-group"><label>MSNV</label><input type="text" id="fm_msnv"></div>
                 <div class="form-group"><label>Họ và Tên</label><input type="text" id="fm_hoten" required></div>
                 <div class="form-group"><label>Giới tính</label><select id="fm_gioitinh"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
-                <div class="form-group"><label>Ngày Sinh</label><input type="date" id="fm_ngaysinh"></div>
+                <div class="form-group"><label>Ngày Sinh (YYYY-MM-DD)</label><input type="date" id="fm_ngaysinh"></div>
                 <div class="form-group"><label>Ngày Vào Làm</label><input type="date" id="fm_ngayvao"></div>
                 <div class="form-group"><label>Ngày Hợp Đồng</label><input type="date" id="fm_ngayhd"></div>
                 <div class="form-group"><label>Bộ Phận</label><input type="text" id="fm_bophan"></div>
@@ -205,7 +205,7 @@
     <div id="importModal" class="form-modal">
         <div class="form-modal-content" style="width: 400px;">
             <h3><i class="fas fa-file-import"></i> IMPORT DỮ LIỆU</h3>
-            <p style="font-size:13px; color:#555; margin-bottom: 15px;">Tính năng này cần cấu hình API. Vui lòng dùng Google Sheet!</p>
+            <p style="font-size:13px; color:#555; margin-bottom: 15px;">Dùng file Google Sheet của bạn để nạp dữ liệu tốt nhất.</p>
             <input type="file" accept=".csv, .xlsx" style="margin-bottom: 20px;">
             <div class="form-actions">
                 <button class="btn-cancel" onclick="closeImportModal()">Đóng</button>
@@ -254,151 +254,79 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 
         // ==========================================================
-        // LOGIC AUTH VÀ TÀI KHOẢN (Đã tách rõ ràng chống lỗi undefined)
+        // LOGIC AUTH VÀ TÀI KHOẢN 
         // ==========================================================
-        if (!localStorage.getItem('users')) {
-            localStorage.setItem('users', JSON.stringify([]));
-        }
+        if (!localStorage.getItem('users')) { localStorage.setItem('users', JSON.stringify([])); }
+        function getUsers() { return JSON.parse(localStorage.getItem('users')); }
+        function saveUsers(users) { localStorage.setItem('users', JSON.stringify(users)); }
 
-        function getUsers() { 
-            return JSON.parse(localStorage.getItem('users')); 
-        }
-        function saveUsers(users) { 
-            localStorage.setItem('users', JSON.stringify(users)); 
-        }
-
-        function showLogin() { 
-            document.getElementById('loginForm').style.display = 'block'; 
-            document.getElementById('registerForm').style.display = 'none'; 
-            document.getElementById('forgotForm').style.display = 'none'; 
-        }
-        function showRegister() { 
-            document.getElementById('loginForm').style.display = 'none'; 
-            document.getElementById('registerForm').style.display = 'block'; 
-            document.getElementById('forgotForm').style.display = 'none'; 
-        }
-        function showForgot() { 
-            document.getElementById('loginForm').style.display = 'none'; 
-            document.getElementById('registerForm').style.display = 'none'; 
-            document.getElementById('forgotForm').style.display = 'block'; 
-        }
+        function showLogin() { document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('forgotForm').style.display = 'none'; }
+        function showRegister() { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; document.getElementById('forgotForm').style.display = 'none'; }
+        function showForgot() { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('forgotForm').style.display = 'block'; }
 
         function login() { 
-            const u = document.getElementById('loginUsername').value.trim(); 
-            const p = document.getElementById('loginPassword').value; 
-            const r = document.getElementById('rememberMe').checked; 
+            const u = document.getElementById('loginUsername').value.trim(); const p = document.getElementById('loginPassword').value; const r = document.getElementById('rememberMe').checked; 
             if (!u || !p) return alert('Nhập đủ thông tin!'); 
             const user = getUsers().find(x => x.username === u && x.password === p); 
             if (!user) return alert('Sai tài khoản/mật khẩu!'); 
-            if (r) localStorage.setItem('rememberedUser', JSON.stringify({ username: u, password: p })); 
-            else localStorage.removeItem('rememberedUser'); 
-            sessionStorage.setItem('currentUser', u); 
-            showDashboard(u); 
+            if (r) localStorage.setItem('rememberedUser', JSON.stringify({ username: u, password: p })); else localStorage.removeItem('rememberedUser'); 
+            sessionStorage.setItem('currentUser', u); showDashboard(u); 
         }
 
         function register() { 
-            const u = document.getElementById('regUsername').value.trim(); 
-            const p = document.getElementById('regPassword').value; 
-            const c = document.getElementById('regConfirm').value; 
+            const u = document.getElementById('regUsername').value.trim(); const p = document.getElementById('regPassword').value; const c = document.getElementById('regConfirm').value; 
             if (!u || !p || !c) return alert('Điền đủ thông tin!'); 
             if (p !== c) return alert('Mật khẩu không khớp!'); 
             const users = getUsers(); 
             if (users.find(x => x.username === u)) return alert('Tài khoản đã tồn tại!'); 
-            users.push({ username: u, password: p }); 
-            saveUsers(users); 
-            alert('Đăng ký thành công!'); 
-            showLogin(); 
+            users.push({ username: u, password: p }); saveUsers(users); alert('Đăng ký thành công!'); showLogin(); 
         }
 
         function resetPassword() { 
-            const u = document.getElementById('forgotUsername').value.trim(); 
-            const np = document.getElementById('forgotNewPassword').value; 
-            const c = document.getElementById('forgotConfirm').value; 
-            if (!u || !np || !c) return alert('Điền đủ thông tin!'); 
-            if (np !== c) return alert('Mật khẩu không khớp!'); 
-            const users = getUsers(); 
-            const idx = users.findIndex(x => x.username === u); 
-            if (idx === -1) return alert('Tài khoản không tồn tại!'); 
-            users[idx].password = np; 
-            saveUsers(users); 
-            alert('Đổi MK thành công!'); 
-            showLogin(); 
+            const u = document.getElementById('forgotUsername').value.trim(); const np = document.getElementById('forgotNewPassword').value; const c = document.getElementById('forgotConfirm').value; 
+            if (!u || !np || !c) return alert('Điền đủ thông tin!'); if (np !== c) return alert('Mật khẩu không khớp!'); 
+            const users = getUsers(); const idx = users.findIndex(x => x.username === u); if (idx === -1) return alert('Tài khoản không tồn tại!'); 
+            users[idx].password = np; saveUsers(users); alert('Đổi MK thành công!'); showLogin(); 
         }
 
-        function logout() { 
-            sessionStorage.removeItem('currentUser'); 
-            window.location.reload(); 
-        }
+        function logout() { sessionStorage.removeItem('currentUser'); window.location.reload(); }
 
         function showDashboard(username) { 
-            document.body.style.background = '#f4f7f6'; 
-            document.getElementById('authWrapper').style.display = 'none'; 
-            document.getElementById('dashboard').style.display = 'block'; 
-            document.getElementById('employeeSection').style.display = 'none'; 
-            document.getElementById('pdfSection').style.display = 'none'; 
-            document.getElementById('usernameDisplay').innerText = username; 
+            document.body.style.background = '#f4f7f6'; document.getElementById('authWrapper').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; 
+            document.getElementById('employeeSection').style.display = 'none'; document.getElementById('pdfSection').style.display = 'none'; document.getElementById('usernameDisplay').innerText = username; 
         }
 
         // ==========================================================
-        // DỮ LIỆU & RENDER BẢNG (CHÚ Ý CẬP NHẬT CỘT Ở ĐÂY)
+        // DỮ LIỆU & RENDER BẢNG 
         // ==========================================================
         let empData = []; 
         let currentIndex = -1; 
         let currentPDFBytes = null;
         let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
         let croppedImages = { '45': { blob: null, original: null }, '46': { blob: null, original: null }, '47': { blob: null, original: null }, '48': { blob: null, original: null }, '49': { blob: null, original: null } };
-        let cropper = null; 
-        let currentCropField = null;
+        let cropper = null; let currentCropField = null;
 
         window.onload = async () => {
             const remembered = localStorage.getItem('rememberedUser');
-            if (remembered) { 
-                try { 
-                    const { username, password } = JSON.parse(remembered); 
-                    document.getElementById('loginUsername').value = username; 
-                    document.getElementById('loginPassword').value = password; 
-                    login(); 
-                } catch (e) {} 
-            } else { 
-                const cU = sessionStorage.getItem('currentUser'); 
-                if (cU) showDashboard(cU); 
-                else showLogin(); 
-            }
+            if (remembered) { try { const { username, password } = JSON.parse(remembered); document.getElementById('loginUsername').value = username; document.getElementById('loginPassword').value = password; login(); } catch (e) {} } 
+            else { const cU = sessionStorage.getItem('currentUser'); if (cU) showDashboard(cU); else showLogin(); }
+            
             try { 
                 let res = await fetch(SCRIPT_URL); 
                 empData = await res.json(); 
                 document.getElementById('statusLoading').style.display = 'none'; 
                 renderTable(); 
-            } catch(e) { 
-                document.getElementById('statusLoading').innerText = '❌ Lỗi tải dữ liệu. Vui lòng F5 lại!'; 
-            }
+            } catch(e) { document.getElementById('statusLoading').innerText = '❌ Lỗi tải dữ liệu. Vui lòng F5 lại!'; }
         };
 
-        function goToEmployeeSection() { 
-            document.getElementById('dashboard').style.display = 'none'; 
-            document.getElementById('pdfSection').style.display = 'none'; 
-            document.getElementById('employeeSection').style.display = 'block'; 
-            renderTable(); 
-        }
-        function goBackToDashboard() { 
-            document.getElementById('employeeSection').style.display = 'none'; 
-            document.getElementById('dashboard').style.display = 'block'; 
-        }
-        function goBackToEmployeeSection() { 
-            document.getElementById('pdfSection').style.display = 'none'; 
-            document.getElementById('employeeSection').style.display = 'block'; 
-            document.getElementById('pdfFrame').src = ''; 
-        }
-        function safeDate(val) { 
-            if (!val) return '-'; 
-            try { 
-                let d = new Date(val); 
-                if (!isNaN(d)) return `${("0" + d.getDate()).slice(-2)}/${("0" + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`; 
-                return val; 
-            } catch (e) { return val; } 
-        }
+        function goToEmployeeSection() { document.getElementById('dashboard').style.display = 'none'; document.getElementById('pdfSection').style.display = 'none'; document.getElementById('employeeSection').style.display = 'block'; renderTable(); }
+        function goBackToDashboard() { document.getElementById('employeeSection').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; }
+        function goBackToEmployeeSection() { document.getElementById('pdfSection').style.display = 'none'; document.getElementById('employeeSection').style.display = 'block'; document.getElementById('pdfFrame').src = ''; }
+        
+        function safeDate(val) { if (!val) return '-'; try { let d = new Date(val); if (!isNaN(d)) return `${("0" + d.getDate()).slice(-2)}/${("0" + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`; return val; } catch (e) { return val; } }
         function safeStr(val) { return val ? val : '-'; }
 
+        // MAPPING ĐÚNG 100% CỘT NHƯ FORM MÀY CẤP
         function renderTable() {
             let html = ''; let stt = 1;
             empData.slice(1).reverse().forEach((emp, revIdx) => {
@@ -408,7 +336,6 @@
 
                 let idx = empData.length - 1 - revIdx;
 
-                // THAY ĐỔI CÁC SỐ NÀY ĐỂ KHỚP VỚI CỘT SHEET CỦA MÀY
                 let msnv = "-"; 
                 let hoTen = safeStr(emp[0]); 
                 let gioitinh = safeStr(emp[4]);
@@ -444,26 +371,24 @@
         }
 
         // ==============================================
-        // LOGIC LƯU DỮ LIỆU ĐÃ FIX LỖI ITERABLE
+        // LOGIC LƯU DỮ LIỆU CỰC KỲ AN TOÀN
         // ==============================================
         function openImportModal() { document.getElementById('importModal').style.display = 'flex'; }
         function closeImportModal() { document.getElementById('importModal').style.display = 'none'; }
         
         function openAddModal() { 
             document.getElementById('formModalTitle').innerHTML = '<i class="fas fa-user-plus"></i> THÊM MỚI NHÂN VIÊN'; 
-            document.getElementById('emp_idx').value = -1; 
-            document.querySelectorAll('#employeeFormModal input').forEach(inp => inp.value = ''); 
+            document.getElementById('emp_idx').value = "-1"; 
+            document.querySelectorAll('#employeeFormModal input').forEach(inp => {
+                if(inp.type !== 'hidden') inp.value = '';
+            }); 
             document.getElementById('fm_quoctich').value = ''; 
             document.getElementById('employeeFormModal').style.display = 'flex'; 
         }
         
         function formatDateForInput(dateStr) { 
             if(!dateStr) return ''; 
-            try { 
-                let d = new Date(dateStr); 
-                if (isNaN(d)) return ''; 
-                return d.toISOString().split('T')[0]; 
-            } catch(e) { return ''; } 
+            try { let d = new Date(dateStr); if (isNaN(d)) return ''; return d.toISOString().split('T')[0]; } catch(e) { return ''; } 
         }
         
         function openEditModal(idx) {
@@ -494,18 +419,21 @@
         }
 
         async function saveEmployeeData() {
-            let idx = parseInt(document.getElementById('emp_idx').value);
+            let idxStr = document.getElementById('emp_idx').value;
+            if (idxStr === "") {
+                alert("Lỗi hệ thống: Không có ID.");
+                return;
+            }
+            
+            let idx = parseInt(idxStr);
             let isNew = (idx === -1);
             
-            // Xử lý chống lỗi TypeError Iterable cực kỳ an toàn
+            // Xử lý mảng chống lỗi iterable tuyệt đối
             let emp = [];
             if (isNew) {
                 emp = new Array(45).fill('');
             } else {
-                if (!empData[idx]) {
-                    alert("Lỗi: Không tìm thấy dữ liệu nhân viên!");
-                    return;
-                }
+                if (!empData[idx]) return alert("Lỗi: Không tìm thấy nhân viên.");
                 emp = JSON.parse(JSON.stringify(empData[idx])); 
             }
 
@@ -556,7 +484,7 @@
                 alert("✅ Đã lưu dữ liệu thành công vào Google Sheet!");
 
             } catch (e) {
-                document.getElementById('formMsg').innerHTML = "❌ Lỗi: Không thể lưu. Hãy cập nhật API Google Apps Script.";
+                document.getElementById('formMsg').innerHTML = "❌ Lỗi: Không thể lưu. Hãy kiểm tra API Google Apps Script.";
                 console.error(e);
             } finally {
                 btnSave.innerHTML = oldBtnHtml;
@@ -564,10 +492,8 @@
             }
         }
 
-
         // ==============================================
-        // LOGIC TRANG XUẤT PDF (TRẢ LẠI NGUYÊN BẢN 100% CỦA MÀY)
-        // DÙNG LẠI FONT ROBOTO HOẠT ĐỘNG HOÀN HẢO
+        // LÕI XUẤT PDF - DÙNG CHUẨN LINK FONT ROBOTO GỐC
         // ==============================================
         function openPDFManager(idx) {
             currentIndex = idx;
@@ -589,7 +515,7 @@
         function saveCrop() { if(!cropper || !currentCropField) return; cropper.getCroppedCanvas({ maxWidth: 1024, maxHeight: 1024, fillColor: '#fff' }).toBlob((blob) => { const r = new FileReader(); r.onload = (e) => { if(croppedImages[currentCropField].blob) URL.revokeObjectURL(croppedImages[currentCropField].blob); croppedImages[currentCropField] = { blob: URL.createObjectURL(blob), original: e.target.result }; refreshPDF(); }; r.readAsArrayBuffer(blob); closeCropModal(); }, 'image/jpeg', 0.95); }
         async function getImageBufferForField(fId) { if(croppedImages[fId] && croppedImages[fId].original) return croppedImages[fId].original; const inp = document.getElementById('up'+fId); if(inp.files.length > 0) return await new Promise((res) => { let r = new FileReader(); r.onload = () => res(r.result); r.readAsArrayBuffer(inp.files[0]); }); return null; }
         function formatSal(v){ if(!v) return ""; let s = String(v).toUpperCase().trim(); let m = s.replace(/[,.]/g,'').match(/\d+/); if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`; }
-        function fillField(form, fieldName, value, customFont) { try { let field = form.getTextField(fieldName); if (field && value) { field.setText(String(value)); field.setFontSize(10); field.updateAppearances(customFont); } } catch(e) {} }
+        function fillField(form, fieldName, value, customFont) { try { let field = form.getTextField(fieldName); if (field && value) { field.setText(String(value)); field.setFontSize(10); field.updateAppearances({font: customFont}); } } catch(e) {} }
 
         async function refreshPDF() {
             if(currentIndex === -1) return;
@@ -598,11 +524,13 @@
                 const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
                 doc.registerFontkit(window.fontkit);
                 
-                // === LẤY LẠI ĐÚNG FONT ROBOTO TỪ CDNJS NHƯ YÊU CẦU ===
+                // MANG TRẢ LẠI ĐÚNG CÁI LINK FONT TỪ CDNJS (SIÊU ỔN ĐỊNH)
                 const fontBytes = await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer());
                 const customFont = await doc.embedFont(fontBytes);
                 const form = doc.getForm();
                 
+                form.updateFieldAppearances({font: customFont}); 
+
                 loadingDiv.innerText = "⏳ Đang điền dữ liệu...";
                 for(let i=0; i<=44; i++){
                     if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
@@ -633,8 +561,6 @@
                 try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
                 try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-                form.updateFieldAppearances(customFont); 
-
                 loadingDiv.innerText = "⏳ Đang ghép ảnh...";
                 let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ]; const allFields = form.getFields(); let drawTasks = [];
                 for(let item of inputs) {
@@ -659,32 +585,13 @@
             let cccd = emp[19] || ('NO_CCCD_' + currentIndex); exportedList[cccd] = true; localStorage.setItem('exportedData', JSON.stringify(exportedList)); renderTable(); goBackToEmployeeSection();
         }
 
-        // ==============================================
-        // BẢO VỆ HÀM GLOBAL (FIX LỖI "REGISTER IS NOT DEFINED")
-        // ==============================================
-        window.login = login; 
-        window.register = register; 
-        window.resetPassword = resetPassword; 
-        window.logout = logout;
-        window.showLogin = showLogin; 
-        window.showRegister = showRegister; 
-        window.showForgot = showForgot;
-        window.goToEmployeeSection = goToEmployeeSection; 
-        window.goBackToDashboard = goBackToDashboard; 
-        window.goBackToEmployeeSection = goBackToEmployeeSection; 
-        window.openAddModal = openAddModal; 
-        window.openEditModal = openEditModal; 
-        window.closeFormModal = closeFormModal; 
-        window.saveEmployeeData = saveEmployeeData;
-        window.openImportModal = openImportModal; 
-        window.closeImportModal = closeImportModal;
-        window.openPDFManager = openPDFManager; 
-        window.downloadAllImages = downloadAllImages; 
-        window.handleFileSelect = handleFileSelect; 
-        window.openCropModal = openCropModal; 
-        window.closeCropModal = closeCropModal; 
-        window.saveCrop = saveCrop; 
-        window.downloadFinalPDF = downloadFinalPDF;
+        // BẢO VỆ CÁC NÚT BẤM
+        window.login = login; window.register = register; window.resetPassword = resetPassword; window.logout = logout;
+        window.showLogin = showLogin; window.showRegister = showRegister; window.showForgot = showForgot;
+        window.goToEmployeeSection = goToEmployeeSection; window.goBackToDashboard = goBackToDashboard; window.goBackToEmployeeSection = goBackToEmployeeSection; 
+        window.openAddModal = openAddModal; window.openEditModal = openEditModal; window.closeFormModal = closeFormModal; window.saveEmployeeData = saveEmployeeData;
+        window.openImportModal = openImportModal; window.closeImportModal = closeImportModal;
+        window.openPDFManager = openPDFManager; window.downloadAllImages = downloadAllImages; window.handleFileSelect = handleFileSelect; window.openCropModal = openCropModal; window.closeCropModal = closeCropModal; window.saveCrop = saveCrop; window.downloadFinalPDF = downloadFinalPDF;
     </script>
 </body>
 </html>
