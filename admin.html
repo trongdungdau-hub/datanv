@@ -15,7 +15,7 @@ th{background:#0056b3;color:#fff}
 .btn-xem{background:#17a2b8;}
 .badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
 
-/* Modal chính */
+/* Modal chính (ghép ảnh) */
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
 .modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
 .close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
@@ -48,7 +48,7 @@ th{background:#0056b3;color:#fff}
 <body>
 
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (BẢN CHUẨN MƯỢT MÀ 100%)</h2>
+    <h2>QUẢN TRỊ XUẤT PDF (ĐÃ LỌC BỎ TIÊU ĐỀ RÁC)</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
@@ -117,6 +117,9 @@ th{background:#0056b3;color:#fff}
 // ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 
+// Link font Liberation Serif (y hệt Times New Roman) siêu ổn định
+const FONT_URL = "https://unpkg.com/liberation-fonts-ttf@2.1.5/LiberationSerif-Regular.ttf";
+
 let empData = [];
 let currentIndex = -1;
 let currentPDFBytes = null;
@@ -140,12 +143,16 @@ window.onload = async () => {
     } catch(e) {}
 };
 
-// ĐÃ CẮT BỎ DÒNG TIÊU ĐỀ
 function renderTable() {
     let html = '';
+    
+    // ĐÃ THÊM .slice(1) ĐỂ CẮT BỎ DÒNG TIÊU ĐỀ RÁC
     empData.slice(1).reverse().forEach((emp, revIdx) => {
         if(!emp[0]) return; 
-        let idx = empData.length - 1 - revIdx; 
+        
+        // Tính toán lại index chính xác trỏ về mảng gốc
+        let idx = empData.length - 1 - revIdx;
+        
         let cccd = emp[19] || ('NO_CCCD_' + idx);
         let statusHtml = exportedList[cccd] ? '<span class="badge">✅ Đã xuất</span>' : '<span style="color:#888">Chưa xuất</span>';
         
@@ -183,7 +190,6 @@ async function downloadAllImages(idx) {
     let emp = empData[idx];
     let links = [];
     emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) links.push(cell); });
-    
     if(links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
     
     let btn = document.getElementById('btn-dl-' + idx);
@@ -194,7 +200,6 @@ async function downloadAllImages(idx) {
         let b = await getGasImg(links[i]);
         if(b) download(b, `${emp[0]}_Anh_${i+1}.jpg`, "image/jpeg");
     }
-    
     btn.innerHTML = '✅ Tải xong';
     setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
 }
@@ -210,7 +215,7 @@ function openModal(idx) {
             croppedImages[id] = { blob: null, original: null };
         }
     });
-    document.getElementById('myModal').style.display = "block";
+    document.getElementById('myModal').style.display = "flex";
     document.getElementById('btnClose').style.display = "block";
     refreshPDF(); 
 }
@@ -301,14 +306,14 @@ function formatSal(v){
 }
 
 // -----------------------------------------------------------
-// HÀM BƠM CHỮ CHỈ ÉP CỠ 10, KHÔNG CHẠM VÀO FONT Ở ĐÂY NỮA
+// HÀM BƠM CHỮ: ÉP CỠ CHỮ 10 CỐ ĐỊNH CHO TẤT CẢ CÁC Ô
 // -----------------------------------------------------------
-function fillField(form, fieldName, value) {
+function fillField(form, fieldName, value, customFont) {
     try {
         let field = form.getTextField(fieldName);
         if (field && value) {
             field.setText(String(value));
-            field.setFontSize(10); // CỐ ĐỊNH CỠ 10
+            field.setFontSize(10); // CỐ ĐỊNH CHỮ SIZE 10
         }
     } catch(e) {}
 }
@@ -316,33 +321,50 @@ function fillField(form, fieldName, value) {
 async function refreshPDF() {
     if(currentIndex === -1) return;
     let emp = empData[currentIndex]; 
-    document.getElementById('loadingPDF').style.display = 'flex';
+    let loadingDiv = document.getElementById('loadingPDF');
+    loadingDiv.style.display = 'flex';
+    loadingDiv.innerText = "⏳ Đang tải Template PDF...";
     
     try {
-        // TẢI FILE TEMPLATE
-        const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
+        // TẢI TEMPLATE TRÊN GITHUB
+        let templateRes = await fetch("template.pdf?v="+Math.random());
+        if(!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf'. Hãy up file template.pdf lên Github!");
+        const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
         doc.registerFontkit(window.fontkit);
         
-        // TẢI FONT CHUẨN XỊN (CÓ CHỮ Ố, Ế) ĐỂ DIỆT LỖI WINANSI
-        const fontBytes = await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf").then(r=>r.arrayBuffer());
+        loadingDiv.innerText = "⏳ Đang nạp Font chữ Times New Roman...";
         
-        // ĐÃ SỬA CHUẨN TÊN BIẾN MYFONT (BẢO BỐI CHỐNG SẬP GAME)
-        const myFont = await doc.embedFont(fontBytes);
+        // TẢI FONT TRỰC TIẾP TỪ SERVER (Bypass mọi lỗi vớ vẩn)
+        let fontBytes;
+        try {
+            let res = await fetch(FONT_URL);
+            fontBytes = await res.arrayBuffer();
+        } catch(e) {
+            // Nếu mạng siêu lởm, lấy font Roboto thần thánh làm backup cuối cùng
+            let res = await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf");
+            fontBytes = await res.arrayBuffer();
+        }
         
+        const font = await doc.embedFont(fontBytes);
         const form = doc.getForm();
 
-        // 1. Điền text fields bình thường
+        // CHỐT CHẶN DIỆT WINANSI (ÉP TOÀN BỘ FORM SANG FONT TIẾNG VIỆT TRƯỚC KHI LÀM GÌ ĐÓ)
+        form.updateFieldAppearances(font);
+
+        loadingDiv.innerText = "⏳ Đang điền dữ liệu...";
+
+        // 1. Điền text fields bình thường và ép size 10
         for(let i=0; i<=44; i++){
             if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
-            
             let val = emp[i] ? String(emp[i]) : "";
+            
             if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
             if(i===9 || i===12) val = formatSal(val);
             
-            fillField(form, i.toString(), val);
+            fillField(form, i.toString(), val, font);
         }
         
-        // 2. XỬ LÝ NGÀY SINH
+        // 2. XỬ LÝ NGÀY SINH (TÁCH ĐÚNG 3_nam, 3_thang, 3_ngay)
         let dobRaw = emp[3];
         if (dobRaw) {
             let d = new Date(dobRaw);
@@ -355,14 +377,14 @@ async function refreshPDF() {
                 let mm = ("0" + (d.getMonth() + 1)).slice(-2);
                 let yyyy = d.getFullYear().toString();
                 
-                fillField(form, '3', `${dd}/${mm}/${yyyy}`);
-                fillField(form, '3_nam', yyyy);
-                fillField(form, '3_thang', mm);
-                fillField(form, '3_ngay', dd);
+                fillField(form, '3', `${dd}/${mm}/${yyyy}`, font);
+                fillField(form, '3_nam', yyyy, font);
+                fillField(form, '3_thang', mm, font);
+                fillField(form, '3_ngay', dd, font);
             }
         }
 
-        // 3. XỬ LÝ ĐỊA CHỈ
+        // 3. XỬ LÝ ĐỊA CHỈ (Ô 18)
         let addr18 = emp[18];
         if (addr18) {
             let parts = String(addr18).split('|');
@@ -371,21 +393,20 @@ async function refreshPDF() {
             let chitiet = parts[2] || '';
             
             let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
-            fillField(form, '18', full18); 
-            fillField(form, '18_tinh', tinh); 
-            fillField(form, '18_phuong', phuong);
-            fillField(form, '18_chitiet', chitiet);
+            fillField(form, '18', full18, font); 
+            fillField(form, '18_tinh', tinh, font); 
+            fillField(form, '18_phuong', phuong, font);
+            fillField(form, '18_chitiet', chitiet, font);
         }
-        
-        fillField(form, '22', String(emp[22]||''));
-        fillField(form, '23', String(emp[23]||''));
+        fillField(form, '22', String(emp[22]||''), font);
+        fillField(form, '23', String(emp[23]||''), font);
 
         // 4. Xử lý học vấn 
         [25,26,27,30].forEach(i => {
             if(emp[i]){
                 let p = String(emp[i]).split('|');
-                fillField(form, `${i}_thoigian`, p[0]||'');
-                fillField(form, `${i}_tentruong`, p[1]||'');
+                fillField(form, `${i}_thoigian`, p[0]||'', font);
+                fillField(form, `${i}_tentruong`, p[1]||'', font);
             }
         });
 
@@ -393,14 +414,11 @@ async function refreshPDF() {
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-
-        // ----------------------------------------------------------------------
-        // CÚ PHÁP TỐI THƯỢNG ĐỂ KHÔNG BỊ LỖI CHỮ "Ố, Ế" KHI ÉP PHẲNG (FLATTEN)
-        // Gọi chuẩn xác tên biến myFont
-        // ----------------------------------------------------------------------
-        form.updateFieldAppearances(myFont);
+        // LÀM LẠI PHÁT NỮA CHO CHẮC ĂN TRƯỚC KHI VẼ ẢNH
+        form.updateFieldAppearances(font);
 
         // 6. Vẽ ảnh
+        loadingDiv.innerText = "⏳ Đang ghép ảnh vào form...";
         let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -427,7 +445,7 @@ async function refreshPDF() {
             }
         }
 
-        // BÂY GIỜ FLATTEN SẼ CHẠY MƯỢT MÀ VÌ ĐÃ CÓ MYFONT BẢO KÊ TỪ TRƯỚC ĐÓ
+        // ĐOẠN NÀY LÀ ĐOẠN ĐANG GÂY ÁM ẢNH NHẤT - NAY ĐÃ BỊ BẮT CHẾT CÚ PHÁP
         form.flatten(); 
 
         for(let task of drawTasks) {
@@ -444,26 +462,24 @@ async function refreshPDF() {
         const url = URL.createObjectURL(blob);
         
         document.getElementById('pdfFrame').src = url;
-        document.getElementById('loadingPDF').style.display = 'none';
+        loadingDiv.style.display = 'none';
 
     } catch(e) { 
-        alert("Lỗi tải PDF: " + e.message); 
+        alert("Cảnh báo lỗi: " + e.message); 
         console.error(e);
-        document.getElementById('loadingPDF').style.display = 'none';
+        loadingDiv.style.display = 'none';
     }
 }
 
 function downloadFinalPDF() {
     if(!currentPDFBytes) return;
     let emp = empData[currentIndex];
-    
     download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
     
     let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
     exportedList[cccd] = true;
     localStorage.setItem('exportedData', JSON.stringify(exportedList));
     renderTable(); 
-    
     closeModal();
 }
 </script></body></html>
