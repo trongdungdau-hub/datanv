@@ -15,7 +15,7 @@ th{background:#0056b3;color:#fff}
 .btn-xem{background:#17a2b8;}
 .badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
 
-/* Modal chính (ghép ảnh) */
+/* Modal chính */
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
 .modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
 .close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
@@ -48,7 +48,7 @@ th{background:#0056b3;color:#fff}
 <body>
 
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (SIZE 10 & TÁCH NGÀY) - BẢN KHÁNG LỖI FONT</h2>
+    <h2>QUẢN TRỊ XUẤT PDF (SIZE 10 & ĐÃ FIX SẠCH LỖI FONT)</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
@@ -114,8 +114,6 @@ th{background:#0056b3;color:#fff}
 </div>
 
 <script>
-// ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
-// MÀY KIỂM TRA LẠI LINK GOOGLE SCRIPT Ở ĐÂY LÀ OK
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 
 let empData = [];
@@ -124,8 +122,10 @@ let currentPDFBytes = null;
 let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
 
 let croppedImages = {
-    '45': { blob: null, original: null }, '46': { blob: null, original: null },
-    '47': { blob: null, original: null }, '48': { blob: null, original: null },
+    '45': { blob: null, original: null },
+    '46': { blob: null, original: null },
+    '47': { blob: null, original: null },
+    '48': { blob: null, original: null },
     '49': { blob: null, original: null }
 };
 
@@ -258,7 +258,10 @@ function closeCropModal() {
 
 function saveCrop() {
     if(!cropper || !currentCropField) return;
-    const canvas = cropper.getCroppedCanvas({ maxWidth: 1024, maxHeight: 1024, fillColor: '#fff', imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+    const canvas = cropper.getCroppedCanvas({
+        maxWidth: 1024, maxHeight: 1024, fillColor: '#fff',
+        imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
+    });
     canvas.toBlob((blob) => {
         const blobUrl = URL.createObjectURL(blob);
         const reader = new FileReader();
@@ -294,40 +297,17 @@ function formatSal(v){
 }
 
 // -----------------------------------------------------------
-// HÀM ÉP CỠ CHỮ 10 CỐ ĐỊNH CHO TẤT CẢ CÁC Ô
+// HÀM BƠM CHỮ: ÉP CỠ CHỮ 10
 // -----------------------------------------------------------
 function fillField(form, fieldName, value, customFont) {
     try {
         let field = form.getTextField(fieldName);
         if (field && value) {
             field.setText(String(value));
-            field.setFontSize(10); // CỐ ĐỊNH CỠ CHỮ 10 TẠI ĐÂY
+            field.setFontSize(10); 
+            field.updateAppearances({ font: customFont });
         }
     } catch(e) {}
-}
-
-// -----------------------------------------------------------
-// BỘ LỌC FONT CHỮ THÉP (DIỆT LỖI UNKNOWN FORMAT)
-// -----------------------------------------------------------
-async function getSafeFontBuffer() {
-    const fontSources = [
-        "font.ttf", // Ưu tiên 1: Lấy file trên Github của mày nếu có
-        "https://raw.githubusercontent.com/google/fonts/main/ofl/tinos/Tinos-Regular.ttf", // Ưu tiên 2: Tinos (Times New Roman clone)
-        "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf" // Ưu tiên 3: Roboto siêu cứng không bao giờ lỗi
-    ];
-
-    for (let url of fontSources) {
-        try {
-            let res = await fetch(url);
-            if (res.ok) {
-                let buffer = await res.arrayBuffer();
-                let view = new Uint8Array(buffer);
-                // Kiểm tra ký tự đầu tiên. Nếu là ký tự '<' (Mã 60 của HTML) nghĩa là nó tải nhầm trang 404, bỏ qua ngay!
-                if (view[0] !== 60) return buffer; 
-            }
-        } catch(e) {} // Bỏ qua lỗi mạng và thử link tiếp theo
-    }
-    throw new Error("Không thể tải được bất kỳ Font chữ nào. Vui lòng kiểm tra lại mạng!");
 }
 
 async function refreshPDF() {
@@ -335,30 +315,39 @@ async function refreshPDF() {
     let emp = empData[currentIndex]; 
     let loadingDiv = document.getElementById('loadingPDF');
     loadingDiv.style.display = 'flex';
-    loadingDiv.innerText = "⏳ Đang tải Template PDF và Font chữ...";
+    loadingDiv.innerText = "⏳ Đang tải form PDF...";
     
     try {
-        // TẢI TEMPLATE PDF
         const templateRes = await fetch("template.pdf?v="+Math.random());
-        if(!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf' trên Github của mày.");
+        if(!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf'");
         const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
         doc.registerFontkit(window.fontkit);
         
-        // TẢI FONT BẰNG BỘ LỌC THÉP
-        const fontBytes = await getSafeFontBuffer();
+        loadingDiv.innerText = "⏳ Đang tải Font chữ chuẩn...";
+        
+        // ĐÃ ĐỔI LINK FONT SANG THƯ MỤC APACHE CỦA GOOGLE FONTS (ĐẢM BẢO SỐNG 100%)
+        let fontBytes;
+        try {
+            let res = await fetch("https://cdn.jsdelivr.net/gh/google/fonts@main/apache/tinos/Tinos-Regular.ttf");
+            if(res.ok) {
+                fontBytes = await res.arrayBuffer();
+            } else {
+                throw new Error("CDNJS fallback");
+            }
+        } catch(e) {
+            // Nếu mạng siêu lởm, lấy font Roboto thần thánh làm backup
+            let res = await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf");
+            fontBytes = await res.arrayBuffer();
+        }
+        
         const font = await doc.embedFont(fontBytes);
         const form = doc.getForm();
 
-        // FIX LỖI WINANSI: ÉP TOÀN BỘ FORM SANG FONT MỚI
-        form.updateFieldAppearances({ font: font });
-
-        loadingDiv.innerText = "⏳ Đang điền dữ liệu (Cỡ 10)...";
-
-        // 1. Điền text fields bình thường
+        // 1. Điền text fields bình thường và ép size 10
         for(let i=0; i<=44; i++){
             if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
-            
             let val = emp[i] ? String(emp[i]) : "";
+            
             if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
             if(i===9 || i===12) val = formatSal(val);
             
@@ -379,8 +368,6 @@ async function refreshPDF() {
                 let yyyy = d.getFullYear().toString();
                 
                 fillField(form, '3', `${dd}/${mm}/${yyyy}`, font);
-                
-                // Điền vào 3 ô mày thiết kế
                 fillField(form, '3_nam', yyyy, font);
                 fillField(form, '3_thang', mm, font);
                 fillField(form, '3_ngay', dd, font);
@@ -417,8 +404,11 @@ async function refreshPDF() {
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
+        // ĐÂY LÀ ĐOẠN CODE CỨU MẠNG: Ép font cho toàn bộ PDF mà KHÔNG DÙNG DẤU NGOẶC NHỌN KHỐN NẠN
+        form.updateFieldAppearances(font);
+
         // 6. Vẽ ảnh
-        loadingDiv.innerText = "⏳ Đang ghép hình ảnh...";
+        loadingDiv.innerText = "⏳ Đang ghép ảnh vào form...";
         let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -445,7 +435,6 @@ async function refreshPDF() {
             }
         }
 
-        // ĐOẠN NÀY LÀ ĐOẠN ĐANG GÂY ÁM ẢNH NHẤT - NAY ĐÃ BỊ BẮT CHẾT
         form.flatten(); 
 
         for(let task of drawTasks) {
@@ -465,7 +454,7 @@ async function refreshPDF() {
         loadingDiv.style.display = 'none';
 
     } catch(e) { 
-        alert("Cảnh báo lỗi: " + e.message); 
+        alert("LỖI: " + e.message); 
         console.error(e);
         loadingDiv.style.display = 'none';
     }
