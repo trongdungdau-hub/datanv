@@ -1,107 +1,150 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Thông tin nhân viên</title>
+<html lang="vi"><head><meta charset="UTF-8"><title>Thông tin nhân viên</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 
 <style>
-:root { --primary: #2563eb; --primary-hover: #1d4ed8; --secondary: #64748b; --success: #10b981; --background: #f8fafc; --surface: #ffffff; --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0; --ring: rgba(37, 99, 235, 0.2); }
+:root { --primary: #2563eb; --primary-hover: #1d4ed8; --secondary: #64748b; --success: #10b981; --background: #f1f5f9; --surface: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border: #cbd5e1; --ring: rgba(37, 99, 235, 0.2); }
 
 /* ĐÓNG BĂNG NỀN TRÊN MÁY TÍNH */
 body { 
     font-family: 'Inter', sans-serif; background: var(--background); margin: 0; padding: 0;
-    color: var(--text-main); height: 100vh; width: 100vw; overflow: hidden; 
+    color: var(--text-main); height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; 
     display: flex; align-items: center; justify-content: center;
 }
 
 /* KHUNG NỘI DUNG */
 .wrap { 
-    width: 100%; max-width: 850px; max-height: 95vh; background: var(--surface); 
-    padding: 30px 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+    width: 100%; max-width: 800px; max-height: 95vh; background: var(--surface); 
+    padding: 30px 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
     overflow-y: auto; box-sizing: border-box; -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
+/* Tùy chỉnh thanh cuộn PC */
 .wrap::-webkit-scrollbar { width: 6px; }
 .wrap::-webkit-scrollbar-track { background: transparent; }
 .wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
 /* HEADER CÓ LOGO */
-.header-container { position: relative; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; min-height: 50px; }
-.logo-img { position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 50px; max-width: 150px; object-fit: contain; }
-h2 { color: var(--primary); margin: 0; font-weight: 700; font-size: 24px; letter-spacing: -0.5px; text-transform: uppercase; text-align: center; }
+.header-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; gap: 10px; }
+.logo-img { height: 50px; max-width: 200px; object-fit: contain; }
+h2 { color: var(--primary); margin: 0; font-weight: 700; font-size: 22px; letter-spacing: -0.5px; text-transform: uppercase; text-align: center; }
 h3 { color: var(--text-main); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; font-size: 18px; }
 
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px; color: var(--text-main); }
-input, select { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: 'Inter', sans-serif; font-size: 14px; transition: all 0.3s ease; background-color: #fff; color: var(--text-main); }
-input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
-input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5e1; cursor: pointer; }
+label { font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px; color: var(--text-main); }
 
-/* Nút bấm */
-.btn { padding: 14px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 15px; border: none; display: inline-flex; align-items: center; justify-content: center; }
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-secondary { background: #f1f5f9; color: var(--secondary); }
-.btn-success { background: var(--success); color: #fff; }
-.btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+/* TỐI ƯU Ô NHẬP LIỆU CHO NGÓN TAY */
+input, select { 
+    width: 100%; padding: 0 15px; height: 48px; border: 1.5px solid var(--border); 
+    border-radius: 10px; box-sizing: border-box; font-family: 'Inter', sans-serif; 
+    font-size: 15px; transition: all 0.3s ease; background-color: #fff; color: var(--text-main); 
+}
+input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--ring); }
+input[type="file"] { padding: 12px; height: auto; background: #f8fafc; border: 1.5px dashed #cbd5e1; cursor: pointer; }
+input[type="date"] { padding: 0 15px; } /* Sửa lỗi lệch chữ ô date trên iOS */
+
+/* Nút bấm chuẩn ngón tay */
+.btn { 
+    height: 52px; padding: 0 24px; border-radius: 12px; cursor: pointer; 
+    font-weight: 600; font-size: 16px; border: none; display: inline-flex; 
+    align-items: center; justify-content: center; transition: all 0.2s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+.btn-secondary { background: #e2e8f0; color: var(--text-main); }
+.btn-success { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+.btn:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; color: #fff; }
 
 .d-none { display: none !important; }
 .col-id { display: none; }
-.addr-group { display: flex; gap: 10px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+.addr-group { display: flex; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1.5px solid var(--border); }
 .addr-group select { flex: 1; }
 .addr-group input { flex: 1.5; background: #fff; }
-.toggle-box { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); border-left: 4px solid var(--primary); margin-top: 15px; }
+.toggle-box { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1.5px solid var(--border); border-left: 5px solid var(--primary); margin-top: 15px; }
 
-/* WIZARD */
+/* WIZARD MỚI NHỎ GỌN */
+.stepper-wrapper { display: flex; justify-content: space-between; margin-bottom: 30px; position: relative; padding: 0 20px; }
+.stepper-wrapper::before { content: ''; position: absolute; top: 16px; left: 20px; right: 20px; height: 3px; background: #e2e8f0; z-index: 0; }
+.stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 1; }
+.step-counter { width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 14px; transition: all 0.3s; border: 4px solid var(--surface); box-sizing: content-box; }
+.stepper-item.active .step-counter { background: var(--primary); color: white; box-shadow: 0 0 0 4px var(--ring); }
+
 .step { display: none; animation: slideUp 0.3s ease-out; }
 .step.active { display: block; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-.step-footer { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); }
+.step-footer { display: flex; justify-content: space-between; margin-top: 30px; gap: 15px; }
 
 /* VÙNG UP ẢNH */
 .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.upload-zone { border: 2px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
-.upload-zone .icon { font-size: 24px; margin-bottom: 5px; color: #94a3b8; }
-.upload-zone span { font-size: 12px; font-weight: 600; color: var(--secondary); text-align: center; padding: 0 5px; }
+.upload-zone { border: 2px dashed #94a3b8; border-radius: 12px; background: #f8fafc; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: 0.2s; }
+.upload-zone.has-img { border: 2px solid var(--primary); }
+.upload-zone .icon { font-size: 28px; margin-bottom: 8px; color: #94a3b8; }
+.upload-zone span { font-size: 13px; font-weight: 600; color: var(--secondary); text-align: center; padding: 0 10px; }
 .upload-zone img.preview-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000; z-index: 5; }
-.btn-edit-img { position: absolute; bottom: 5px; right: 5px; z-index: 10; background: rgba(0,0,0,0.7); color: #fff; border: none; padding: 5px 10px; border-radius: 20px; font-size: 11px; display: none; }
+.btn-edit-img { position: absolute; bottom: 8px; right: 8px; z-index: 10; background: rgba(15, 23, 42, 0.7); color: #fff; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; display: none; backdrop-filter: blur(4px); }
 .upload-zone.has-img .btn-edit-img { display: block; }
 
-/* MODAL CHUNG */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.8); align-items: center; justify-content: center; }
-.modal-content { background-color: var(--surface); padding: 20px; border-radius: 12px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-.modal-content h3 { margin-top: 0; color: var(--primary); text-align: center; border-bottom: 1px dashed var(--border); padding-bottom: 15px; }
+/* MODAL & BOTTOM SHEET CHO MOBILE */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
+.modal-content { background-color: var(--surface); padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; }
+.modal-content h3 { margin-top: 0; color: var(--primary); text-align: center; border-bottom: none; margin-bottom: 20px; }
 
 /* WIDGET CROP */
 .editor-layout { display: flex; flex-direction: column; gap: 15px; }
-.crop-container { width: 100%; height: 350px; background: #000; border-radius: 8px; overflow: hidden;}
+.crop-container { width: 100%; height: 45vh; background: #000; border-radius: 12px; overflow: hidden; }
 .crop-container img { display: block; max-width: 100%; }
-.tools-container { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
-.tool-row { display: flex; align-items: center; margin-bottom: 10px; }
-.tool-row label { font-size: 12px; width: 80px; margin:0;}
-.tool-row input[type="range"] { flex: 1; margin: 0 10px; }
-.tool-row span { font-size: 12px; font-weight: bold; width: 35px; color: var(--primary); }
+.tools-container { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+.tool-row { display: flex; align-items: center; margin-bottom: 15px; }
+.tool-row label { font-size: 13px; width: 60px; margin:0; font-weight: 600;}
+.tool-row input[type="range"] { flex: 1; margin: 0 10px; height: 6px; border-radius: 5px; outline: none; }
+.tool-row span { font-size: 13px; font-weight: 700; width: 40px; text-align: right; color: var(--primary); }
 
-.overview-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
-.overview-table td { padding: 10px 5px; border-bottom: 1px solid #f1f5f9; }
-.overview-table td:first-child { font-weight: 600; color: var(--text-muted); width: 45%; }
-#status { margin-top:15px; padding:15px; background:#eff6ff; font-weight:bold; display:none; color:var(--primary); border-radius:8px; text-align:center; border:1px solid #bfdbfe; }
+.overview-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px; }
+.overview-table td { padding: 12px 5px; border-bottom: 1px solid #f1f5f9; }
+.overview-table td:first-child { font-weight: 600; color: var(--secondary); width: 40%; }
+#status { margin-top:15px; padding:15px; background:#eff6ff; font-weight:bold; display:none; color:var(--primary); border-radius:10px; text-align:center; border:1px solid #bfdbfe; }
 
-/* 📱 RESPONSIVE CHO ĐIỆN THOẠI (HIỂN THỊ CỰC TO VÀ RÕ) */
-@media (max-width: 600px) { 
-    body { padding: 0; align-items: flex-start; } /* Đẩy form lên sát mép trên */
+/* 📱 GIAO DIỆN SIÊU TỐI ƯU CHO ĐIỆN THOẠI APP-LIKE */
+@media (max-width: 768px) { 
+    body { padding: 0; background: var(--surface); } 
     .wrap { 
-        max-width: 100%; height: 100vh; max-height: 100vh; border-radius: 0; 
-        padding: 20px 15px; box-shadow: none; margin: 0;
+        max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; 
+        padding: 20px 15px; box-shadow: none; display: flex; flex-direction: column;
     }
-    .header-container { flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
-    .logo-img { position: relative; transform: none; left: auto; top: auto; height: 40px; }
+    .header-container { margin-bottom: 15px; }
     h2 { font-size: 20px; }
-    .grid { grid-template-columns: 1fr; gap: 12px; } /* Xếp thành 1 cột dọc */
-    .upload-grid { grid-template-columns: 1fr; } /* Ảnh cũng xếp 1 dọc cho to */
-    .addr-group { flex-direction: column; gap: 8px; } /* Ô địa chỉ xếp dọc */
-    .btn { width: 100%; margin-bottom: 10px; } /* Nút bấm bự bằng màn hình */
-    .step-footer { flex-direction: column-reverse; gap: 10px; } /* Đảo ngược nút quay lại xuống dưới */
+    h3 { font-size: 16px; margin-bottom: 15px; }
+    .stepper-wrapper { margin-bottom: 20px; padding: 0 10px; }
+    .step-counter { width: 28px; height: 28px; font-size: 12px; border-width: 3px; }
+    .stepper-wrapper::before { top: 13px; left: 10px; right: 10px; }
+    
+    /* 1 Cột dọc cho dễ cuộn */
+    .grid { grid-template-columns: 1fr; gap: 12px; } 
+    .addr-group { flex-direction: column; gap: 10px; padding: 12px; } 
+    .upload-grid { grid-template-columns: 1fr; gap: 12px; }
+    .upload-zone { height: 180px; } /* Ảnh to hơn trên mobile */
+    
+    /* Input trên iOS phải là 16px để không bị auto-zoom */
+    input, select { font-size: 16px !important; }
+    
+    /* Bottom Sheet Modal Style (Trượt từ dưới lên) */
+    .modal { align-items: flex-end; padding-top: 50px; }
+    .modal-content { 
+        width: 100%; max-width: 100%; max-height: 90dvh; 
+        border-radius: 24px 24px 0 0; padding: 25px 20px; 
+        animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        margin: 0;
+    }
+    @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    
+    /* Các nút chốt ở Mobile */
+    .step-footer { flex-direction: column-reverse; margin-top: 20px; padding-bottom: 20px; }
+    .btn { width: 100%; height: 56px; font-size: 16px; }
+    .modal-footer-btns { flex-direction: column-reverse; gap: 10px; margin-top: 20px;}
+    .modal-footer-btns .btn { width: 100%; margin: 0; }
 }
 </style>
 </head><body>
@@ -114,8 +157,16 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
     
     <div id="status"></div>
 
+    <div class="stepper-wrapper">
+        <div class="stepper-item active" id="stepIndicator1"><div class="step-counter">1</div></div>
+        <div class="stepper-item" id="stepIndicator2"><div class="step-counter">2</div></div>
+        <div class="stepper-item" id="stepIndicator3"><div class="step-counter">3</div></div>
+        <div class="stepper-item" id="stepIndicator4"><div class="step-counter">4</div></div>
+        <div class="stepper-item" id="stepIndicator5"><div class="step-counter">5</div></div>
+    </div>
+
     <div class="step active" id="step1">
-        <h3>1. Thông tin cá nhân cơ bản</h3>
+        <h3>Thông tin cá nhân cơ bản</h3>
         <div class="grid">
             <div><label>Họ và Tên (Viết Hoa) <span class="col-id">[0]</span></label><input id="c0" placeholder="VD: NGUYỄN VĂN A"></div>
             <div><label>Học lực <span class="col-id">[1]</span></label><input id="c1" placeholder="VD: 12/12"></div>
@@ -140,8 +191,8 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
             <div style="grid-column: 1 / -1">
                 <label>Nơi ở hiện tại <span class="col-id">[37]</span></label>
                 <select id="c37" onchange="toggleTamTru()">
-                    <option value="Thường trú">Đang sống tại Thường trú (Trùng Hộ khẩu)</option>
-                    <option value="Tạm trú">Đang sống tại Tạm trú (Khác Hộ khẩu)</option>
+                    <option value="Thường trú">Sống tại Thường trú (Trùng Hộ khẩu)</option>
+                    <option value="Tạm trú">Sống tại Tạm trú (Khác Hộ khẩu)</option>
                 </select>
                 <div id="khu_vuc_tam_tru" class="toggle-box d-none">
                     <label>🏠 Nhập địa chỉ Tạm trú hiện tại <span class="col-id">[38]</span></label>
@@ -154,12 +205,12 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
             </div>
         </div>
         <div class="step-footer">
-            <div></div><button type="button" class="btn btn-primary" onclick="changeStep(1, 2)">Tiếp tục ➡️</button>
+            <button type="button" class="btn btn-primary" style="width: 100%;" onclick="changeStep(1, 2)">Tiếp tục ➡️</button>
         </div>
     </div>
 
     <div class="step" id="step2">
-        <h3>2. Thông tin Công việc & Lương</h3>
+        <h3>Công việc & Lương</h3>
         <div class="grid">
             <div><label>Ngày vào làm <span class="col-id">[5]</span></label><input id="c5" type="date"></div>
             <div>
@@ -171,7 +222,7 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
                 </select>
             </div>
             <div><label>Chức vụ <span class="col-id">[7]</span></label><input id="c7"></div>
-            <div><label>Mức lương hiện tại <span class="col-id">[9]</span></label><input id="c9" placeholder="VD: 5000000"></div>
+            <div><label>Mức lương hiện tại <span class="col-id">[9]</span></label><input id="c9" type="tel" placeholder="VD: 5000000"></div>
             <div><label>Lương sau thử việc <span class="col-id">[12]</span></label><input id="c12"></div>
             
             <div style="grid-column: 1 / -1">
@@ -190,7 +241,7 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
     </div>
 
     <div class="step" id="step3">
-        <h3>3. Quá trình học tập</h3>
+        <h3>Quá trình học tập</h3>
         <label>Trình độ học vấn cao nhất của bạn? <span class="col-id">[29]</span></label>
         <select id="c29" onchange="toggleHocVan()">
             <option value="Chưa từng đi học">Chưa từng đi học</option>
@@ -212,7 +263,7 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
     </div>
 
     <div class="step" id="step4">
-        <h3>4. Liên hệ Khẩn cấp & Thuế / Bảo hiểm</h3>
+        <h3>Khẩn cấp & Bảo hiểm</h3>
         <div class="grid">
             <div><label>Người liên hệ Khẩn cấp <span class="col-id">[22]</span></label><input id="c22" placeholder="Tên người thân"></div>
             <div><label>SĐT Khẩn cấp <span class="col-id">[23]</span></label><input id="c23" type="tel"></div>
@@ -233,7 +284,7 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
             <div><label>Mã số thuế (Nếu có) <span class="col-id">[35]</span></label><input id="c35"></div>
             
             <div style="grid-column: 1 / -1">
-                <label>Bạn có phải là Chủ hộ trên Sổ hộ khẩu không? <span class="col-id">[39]</span></label>
+                <label>Bạn có phải là Chủ hộ không? <span class="col-id">[39]</span></label>
                 <select id="c39" onchange="toggleChuHo()">
                     <option value="Có">Có, tôi là chủ hộ</option>
                     <option value="Không">Không, người khác là chủ hộ</option>
@@ -263,8 +314,8 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
     </div>
 
     <div class="step" id="step5">
-        <h3>5. Đính kèm hồ sơ hình ảnh</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 20px;">Bấm vào từng ô để tải ảnh lên. Bạn có thể tự cắt chỉnh xoay hình ngay trên web trước khi nộp.</p>
+        <h3>Đính kèm hình ảnh</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 20px;">Bấm vào từng ô để tải ảnh lên. Có thể tự cắt chỉnh hình.</p>
         
         <div class="upload-grid">
             <div class="upload-zone" id="zone_45" onclick="triggerFileInput('45')">
@@ -311,17 +362,17 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
 </div>
 
 <div id="editorModal" class="modal">
-    <div class="modal-content" style="max-width: 800px; padding: 20px;">
-        <h3 style="margin-bottom: 15px;">Chỉnh Sửa Hình Ảnh</h3>
+    <div class="modal-content" style="padding: 20px;">
+        <h3 style="margin-bottom: 15px; font-size: 18px;">Chỉnh Sửa Hình Ảnh</h3>
         <div class="editor-layout">
-            <div class="crop-container">
+            <div class="crop-container" style="height: 50vh;">
                 <img id="imageWorkspace" src="">
             </div>
             <div class="tools-container">
-                <div style="display:flex; gap:5px; margin-bottom: 15px; justify-content:center;">
-                    <button type="button" class="btn btn-secondary" style="padding:8px 10px; font-size:12px;" onclick="cropper.rotate(-90)">↺ Trái</button>
-                    <button type="button" class="btn btn-secondary" style="padding:8px 10px; font-size:12px;" onclick="cropper.rotate(90)">↻ Phải</button>
-                    <button type="button" class="btn btn-secondary" style="padding:8px 10px; font-size:12px;" onclick="cropper.reset()">Làm lại</button>
+                <div style="display:flex; gap:8px; margin-bottom: 15px; justify-content:center;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; height:40px; font-size:13px;" onclick="cropper.rotate(-90)">↺ Xoay Trái</button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; height:40px; font-size:13px;" onclick="cropper.rotate(90)">↻ Xoay Phải</button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; height:40px; font-size:13px;" onclick="cropper.reset()">Làm lại</button>
                 </div>
                 <div class="tool-row">
                     <label>☀️ Sáng</label>
@@ -333,9 +384,9 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
                     <input type="range" id="filterContrast" min="50" max="200" value="100" oninput="applyFiltersPreview()">
                     <span id="valContrast">100%</span>
                 </div>
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditor()">Hủy</button>
-                    <button type="button" class="btn btn-primary" onclick="saveEditedImage()">✂️ Lưu Ảnh</button>
+                <div class="modal-footer-btns" style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeEditor()">Hủy</button>
+                    <button type="button" class="btn btn-primary" style="flex:2;" onclick="saveEditedImage()">✂️ Lưu Ảnh</button>
                 </div>
             </div>
         </div>
@@ -344,21 +395,21 @@ input[type="file"] { padding: 9px; background: #f8fafc; border: 1px dashed #cbd5
 
 <div id="overviewModal" class="modal">
     <div class="modal-content">
-        <h3>🔍 XÁC NHẬN HỒ SƠ</h3>
+        <h3 style="font-size: 18px;">🔍 XÁC NHẬN HỒ SƠ</h3>
         <table class="overview-table" id="overviewTable"></table>
-        <div style="display:flex; justify-content:space-between; margin-top:20px;">
-            <button type="button" class="btn btn-secondary" onclick="closeOverview()">Sửa lại</button>
-            <button type="button" class="btn btn-primary" id="btnFinalSubmit" onclick="submitData()">🚀 GỬI HỒ SƠ</button>
+        <div class="modal-footer-btns" style="display:flex; gap:10px; margin-top:20px;">
+            <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeOverview()">Sửa lại</button>
+            <button type="button" class="btn btn-primary" id="btnFinalSubmit" style="flex:2;" onclick="submitData()">🚀 GỬI HỒ SƠ</button>
         </div>
     </div>
 </div>
 
 <div id="successModal" class="modal">
-    <div class="modal-content" style="max-width:350px; text-align: center;">
+    <div class="modal-content" style="text-align: center;">
         <div style="font-size: 60px; color: #10b981; margin-bottom: 10px;">✔️</div>
-        <h3 style="border:none; margin-bottom: 10px;">THÀNH CÔNG!</h3>
-        <div id="successText" style="line-height: 1.5;"></div>
-        <button type="button" class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="location.reload()">Đóng</button>
+        <h3 style="border:none; margin-bottom: 10px; font-size: 20px;">NỘP THÀNH CÔNG!</h3>
+        <div id="successText" style="line-height: 1.5; color: var(--text-main);"></div>
+        <button type="button" class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="location.reload()">Về trang chủ</button>
     </div>
 </div>
 
@@ -370,7 +421,12 @@ function changeStep(from, to) {
     try {
         document.getElementById("step" + from).classList.remove("active");
         document.getElementById("step" + to).classList.add("active");
-        // Cuộn lên top của thẻ wrap
+        // Update dots
+        for(let i=1; i<=5; i++) {
+            let ind = document.getElementById("stepIndicator" + i);
+            if(ind) { i <= to ? ind.classList.add("active") : ind.classList.remove("active"); }
+        }
+        // Cuộn mượt lên đỉnh
         document.getElementById("mainWrap").scrollTo({ top: 0, behavior: 'smooth' });
     } catch(e) {}
 }
@@ -382,12 +438,8 @@ function toggleHocVan(){
     document.getElementById("hv_3").className = ["THPT","Cao đẳng / Đại học"].includes(v) ? "grid toggle-box" : "d-none";
     document.getElementById("hv_4").className = (v==="Cao đẳng / Đại học") ? "grid toggle-box" : "d-none";
 }
-function toggleTamTru() {
-    document.getElementById("c37").value === "Tạm trú" ? document.getElementById("khu_vuc_tam_tru").classList.remove("d-none") : document.getElementById("khu_vuc_tam_tru").classList.add("d-none");
-}
-function toggleChuHo() {
-    document.getElementById("c39").value === "Không" ? document.getElementById("khu_vuc_chu_ho").classList.remove("d-none") : document.getElementById("khu_vuc_chu_ho").classList.add("d-none");
-}
+function toggleTamTru() { document.getElementById("c37").value === "Tạm trú" ? document.getElementById("khu_vuc_tam_tru").classList.remove("d-none") : document.getElementById("khu_vuc_tam_tru").classList.add("d-none"); }
+function toggleChuHo() { document.getElementById("c39").value === "Không" ? document.getElementById("khu_vuc_chu_ho").classList.remove("d-none") : document.getElementById("khu_vuc_chu_ho").classList.add("d-none"); }
 
 const dataDiaChi = {
     "Thành phố Hà Nội": ["Phường Ba Đình", "Phường Ngọc Hà", "Phường Giảng Võ", "Phường Hoàn Kiếm", "Phường Cửa Nam", "Phường Phú Thượng", "Phường Hồng Hà", "Phường Tây Hồ", "Phường Bồ Đề", "Phường Việt Hưng", "Phường Phúc Lợi", "Phường Long Biên", "Phường Nghĩa Đô", "Phường Cầu Giấy", "Phường Yên Hòa", "Phường Ô Chợ Dừa", "Phường Láng", "Phường Văn Miếu - Quốc Tử Giám", "Phường Kim Liên", "Phường Đống Đa", "Phường Hai Bà Trưng", "Phường Vĩnh Tuy", "Phường Bạch Mai", "Phường Vĩnh Hưng", "Phường Định Công", "Phường Tương Mai", "Phường Lĩnh Nam", "Phường Hoàng Mai", "Phường Hoàng Liệt", "Phường Yên Sở", "Phường Phương Liệt", "Phường Khương Đình", "Phường Thanh Xuân", "Xã Sóc Sơn", "Xã Kim Anh", "Xã Trung Giã", "Xã Đa Phúc", "Xã Nội Bài", "Xã Đông Anh", "Xã Phúc Thịnh", "Xã Thư Lâm", "Xã Thiên Lộc", "Xã Vĩnh Thanh", "Xã Phù Đổng", "Xã Thuận An", "Xã Gia Lâm", "Xã Bát Tràng", "Phường Từ Liêm", "Phường Thượng Cát", "Phường Đông Ngạc", "Phường Xuân Đỉnh", "Phường Tây Tựu", "Phường Phú Diễn", "Phường Xuân Phương", "Phường Tây Mỗ", "Phường Đại Mỗ", "Xã Thanh Trì", "Phường Thanh Liệt", "Xã Đại Thanh", "Xã Ngọc Hồi", "Xã Nam Phù", "Xã Yên Xuân", "Xã Quang Minh", "Xã Yên Lãng", "Xã Tiến Thắng", "Xã Mê Linh", "Phường Kiến Hưng", "Phường Hà Đông", "Phường Yên Nghĩa", "Phường Phú Lương", "Phường Sơn Tây", "Phường Tùng Thiện", "Xã Đoài Phương", "Xã Quảng Oai", "Xã Cổ Đô", "Xã Minh Châu", "Xã Vật Lại", "Xã Bất Bạt", "Xã Suối Hai", "Xã Ba Vì", "Xã Yên Bài", "Xã Phúc Thọ", "Xã Phúc Lộc", "Xã Hát Môn", "Xã Đan Phượng", "Xã Liên Minh", "Xã Ô Diên", "Xã Hoài Đức", "Xã Dương Hòa", "Xã Sơn Đồng", "Xã An Khánh", "Phường Dương Nội", "Xã Quốc Oai", "Xã Kiều Phú", "Xã Hưng Đạo", "Xã Phú Cát", "Xã Thạch Thất", "Xã Hạ Bằng", "Xã Hòa Lạc", "Xã Tây Phương", "Phường Chương Mỹ", "Xã Phú Nghĩa", "Xã Xuân Mai", "Xã Quảng Bị", "Xã Trần Phú", "Xã Hòa Phú", "Xã Thanh Oai", "Xã Bình Minh", "Xã Tam Hưng", "Xã Dân Hòa", "Xã Thường Tín", "Xã Hồng Vân", "Xã Thượng Phúc", "Xã Chương Dương", "Xã Phú Xuyên", "Xã Phượng Dực", "Xã Chuyên Mỹ", "Xã Đại Xuyên", "Xã Vân Đình", "Xã Ứng Thiên", "Xã Ứng Hòa", "Xã Hòa Xá", "Xã Mỹ Đức", "Xã Phúc Sơn", "Xã Hồng Sơn", "Xã Hương Sơn"],
@@ -463,18 +515,12 @@ function handleFileSelect(input, id) {
             document.getElementById("imageWorkspace").src = e.target.result;
             
             document.getElementById("editorModal").style.display = "flex";
-            
             document.getElementById("filterBright").value = 100; document.getElementById("valBright").innerText = "100%";
             document.getElementById("filterContrast").value = 100; document.getElementById("valContrast").innerText = "100%";
             
             if(cropper) cropper.destroy();
             cropper = new Cropper(document.getElementById("imageWorkspace"), { 
-                viewMode: 1, 
-                autoCropArea: 0.9, 
-                background: false, 
-                zoomOnWheel: false,
-                movable: false,
-                toggleDragModeOnDblclick: false 
+                viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, toggleDragModeOnDblclick: false 
             });
         }
         reader.readAsDataURL(input.files[0]);
@@ -493,11 +539,11 @@ function editImage(id) {
     document.getElementById("imageWorkspace").src = editedImages[id];
     
     document.getElementById("editorModal").style.display = "flex";
-    
     document.getElementById("filterBright").value = 100; document.getElementById("valBright").innerText = "100%";
     document.getElementById("filterContrast").value = 100; document.getElementById("valContrast").innerText = "100%";
+    
     if(cropper) cropper.destroy();
-    cropper = new Cropper(document.getElementById("imageWorkspace"), { viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, movable: false, toggleDragModeOnDblclick: false });
+    cropper = new Cropper(document.getElementById("imageWorkspace"), { viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, toggleDragModeOnDblclick: false });
 }
 
 function applyFiltersPreview() {
@@ -536,7 +582,7 @@ function openOverview() {
     let cccd = document.getElementById("c19").value || "Chưa nhập";
     let chucvu = document.getElementById("c7").value || "Chưa nhập";
     let diachi = (document.getElementById("chitiet18").value + ", " + document.getElementById("phuong18").value + ", " + document.getElementById("tinh18").value).replace(/^, |, $/g, '');
-    let isFileOK = document.getElementById("file_45").files.length > 0 ? "Đã đính kèm ảnh đủ" : "⚠️ CHƯA ĐÍNH KÈM ẢNH";
+    let isFileOK = editedImages['45'] ? "Đã đính kèm ảnh đủ" : "⚠️ CHƯA ĐÍNH KÈM ẢNH 4x6";
 
     let html = `
         <tr><td>👤 Họ và Tên:</td><td><b>${name}</b></td></tr>
@@ -544,7 +590,7 @@ function openOverview() {
         <tr><td>🪪 CCCD / CMND:</td><td>${cccd}</td></tr>
         <tr><td>💼 Chức vụ:</td><td>${chucvu}</td></tr>
         <tr><td>📍 Thường trú:</td><td>${diachi}</td></tr>
-        <tr><td>📁 Trạng thái File:</td><td style="color:${document.getElementById("file_45").files.length > 0 ? 'var(--success)' : 'red'}; font-weight:bold;">${isFileOK}</td></tr>
+        <tr><td>📁 File Upload:</td><td style="color:${editedImages['45'] ? 'var(--success)' : 'red'}; font-weight:bold;">${isFileOK}</td></tr>
     `;
     document.getElementById("overviewTable").innerHTML = html;
     document.getElementById("overviewModal").style.display = "flex";
@@ -552,11 +598,6 @@ function openOverview() {
 
 function closeOverview() { 
     document.getElementById("overviewModal").style.display = "none"; 
-}
-
-async function toBase64(file){
-    if(!file) return "";
-    return new Promise(r => { let reader = new FileReader(); reader.onload = e => { let img = new Image(); img.onload = () => { let cvs = document.createElement("canvas"); let max=1000; let w=img.width, h=img.height; if(w>max||h>max){if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}} cvs.width=w; cvs.height=h; cvs.getContext("2d").drawImage(img,0,0,w,h); r(cvs.toDataURL("image/jpeg",0.7)); }; img.src = e.target.result; }; reader.readAsDataURL(file); });
 }
 
 async function submitData(){
@@ -601,7 +642,7 @@ async function submitData(){
         document.getElementById("successModal").style.display = "flex";
     } catch(e){ 
         alert("Lỗi mạng! Vui lòng thử lại."); 
-        document.getElementById("btnFinalSubmit").innerText = "🚀 XÁC NHẬN NỘP HỒ SƠ";
+        document.getElementById("btnFinalSubmit").innerText = "🚀 GỬI HỒ SƠ";
         document.getElementById("btnFinalSubmit").disabled = false;
     }
 }
