@@ -7,59 +7,36 @@
 <style>
 :root { --primary: #2563eb; --primary-hover: #1d4ed8; --secondary: #64748b; --success: #10b981; --background: #f1f5f9; --surface: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border: #cbd5e1; --ring: rgba(37, 99, 235, 0.2); }
 
-/* ĐÓNG BĂNG TOÀN BỘ NỀN TRANG WEB NGOÀI CÙNG */
+/* ĐÓNG BĂNG NỀN TRÊN MÁY TÍNH */
 body { 
     font-family: 'Inter', sans-serif; background: var(--background); margin: 0; padding: 0;
-    color: var(--text-main); height: 100vh; width: 100vw; overflow: hidden; 
+    color: var(--text-main); height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; 
     display: flex; align-items: center; justify-content: center;
 }
 
-/* KHUNG APP CHÍNH CỐ ĐỊNH */
+/* KHUNG NỘI DUNG */
 .wrap { 
-    width: 100%; max-width: 800px; height: 96vh; max-height: 900px; background: var(--surface); 
-    border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-    display: flex; flex-direction: column; overflow: hidden; position: relative;
+    width: 100%; max-width: 800px; max-height: 95vh; background: var(--surface); 
+    padding: 30px 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+    overflow-y: auto; box-sizing: border-box; -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
-/* 1. THỚT HEADER KHÓA CỨNG (TRÊN CÙNG) */
-.header-section {
-    padding: 25px 30px 10px 30px;
-    flex-shrink: 0; /* Không bao giờ bị co lại */
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    z-index: 10;
-}
-.header-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 15px; gap: 10px; }
-.logo-img { height: 45px; max-width: 200px; object-fit: contain; }
-h2 { color: var(--primary); margin: 0; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; text-transform: uppercase; text-align: center; }
+/* Tùy chỉnh thanh cuộn PC */
+.wrap::-webkit-scrollbar { width: 6px; }
+.wrap::-webkit-scrollbar-track { background: transparent; }
+.wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-/* PROGRESS BAR MỚI */
-.stepper-wrapper { display: flex; justify-content: space-between; position: relative; padding: 0 20px; margin-top: 10px;}
-.stepper-wrapper::before { content: ''; position: absolute; top: 14px; left: 20px; right: 20px; height: 3px; background: #e2e8f0; z-index: 0; }
-.stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 1; }
-.step-counter { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 13px; transition: all 0.3s; border: 4px solid var(--surface); box-sizing: content-box; }
-.stepper-item.active .step-counter { background: var(--primary); color: white; box-shadow: 0 0 0 3px var(--ring); }
+/* HEADER CÓ LOGO */
+.header-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; gap: 10px; }
+.logo-img { height: 50px; max-width: 200px; object-fit: contain; }
+h2 { color: var(--primary); margin: 0; font-weight: 700; font-size: 22px; letter-spacing: -0.5px; text-transform: uppercase; text-align: center; }
+h3 { color: var(--text-main); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; font-size: 18px; }
 
-/* 2. THỚT NỘI DUNG CUỘN ĐƯỢC (Ở GIỮA) */
-.step { display: none; height: 100%; flex-direction: column; animation: fadeIn 0.3s ease-out; }
-.step.active { display: flex; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.step-body {
-    flex: 1; /* Tự động phình to chiếm hết khoảng trống */
-    overflow-y: auto; /* Chỉ cuộn phần này */
-    padding: 20px 30px 40px 30px;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Thanh cuộn tàng hình lịch sự */
-.step-body::-webkit-scrollbar { width: 5px; }
-.step-body::-webkit-scrollbar-track { background: transparent; }
-.step-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-h3 { color: var(--primary); padding-bottom: 10px; margin-top:0; margin-bottom: 20px; font-size: 17px; text-transform: uppercase;}
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 label { font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px; color: var(--text-main); }
+
+/* TỐI ƯU Ô NHẬP LIỆU CHO NGÓN TAY */
 input, select { 
     width: 100%; padding: 0 15px; height: 48px; border: 1.5px solid var(--border); 
     border-radius: 10px; box-sizing: border-box; font-family: 'Inter', sans-serif; 
@@ -67,7 +44,19 @@ input, select {
 }
 input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--ring); }
 input[type="file"] { padding: 12px; height: auto; background: #f8fafc; border: 1.5px dashed #cbd5e1; cursor: pointer; }
-input[type="date"] { padding: 0 15px; }
+input[type="date"] { padding: 0 15px; } /* Sửa lỗi lệch chữ ô date trên iOS */
+
+/* Nút bấm chuẩn ngón tay */
+.btn { 
+    height: 52px; padding: 0 24px; border-radius: 12px; cursor: pointer; 
+    font-weight: 600; font-size: 16px; border: none; display: inline-flex; 
+    align-items: center; justify-content: center; transition: all 0.2s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+.btn-secondary { background: #e2e8f0; color: var(--text-main); }
+.btn-success { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+.btn:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; color: #fff; }
 
 .d-none { display: none !important; }
 .col-id { display: none; }
@@ -76,6 +65,18 @@ input[type="date"] { padding: 0 15px; }
 .addr-group input { flex: 1.5; background: #fff; }
 .toggle-box { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1.5px solid var(--border); border-left: 5px solid var(--primary); margin-top: 15px; }
 
+/* WIZARD MỚI NHỎ GỌN */
+.stepper-wrapper { display: flex; justify-content: space-between; margin-bottom: 30px; position: relative; padding: 0 20px; }
+.stepper-wrapper::before { content: ''; position: absolute; top: 16px; left: 20px; right: 20px; height: 3px; background: #e2e8f0; z-index: 0; }
+.stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 1; }
+.step-counter { width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 14px; transition: all 0.3s; border: 4px solid var(--surface); box-sizing: content-box; }
+.stepper-item.active .step-counter { background: var(--primary); color: white; box-shadow: 0 0 0 4px var(--ring); }
+
+.step { display: none; animation: slideUp 0.3s ease-out; }
+.step.active { display: block; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+.step-footer { display: flex; justify-content: space-between; margin-top: 30px; gap: 15px; }
+
 /* VÙNG UP ẢNH */
 .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .upload-zone { border: 2px dashed #94a3b8; border-radius: 12px; background: #f8fafc; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: 0.2s; }
@@ -83,36 +84,15 @@ input[type="date"] { padding: 0 15px; }
 .upload-zone .icon { font-size: 28px; margin-bottom: 8px; color: #94a3b8; }
 .upload-zone span { font-size: 13px; font-weight: 600; color: var(--secondary); text-align: center; padding: 0 10px; }
 .upload-zone img.preview-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000; z-index: 5; }
-.btn-edit-img { position: absolute; bottom: 8px; right: 8px; z-index: 10; background: rgba(15, 23, 42, 0.7); color: #fff; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; display: none; backdrop-filter: blur(4px); cursor:pointer;}
+.btn-edit-img { position: absolute; bottom: 8px; right: 8px; z-index: 10; background: rgba(15, 23, 42, 0.7); color: #fff; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; display: none; backdrop-filter: blur(4px); }
 .upload-zone.has-img .btn-edit-img { display: block; }
 
-
-/* 3. THỚT FOOTER KHÓA CỨNG ĐÁY (CHỨA NÚT BẤM) */
-.step-footer { 
-    flex-shrink: 0; /* Không bị bóp méo */
-    display: flex; justify-content: space-between; gap: 15px;
-    padding: 20px 30px; border-top: 1px solid var(--border); 
-    background: var(--surface); box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
-    z-index: 10;
-}
-
-.btn { 
-    height: 52px; padding: 0 24px; border-radius: 12px; cursor: pointer; 
-    font-weight: 600; font-size: 16px; border: none; display: inline-flex; 
-    align-items: center; justify-content: center; transition: all 0.2s ease;
-}
-.btn:active { transform: scale(0.97); }
-.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); flex: 1;}
-.btn-secondary { background: #e2e8f0; color: var(--text-main); width: 130px; }
-.btn-success { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); flex: 1;}
-.btn:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; color: #fff; }
-
-/* MODAL CHUNG */
+/* MODAL & BOTTOM SHEET CHO MOBILE */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
 .modal-content { background-color: var(--surface); padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; }
 .modal-content h3 { margin-top: 0; color: var(--primary); text-align: center; border-bottom: none; margin-bottom: 20px; }
 
-/* WIDGET CROP & EDIT */
+/* WIDGET CROP */
 .editor-layout { display: flex; flex-direction: column; gap: 15px; }
 .crop-container { width: 100%; height: 45vh; background: #000; border-radius: 12px; overflow: hidden; }
 .crop-container img { display: block; max-width: 100%; }
@@ -125,32 +105,44 @@ input[type="date"] { padding: 0 15px; }
 .overview-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px; }
 .overview-table td { padding: 12px 5px; border-bottom: 1px solid #f1f5f9; }
 .overview-table td:first-child { font-weight: 600; color: var(--secondary); width: 40%; }
-#status { margin-bottom: 15px; padding:15px; background:#eff6ff; font-weight:bold; display:none; color:var(--primary); border-radius:10px; text-align:center; border:1px solid #bfdbfe; }
-.check-icon { font-size: 64px; color: var(--success); text-align: center; margin-bottom: 15px;}
+#status { margin-top:15px; padding:15px; background:#eff6ff; font-weight:bold; display:none; color:var(--primary); border-radius:10px; text-align:center; border:1px solid #bfdbfe; }
 
-/* 📱 RESPONSIVE ĐIỆN THOẠI (HIỆU ỨNG APP 100%) */
+/* 📱 GIAO DIỆN SIÊU TỐI ƯU CHO ĐIỆN THOẠI APP-LIKE */
 @media (max-width: 768px) { 
-    .wrap { max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; box-shadow: none; }
-    .header-section { padding: 20px 20px 10px 20px; }
-    .step-body { padding: 15px 20px 40px 20px; }
-    .step-footer { padding: 15px 20px; flex-direction: column-reverse; gap: 10px; }
-    .btn { width: 100%; height: 52px;}
-    .btn-secondary { width: 100%; } /* Nút back trên đt sẽ trải dài */
+    body { padding: 0; background: var(--surface); } 
+    .wrap { 
+        max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; 
+        padding: 20px 15px; box-shadow: none; display: flex; flex-direction: column;
+    }
+    .header-container { margin-bottom: 15px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 16px; margin-bottom: 15px; }
+    .stepper-wrapper { margin-bottom: 20px; padding: 0 10px; }
+    .step-counter { width: 28px; height: 28px; font-size: 12px; border-width: 3px; }
+    .stepper-wrapper::before { top: 13px; left: 10px; right: 10px; }
     
+    /* 1 Cột dọc cho dễ cuộn */
     .grid { grid-template-columns: 1fr; gap: 12px; } 
     .addr-group { flex-direction: column; gap: 10px; padding: 12px; } 
     .upload-grid { grid-template-columns: 1fr; gap: 12px; }
-    .upload-zone { height: 180px; } 
-    input, select { font-size: 16px !important; } /* Khóa thu phóng iOS */
+    .upload-zone { height: 180px; } /* Ảnh to hơn trên mobile */
     
-    /* Popup trượt từ dưới lên */
+    /* Input trên iOS phải là 16px để không bị auto-zoom */
+    input, select { font-size: 16px !important; }
+    
+    /* Bottom Sheet Modal Style (Trượt từ dưới lên) */
     .modal { align-items: flex-end; padding-top: 50px; }
     .modal-content { 
         width: 100%; max-width: 100%; max-height: 90dvh; 
         border-radius: 24px 24px 0 0; padding: 25px 20px; 
-        animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; margin: 0;
+        animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        margin: 0;
     }
     @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    
+    /* Các nút chốt ở Mobile */
+    .step-footer { flex-direction: column-reverse; margin-top: 20px; padding-bottom: 20px; }
+    .btn { width: 100%; height: 56px; font-size: 16px; }
     .modal-footer-btns { flex-direction: column-reverse; gap: 10px; margin-top: 20px;}
     .modal-footer-btns .btn { width: 100%; margin: 0; }
 }
@@ -158,59 +150,56 @@ input[type="date"] { padding: 0 15px; }
 </head><body>
 
 <div class="wrap" id="mainWrap">
+    <div class="header-container">
+        <img src="logo.jpg" alt="Samson Logo" class="logo-img" onerror="this.style.display='none'">
+        <h2>THÔNG TIN NHÂN VIÊN</h2>
+    </div>
     
-    <div class="header-section">
-        <div class="header-container">
-            <img src="logo.jpg" alt="Samson Logo" class="logo-img" onerror="this.style.display='none'">
-            <h2>THÔNG TIN NHÂN VIÊN</h2>
-        </div>
-        <div id="status"></div>
-        <div class="stepper-wrapper">
-            <div class="stepper-item active" id="stepIndicator1"><div class="step-counter">1</div></div>
-            <div class="stepper-item" id="stepIndicator2"><div class="step-counter">2</div></div>
-            <div class="stepper-item" id="stepIndicator3"><div class="step-counter">3</div></div>
-            <div class="stepper-item" id="stepIndicator4"><div class="step-counter">4</div></div>
-            <div class="stepper-item" id="stepIndicator5"><div class="step-counter">5</div></div>
-        </div>
+    <div id="status"></div>
+
+    <div class="stepper-wrapper">
+        <div class="stepper-item active" id="stepIndicator1"><div class="step-counter">1</div></div>
+        <div class="stepper-item" id="stepIndicator2"><div class="step-counter">2</div></div>
+        <div class="stepper-item" id="stepIndicator3"><div class="step-counter">3</div></div>
+        <div class="stepper-item" id="stepIndicator4"><div class="step-counter">4</div></div>
+        <div class="stepper-item" id="stepIndicator5"><div class="step-counter">5</div></div>
     </div>
 
     <div class="step active" id="step1">
-        <div class="step-body">
-            <h3>Thông tin cá nhân cơ bản</h3>
-            <div class="grid">
-                <div><label>Họ và Tên (Viết Hoa) <span class="col-id">[0]</span></label><input id="c0" placeholder="VD: NGUYỄN VĂN A"></div>
-                <div><label>Học lực <span class="col-id">[1]</span></label><input id="c1" placeholder="VD: 12/12"></div>
-                <div><label>Nơi sinh (Tỉnh/Thành) <span class="col-id">[2]</span></label><select id="c2"><option value="">-- Chọn Nơi Sinh --</option></select></div>
-                <div><label>Ngày sinh <span class="col-id">[3]</span></label><input id="c3" type="date"></div>
-                <div><label>Giới tính <span class="col-id">[4]</span></label><select id="c4"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
-                <div><label>Tình trạng hôn nhân <span class="col-id">[17]</span></label><select id="c17"><option value="Chưa kết hôn">Chưa kết hôn</option><option value="Đã kết hôn">Đã kết hôn</option></select></div>
-                <div><label>Số CCCD / CMND <span class="col-id">[19]</span></label><input id="c19" type="number" placeholder="Nhập 12 số CCCD"></div>
-                <div><label>Ngày cấp CCCD <span class="col-id">[20]</span></label><input id="c20" type="date"></div>
-                <div><label>Số Điện Thoại <span class="col-id">[21]</span></label><input id="c21" type="tel" placeholder="Số điện thoại liên hệ"></div>
-                <div><label>Email cá nhân <span class="col-id">[31]</span></label><input id="c31" type="email" placeholder="example@gmail.com"></div>
-                
-                <div style="grid-column: 1 / -1">
-                    <label>📍 Địa chỉ Thường trú (Theo Sổ hộ khẩu) <span class="col-id">[18]</span></label>
-                    <div class="addr-group">
-                        <select id="tinh18" onchange="loadPhuong('18')"><option value="">-- Tỉnh/Thành --</option></select>
-                        <select id="phuong18"><option value="">-- Phường/Xã --</option></select>
-                        <input id="chitiet18" placeholder="Số nhà, Tên đường, Thôn/Xóm...">
-                    </div>
+        <h3>Thông tin cá nhân cơ bản</h3>
+        <div class="grid">
+            <div><label>Họ và Tên (Viết Hoa) <span class="col-id">[0]</span></label><input id="c0" placeholder="VD: NGUYỄN VĂN A"></div>
+            <div><label>Học lực <span class="col-id">[1]</span></label><input id="c1" placeholder="VD: 12/12"></div>
+            <div><label>Nơi sinh (Tỉnh/Thành) <span class="col-id">[2]</span></label><select id="c2"><option value="">-- Chọn Nơi Sinh --</option></select></div>
+            <div><label>Ngày sinh <span class="col-id">[3]</span></label><input id="c3" type="date"></div>
+            <div><label>Giới tính <span class="col-id">[4]</span></label><select id="c4"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
+            <div><label>Tình trạng hôn nhân <span class="col-id">[17]</span></label><select id="c17"><option value="Chưa kết hôn">Chưa kết hôn</option><option value="Đã kết hôn">Đã kết hôn</option></select></div>
+            <div><label>Số CCCD / CMND <span class="col-id">[19]</span></label><input id="c19" type="number" placeholder="Nhập 12 số CCCD"></div>
+            <div><label>Ngày cấp CCCD <span class="col-id">[20]</span></label><input id="c20" type="date"></div>
+            <div><label>Số Điện Thoại <span class="col-id">[21]</span></label><input id="c21" type="tel" placeholder="Số điện thoại liên hệ"></div>
+            <div><label>Email cá nhân <span class="col-id">[31]</span></label><input id="c31" type="email" placeholder="example@gmail.com"></div>
+            
+            <div style="grid-column: 1 / -1">
+                <label>📍 Địa chỉ Thường trú (Theo Sổ hộ khẩu) <span class="col-id">[18]</span></label>
+                <div class="addr-group">
+                    <select id="tinh18" onchange="loadPhuong('18')"><option value="">-- Tỉnh/Thành --</option></select>
+                    <select id="phuong18"><option value="">-- Phường/Xã --</option></select>
+                    <input id="chitiet18" placeholder="Số nhà, Tên đường, Thôn/Xóm...">
                 </div>
-                
-                <div style="grid-column: 1 / -1">
-                    <label>Nơi ở hiện tại <span class="col-id">[37]</span></label>
-                    <select id="c37" onchange="toggleTamTru()">
-                        <option value="Thường trú">Sống tại Thường trú (Trùng Hộ khẩu)</option>
-                        <option value="Tạm trú">Sống tại Tạm trú (Khác Hộ khẩu)</option>
-                    </select>
-                    <div id="khu_vuc_tam_tru" class="toggle-box d-none">
-                        <label>🏠 Nhập địa chỉ Tạm trú hiện tại <span class="col-id">[38]</span></label>
-                        <div class="addr-group" style="background:#fff;">
-                            <select id="tinh38" onchange="loadPhuong('38')"><option value="">-- Tỉnh/Thành --</option></select>
-                            <select id="phuong38"><option value="">-- Phường/Xã --</option></select>
-                            <input id="chitiet38" placeholder="Số nhà, đường...">
-                        </div>
+            </div>
+            
+            <div style="grid-column: 1 / -1">
+                <label>Nơi ở hiện tại <span class="col-id">[37]</span></label>
+                <select id="c37" onchange="toggleTamTru()">
+                    <option value="Thường trú">Sống tại Thường trú (Trùng Hộ khẩu)</option>
+                    <option value="Tạm trú">Sống tại Tạm trú (Khác Hộ khẩu)</option>
+                </select>
+                <div id="khu_vuc_tam_tru" class="toggle-box d-none">
+                    <label>🏠 Nhập địa chỉ Tạm trú hiện tại <span class="col-id">[38]</span></label>
+                    <div class="addr-group" style="background:#fff;">
+                        <select id="tinh38" onchange="loadPhuong('38')"><option value="">-- Tỉnh/Thành --</option></select>
+                        <select id="phuong38"><option value="">-- Phường/Xã --</option></select>
+                        <input id="chitiet38" placeholder="Số nhà, đường...">
                     </div>
                 </div>
             </div>
@@ -221,31 +210,29 @@ input[type="date"] { padding: 0 15px; }
     </div>
 
     <div class="step" id="step2">
-        <div class="step-body">
-            <h3>Công việc & Lương</h3>
-            <div class="grid">
-                <div><label>Ngày vào làm <span class="col-id">[5]</span></label><input id="c5" type="date"></div>
-                <div>
-                    <label>Bộ phận <span class="col-id">[6]</span></label>
-                    <select id="c6">
-                        <option value="BAKER">BAKER</option><option value="ADMIN">ADMIN</option><option value="LCH">LCH</option>
-                        <option value="MMD">MMD</option><option value="LEGACY">LEGACY</option><option value="LEGACY US">LEGACY US</option>
-                        <option value="UFII">UFII</option><option value="UFII US">UFII US</option>
-                    </select>
-                </div>
-                <div><label>Chức vụ <span class="col-id">[7]</span></label><input id="c7"></div>
-                <div><label>Mức lương hiện tại <span class="col-id">[9]</span></label><input id="c9" type="tel" placeholder="VD: 5000000"></div>
-                <div><label>Lương sau thử việc <span class="col-id">[12]</span></label><input id="c12"></div>
-                
-                <div style="grid-column: 1 / -1">
-                    <label>Ngân hàng nhận lương <span class="col-id">[15]</span></label>
-                    <select id="c15">
-                        <option value="">-- Chọn Ngân Hàng --</option>
-                        <option value="(ABBANK) An Bình">(ABBANK) An Bình</option><option value="(ACB) Á Châu">(ACB) Á Châu</option><option value="(AGRIBANK) NN & PTNT Việt Nam">(AGRIBANK) Nông nghiệp và phát triển nông thôn Việt Nam</option><option value="(ANZ) ANZ Việt Nam">(ANZ) TNHH Một Thành Viên ANZ Việt Nam</option><option value="(BAC A) Bắc Á">(BAC A) Bắc Á</option><option value="(BAO VIET BANK) Bảo Việt">(BAO VIET BANK) Bảo Việt</option><option value="(BIDV) Đầu tư và phát triển VN">(BIDV) Đầu tư và phát triển Việt Nam</option><option value="(CBBANK) Ngân hàng Xây dựng">(CBBANK) Ngân hàng Xây dựng</option><option value="(CIMB) CIMB Bank Việt Nam">(CIMB) CIMB Bank Việt Nam</option><option value="(CITIBANK) Citibank Việt Nam">(CITIBANK) Citibank Việt Nam</option><option value="(DONG A BANK) Đông Á">(DONG A BANK) Đông Á</option><option value="(EXIMBANK) Xuất Nhập khẩu">(EXIMBANK) Xuất Nhập khẩu</option><option value="(GPBANK) Dầu khí toàn cầu">(GPBANK) Dầu khí toàn cầu</option><option value="(HD BANK) Phát triển TP.HCM">(HD BANK) Phát triển TP.HCM</option><option value="(HLBANK) Hong Leong Việt Nam">(HLBANK) Hong Leong Việt Nam</option><option value="(HSBC) Hongkong and Shanghai Bank">(HSBC) Hongkong and Shanghai Bank</option><option value="(ICBC) Công Thương Trung Quốc">(ICBC) Công Thương Trung Quốc</option><option value="(IVB) Indovina">(IVB) Trách nhiệm hữu hạn Indovina</option><option value="(KIEN LONG BANK) Kiên Long">(KIEN LONG BANK) Kiên Long</option><option value="(LIEN VIET POST BANK) Bưu điện Liên Việt">(LIEN VIET POST BANK) Bưu điện Liên Việt</option><option value="(MB) Quân Đội">(MB) Quân Đội</option><option value="(MSB - MARITIME BANK) Hàng Hải">(MSB - MARITIME BANK) Hàng Hải</option><option value="(NAM A BANK) Nam Á">(NAM A BANK) Nam Á</option><option value="(NCB) Quốc Dân">(NCB) Quốc Dân</option><option value="(OCB) Phương Đông">(OCB) Phương Đông</option><option value="(OCEANBANK) Đại dương">(OCEANBANK) Đại dương</option><option value="(PBVN) Public Việt Nam">(PBVN) Ngân hàng TNHH MTV Public Việt Nam</option><option value="(PGBANK) Xăng Dầu Petrolimex">(PGBANK) Xăng Dầu Petrolimex</option><option value="(PVCOMBANK) Đại chúng">(PVCOMBANK) Đại chúng</option><option value="(SACOMBANK) Sài Gòn thương tín">(SACOMBANK) Sài Gòn thương tín</option><option value="(SAIGONBANK) Sài Gòn Công Thương">(SAIGONBANK) Sài Gòn Công Thương</option><option value="(SC - STANDARD CHARTERED BANK) Standard Chartered">(SC - STANDARD CHARTERED BANK) Standard Chartered</option><option value="(SCB) Sài Gòn">(SCB) Sài Gòn</option><option value="(SHB) Sài Gòn - Hà Nội">(SHB) Sài Gòn - Hà Nội</option><option value="(TECHCOMBANK) Tiên Phong">(TECHCOMBANK) Tiên Phong</option><option value="(TPBANK) Tiên phong">(TPBANK) Tiên phong</option><option value="(UOB VN) UOB Việt Nam">(UOB VN) UOB Việt Nam</option><option value="(VBSP) Chính sách xã hội">(VBSP) Chính sách xã hội</option><option value="(VDB) Phát triển Việt Nam">(VDB) Phát triển Việt Nam</option><option value="(VIB) Quốc tế">(VIB) Quốc tế</option><option value="(VIET A BANK) Việt Á">(VIET A BANK) Việt Á</option><option value="(VIET CAPITAL BANK) Bản Việt">(VIET CAPITAL BANK) Bản Việt</option><option value="(VIETBANK) Việt Nam Thương Tín">(VIETBANK) Việt Nam Thương Tín</option><option value="VIETCOMBANK">VIETCOMBANK (Ngoại thương VN)</option><option value="(VIETINBANK) Công Thương Việt Nam">(VIETINBANK) Công Thương Việt Nam</option><option value="(VPBANK) Việt Nam Thịnh Vượng">(VPBANK) Việt Nam Thịnh Vượng</option><option value="(VRB) Liên doanh Việt Nga">(VRB) Liên doanh Việt Nga</option><option value="(WOORI) Woori Bank">(WOORI) Woori Bank</option><option value="SHINHAN BANK">SHINHAN BANK</option>
-                    </select>
-                </div>
-                <div style="grid-column: 1 / -1"><label>Số Tài Khoản Ngân Hàng <span class="col-id">[16]</span></label><input id="c16" type="number"></div>
+        <h3>Công việc & Lương</h3>
+        <div class="grid">
+            <div><label>Ngày vào làm <span class="col-id">[5]</span></label><input id="c5" type="date"></div>
+            <div>
+                <label>Bộ phận <span class="col-id">[6]</span></label>
+                <select id="c6">
+                    <option value="BAKER">BAKER</option><option value="ADMIN">ADMIN</option><option value="LCH">LCH</option>
+                    <option value="MMD">MMD</option><option value="LEGACY">LEGACY</option><option value="LEGACY US">LEGACY US</option>
+                    <option value="UFII">UFII</option><option value="UFII US">UFII US</option>
+                </select>
             </div>
+            <div><label>Chức vụ <span class="col-id">[7]</span></label><input id="c7"></div>
+            <div><label>Mức lương hiện tại <span class="col-id">[9]</span></label><input id="c9" type="tel" placeholder="VD: 5000000"></div>
+            <div><label>Lương sau thử việc <span class="col-id">[12]</span></label><input id="c12"></div>
+            
+            <div style="grid-column: 1 / -1">
+                <label>Ngân hàng nhận lương <span class="col-id">[15]</span></label>
+                <select id="c15">
+                    <option value="">-- Chọn Ngân Hàng --</option>
+                    <option value="(ABBANK) An Bình">(ABBANK) An Bình</option><option value="(ACB) Á Châu">(ACB) Á Châu</option><option value="(AGRIBANK) NN & PTNT Việt Nam">(AGRIBANK) Nông nghiệp và phát triển nông thôn Việt Nam</option><option value="(ANZ) ANZ Việt Nam">(ANZ) TNHH Một Thành Viên ANZ Việt Nam</option><option value="(BAC A) Bắc Á">(BAC A) Bắc Á</option><option value="(BAO VIET BANK) Bảo Việt">(BAO VIET BANK) Bảo Việt</option><option value="(BIDV) Đầu tư và phát triển VN">(BIDV) Đầu tư và phát triển Việt Nam</option><option value="(CBBANK) Ngân hàng Xây dựng">(CBBANK) Ngân hàng Xây dựng</option><option value="(CIMB) CIMB Bank Việt Nam">(CIMB) CIMB Bank Việt Nam</option><option value="(CITIBANK) Citibank Việt Nam">(CITIBANK) Citibank Việt Nam</option><option value="(DONG A BANK) Đông Á">(DONG A BANK) Đông Á</option><option value="(EXIMBANK) Xuất Nhập khẩu">(EXIMBANK) Xuất Nhập khẩu</option><option value="(GPBANK) Dầu khí toàn cầu">(GPBANK) Dầu khí toàn cầu</option><option value="(HD BANK) Phát triển TP.HCM">(HD BANK) Phát triển TP.HCM</option><option value="(HLBANK) Hong Leong Việt Nam">(HLBANK) Hong Leong Việt Nam</option><option value="(HSBC) Hongkong and Shanghai Bank">(HSBC) Hongkong and Shanghai Bank</option><option value="(ICBC) Công Thương Trung Quốc">(ICBC) Công Thương Trung Quốc</option><option value="(IVB) Indovina">(IVB) Trách nhiệm hữu hạn Indovina</option><option value="(KIEN LONG BANK) Kiên Long">(KIEN LONG BANK) Kiên Long</option><option value="(LIEN VIET POST BANK) Bưu điện Liên Việt">(LIEN VIET POST BANK) Bưu điện Liên Việt</option><option value="(MB) Quân Đội">(MB) Quân Đội</option><option value="(MSB - MARITIME BANK) Hàng Hải">(MSB - MARITIME BANK) Hàng Hải</option><option value="(NAM A BANK) Nam Á">(NAM A BANK) Nam Á</option><option value="(NCB) Quốc Dân">(NCB) Quốc Dân</option><option value="(OCB) Phương Đông">(OCB) Phương Đông</option><option value="(OCEANBANK) Đại dương">(OCEANBANK) Đại dương</option><option value="(PBVN) Public Việt Nam">(PBVN) Ngân hàng TNHH MTV Public Việt Nam</option><option value="(PGBANK) Xăng Dầu Petrolimex">(PGBANK) Xăng Dầu Petrolimex</option><option value="(PVCOMBANK) Đại chúng">(PVCOMBANK) Đại chúng</option><option value="(SACOMBANK) Sài Gòn thương tín">(SACOMBANK) Sài Gòn thương tín</option><option value="(SAIGONBANK) Sài Gòn Công Thương">(SAIGONBANK) Sài Gòn Công Thương</option><option value="(SC - STANDARD CHARTERED BANK) Standard Chartered">(SC - STANDARD CHARTERED BANK) Standard Chartered</option><option value="(SCB) Sài Gòn">(SCB) Sài Gòn</option><option value="(SHB) Sài Gòn - Hà Nội">(SHB) Sài Gòn - Hà Nội</option><option value="(TECHCOMBANK) Tiên Phong">(TECHCOMBANK) Tiên Phong</option><option value="(TPBANK) Tiên phong">(TPBANK) Tiên phong</option><option value="(UOB VN) UOB Việt Nam">(UOB VN) UOB Việt Nam</option><option value="(VBSP) Chính sách xã hội">(VBSP) Chính sách xã hội</option><option value="(VDB) Phát triển Việt Nam">(VDB) Phát triển Việt Nam</option><option value="(VIB) Quốc tế">(VIB) Quốc tế</option><option value="(VIET A BANK) Việt Á">(VIET A BANK) Việt Á</option><option value="(VIET CAPITAL BANK) Bản Việt">(VIET CAPITAL BANK) Bản Việt</option><option value="(VIETBANK) Việt Nam Thương Tín">(VIETBANK) Việt Nam Thương Tín</option><option value="VIETCOMBANK">VIETCOMBANK (Ngoại thương VN)</option><option value="(VIETINBANK) Công Thương Việt Nam">(VIETINBANK) Công Thương Việt Nam</option><option value="(VPBANK) Việt Nam Thịnh Vượng">(VPBANK) Việt Nam Thịnh Vượng</option><option value="(VRB) Liên doanh Việt Nga">(VRB) Liên doanh Việt Nga</option><option value="(WOORI) Woori Bank">(WOORI) Woori Bank</option><option value="SHINHAN BANK">SHINHAN BANK</option>
+                </select>
+            </div>
+            <div style="grid-column: 1 / -1"><label>Số Tài Khoản Ngân Hàng <span class="col-id">[16]</span></label><input id="c16" type="number"></div>
         </div>
         <div class="step-footer">
             <button type="button" class="btn btn-secondary" onclick="changeStep(2, 1)">⬅️ Quay lại</button>
@@ -254,22 +241,21 @@ input[type="date"] { padding: 0 15px; }
     </div>
 
     <div class="step" id="step3">
-        <div class="step-body">
-            <h3>Quá trình học tập</h3>
-            <label>Trình độ học vấn cao nhất của bạn? <span class="col-id">[29]</span></label>
-            <select id="c29" onchange="toggleHocVan()">
-                <option value="Chưa từng đi học">Chưa từng đi học</option>
-                <option value="Tiểu học">Cấp 1 (Tiểu học)</option>
-                <option value="THCS">Cấp 2 (THCS)</option>
-                <option value="THPT">Cấp 3 (THPT)</option>
-                <option value="Cao đẳng / Đại học">Cao đẳng / Đại học</option>
-            </select>
-            
-            <div id="hv_1" class="d-none grid toggle-box"><div><label>TG học Cấp 1 <span class="col-id">[25]</span></label><input id="tg25" placeholder="VD: 2000-2005"></div><div><label>Tên Trường <span class="col-id">[25]</span></label><input id="tr25"></div></div>
-            <div id="hv_2" class="d-none grid toggle-box"><div><label>TG học Cấp 2 <span class="col-id">[26]</span></label><input id="tg26" placeholder="VD: 2005-2009"></div><div><label>Tên Trường <span class="col-id">[26]</span></label><input id="tr26"></div></div>
-            <div id="hv_3" class="d-none grid toggle-box"><div><label>TG học Cấp 3 <span class="col-id">[27]</span></label><input id="tg27" placeholder="VD: 2009-2012"></div><div><label>Tên Trường <span class="col-id">[27]</span></label><input id="tr27"></div></div>
-            <div id="hv_4" class="d-none grid toggle-box"><div><label>TG học CĐ/ĐH <span class="col-id">[30]</span></label><input id="tg30" placeholder="VD: 2012-2016"></div><div><label>Tên Trường <span class="col-id">[30]</span></label><input id="tr30"></div></div>
-        </div>
+        <h3>Quá trình học tập</h3>
+        <label>Trình độ học vấn cao nhất của bạn? <span class="col-id">[29]</span></label>
+        <select id="c29" onchange="toggleHocVan()">
+            <option value="Chưa từng đi học">Chưa từng đi học</option>
+            <option value="Tiểu học">Cấp 1 (Tiểu học)</option>
+            <option value="THCS">Cấp 2 (THCS)</option>
+            <option value="THPT">Cấp 3 (THPT)</option>
+            <option value="Cao đẳng / Đại học">Cao đẳng / Đại học</option>
+        </select>
+        
+        <div id="hv_1" class="d-none grid toggle-box"><div><label>TG học Cấp 1 <span class="col-id">[25]</span></label><input id="tg25" placeholder="VD: 2000-2005"></div><div><label>Tên Trường <span class="col-id">[25]</span></label><input id="tr25"></div></div>
+        <div id="hv_2" class="d-none grid toggle-box"><div><label>TG học Cấp 2 <span class="col-id">[26]</span></label><input id="tg26" placeholder="VD: 2005-2009"></div><div><label>Tên Trường <span class="col-id">[26]</span></label><input id="tr26"></div></div>
+        <div id="hv_3" class="d-none grid toggle-box"><div><label>TG học Cấp 3 <span class="col-id">[27]</span></label><input id="tg27" placeholder="VD: 2009-2012"></div><div><label>Tên Trường <span class="col-id">[27]</span></label><input id="tr27"></div></div>
+        <div id="hv_4" class="d-none grid toggle-box"><div><label>TG học CĐ/ĐH <span class="col-id">[30]</span></label><input id="tg30" placeholder="VD: 2012-2016"></div><div><label>Tên Trường <span class="col-id">[30]</span></label><input id="tr30"></div></div>
+        
         <div class="step-footer">
             <button type="button" class="btn btn-secondary" onclick="changeStep(3, 2)">⬅️ Quay lại</button>
             <button type="button" class="btn btn-primary" onclick="changeStep(3, 4)">Tiếp tục ➡️</button>
@@ -277,48 +263,46 @@ input[type="date"] { padding: 0 15px; }
     </div>
 
     <div class="step" id="step4">
-        <div class="step-body">
-            <h3>Khẩn cấp & Bảo hiểm</h3>
-            <div class="grid">
-                <div><label>Người liên hệ Khẩn cấp <span class="col-id">[22]</span></label><input id="c22" placeholder="Tên người thân"></div>
-                <div><label>SĐT Khẩn cấp <span class="col-id">[23]</span></label><input id="c23" type="tel"></div>
-                
-                <div style="grid-column: 1 / -1">
-                    <label>🚨 Địa chỉ người liên hệ khẩn cấp <span class="col-id">[24]</span></label>
-                    <div class="addr-group">
-                        <select id="tinh24" onchange="loadPhuong('24')"><option value="">-- Chọn Tỉnh/Thành --</option></select>
-                        <select id="phuong24"><option value="">-- Chọn Phường/Xã --</option></select>
-                        <input id="chitiet24" placeholder="Số nhà, đường...">
-                    </div>
+        <h3>Khẩn cấp & Bảo hiểm</h3>
+        <div class="grid">
+            <div><label>Người liên hệ Khẩn cấp <span class="col-id">[22]</span></label><input id="c22" placeholder="Tên người thân"></div>
+            <div><label>SĐT Khẩn cấp <span class="col-id">[23]</span></label><input id="c23" type="tel"></div>
+            
+            <div style="grid-column: 1 / -1">
+                <label>🚨 Địa chỉ người liên hệ khẩn cấp <span class="col-id">[24]</span></label>
+                <div class="addr-group">
+                    <select id="tinh24" onchange="loadPhuong('24')"><option value="">-- Chọn Tỉnh/Thành --</option></select>
+                    <select id="phuong24"><option value="">-- Chọn Phường/Xã --</option></select>
+                    <input id="chitiet24" placeholder="Số nhà, đường...">
                 </div>
-                
-                <div><label>Đã có sổ BHXH chưa? <span class="col-id">[32]</span></label><select id="c32"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
-                <div><label>Số sổ BHXH (Nếu có) <span class="col-id">[33]</span></label><input id="c33" type="number"></div>
-                
-                <div><label>Đã có Mã số thuế cá nhân? <span class="col-id">[34]</span></label><select id="c34"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
-                <div><label>Mã số thuế (Nếu có) <span class="col-id">[35]</span></label><input id="c35"></div>
-                
-                <div style="grid-column: 1 / -1">
-                    <label>Bạn có phải là Chủ hộ không? <span class="col-id">[39]</span></label>
-                    <select id="c39" onchange="toggleChuHo()">
-                        <option value="Có">Có, tôi là chủ hộ</option>
-                        <option value="Không">Không, người khác là chủ hộ</option>
-                    </select>
-                </div>
+            </div>
+            
+            <div><label>Đã có sổ BHXH chưa? <span class="col-id">[32]</span></label><select id="c32"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
+            <div><label>Số sổ BHXH (Nếu có) <span class="col-id">[33]</span></label><input id="c33" type="number"></div>
+            
+            <div><label>Đã có Mã số thuế cá nhân? <span class="col-id">[34]</span></label><select id="c34"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
+            <div><label>Mã số thuế (Nếu có) <span class="col-id">[35]</span></label><input id="c35"></div>
+            
+            <div style="grid-column: 1 / -1">
+                <label>Bạn có phải là Chủ hộ không? <span class="col-id">[39]</span></label>
+                <select id="c39" onchange="toggleChuHo()">
+                    <option value="Có">Có, tôi là chủ hộ</option>
+                    <option value="Không">Không, người khác là chủ hộ</option>
+                </select>
+            </div>
 
-                <div id="khu_vuc_chu_ho" class="grid d-none toggle-box" style="grid-column: 1 / -1;">
-                    <div style="grid-column: 1 / -1; margin-bottom: -10px;"><p style="margin:0; font-weight:600; color:var(--primary);">Điền thông tin của Chủ hộ:</p></div>
-                    <div><label>Tên Chủ hộ <span class="col-id">[40]</span></label><input id="c40"></div>
-                    <div><label>Ngày sinh Chủ hộ <span class="col-id">[41]</span></label><input id="c41" type="date"></div>
-                    <div><label>Giới tính Chủ hộ <span class="col-id">[42]</span></label><select id="c42"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
-                    <div><label>CCCD Chủ hộ <span class="col-id">[44]</span></label><input id="c44" type="number"></div>
-                    <div style="grid-column: 1 / -1">
-                        <label>👑 Địa chỉ Chủ hộ <span class="col-id">[43]</span></label>
-                        <div class="addr-group" style="background:#fff;">
-                            <select id="tinh43" onchange="loadPhuong('43')"><option value="">-- Chọn Tỉnh/Thành --</option></select>
-                            <select id="phuong43"><option value="">-- Chọn Phường/Xã --</option></select>
-                            <input id="chitiet43" placeholder="Số nhà, đường...">
-                        </div>
+            <div id="khu_vuc_chu_ho" class="grid d-none toggle-box" style="grid-column: 1 / -1;">
+                <div style="grid-column: 1 / -1; margin-bottom: -10px;"><p style="margin:0; font-weight:600; color:var(--primary);">Điền thông tin của Chủ hộ:</p></div>
+                <div><label>Tên Chủ hộ <span class="col-id">[40]</span></label><input id="c40"></div>
+                <div><label>Ngày sinh Chủ hộ <span class="col-id">[41]</span></label><input id="c41" type="date"></div>
+                <div><label>Giới tính Chủ hộ <span class="col-id">[42]</span></label><select id="c42"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
+                <div><label>CCCD Chủ hộ <span class="col-id">[44]</span></label><input id="c44" type="number"></div>
+                <div style="grid-column: 1 / -1">
+                    <label>👑 Địa chỉ Chủ hộ <span class="col-id">[43]</span></label>
+                    <div class="addr-group" style="background:#fff;">
+                        <select id="tinh43" onchange="loadPhuong('43')"><option value="">-- Chọn Tỉnh/Thành --</option></select>
+                        <select id="phuong43"><option value="">-- Chọn Phường/Xã --</option></select>
+                        <input id="chitiet43" placeholder="Số nhà, đường...">
                     </div>
                 </div>
             </div>
@@ -330,47 +314,46 @@ input[type="date"] { padding: 0 15px; }
     </div>
 
     <div class="step" id="step5">
-        <div class="step-body">
-            <h3>Đính kèm hình ảnh</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 20px;">Bấm vào từng ô để tải ảnh lên. Có thể tự cắt chỉnh hình ngay trên web.</p>
-            
-            <div class="upload-grid">
-                <div class="upload-zone" id="zone_45" onclick="triggerFileInput('45')">
-                    <div class="icon">📷</div><span>1. Ảnh 4x6</span>
-                    <img id="preview_45" class="preview-img d-none">
-                    <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('45')">✏️ Sửa</button>
-                </div>
-                <input type="file" id="file_45" accept="image/*" class="d-none" onchange="handleFileSelect(this, '45')">
-
-                <div class="upload-zone" id="zone_46" onclick="triggerFileInput('46')">
-                    <div class="icon">🪪</div><span>2. CCCD Trước</span>
-                    <img id="preview_46" class="preview-img d-none">
-                    <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('46')">✏️ Sửa</button>
-                </div>
-                <input type="file" id="file_46" accept="image/*" class="d-none" onchange="handleFileSelect(this, '46')">
-
-                <div class="upload-zone" id="zone_47" onclick="triggerFileInput('47')">
-                    <div class="icon">🪪</div><span>3. CCCD Sau</span>
-                    <img id="preview_47" class="preview-img d-none">
-                    <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('47')">✏️ Sửa</button>
-                </div>
-                <input type="file" id="file_47" accept="image/*" class="d-none" onchange="handleFileSelect(this, '47')">
-
-                <div class="upload-zone" id="zone_48" onclick="triggerFileInput('48')">
-                    <div class="icon">💳</div><span>4. Thẻ Ngân hàng</span>
-                    <img id="preview_48" class="preview-img d-none">
-                    <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('48')">✏️ Sửa</button>
-                </div>
-                <input type="file" id="file_48" accept="image/*" class="d-none" onchange="handleFileSelect(this, '48')">
-
-                <div class="upload-zone" id="zone_49" onclick="triggerFileInput('49')">
-                    <div class="icon">📘</div><span>5. Bìa sổ BHXH</span>
-                    <img id="preview_49" class="preview-img d-none">
-                    <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('49')">✏️ Sửa</button>
-                </div>
-                <input type="file" id="file_49" accept="image/*" class="d-none" onchange="handleFileSelect(this, '49')">
+        <h3>Đính kèm hình ảnh</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 20px;">Bấm vào từng ô để tải ảnh lên. Có thể tự cắt chỉnh hình.</p>
+        
+        <div class="upload-grid">
+            <div class="upload-zone" id="zone_45" onclick="triggerFileInput('45')">
+                <div class="icon">📷</div><span>1. Ảnh 4x6</span>
+                <img id="preview_45" class="preview-img d-none">
+                <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('45')">✏️ Sửa</button>
             </div>
+            <input type="file" id="file_45" accept="image/*" class="d-none" onchange="handleFileSelect(this, '45')">
+
+            <div class="upload-zone" id="zone_46" onclick="triggerFileInput('46')">
+                <div class="icon">🪪</div><span>2. CCCD Trước</span>
+                <img id="preview_46" class="preview-img d-none">
+                <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('46')">✏️ Sửa</button>
+            </div>
+            <input type="file" id="file_46" accept="image/*" class="d-none" onchange="handleFileSelect(this, '46')">
+
+            <div class="upload-zone" id="zone_47" onclick="triggerFileInput('47')">
+                <div class="icon">🪪</div><span>3. CCCD Sau</span>
+                <img id="preview_47" class="preview-img d-none">
+                <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('47')">✏️ Sửa</button>
+            </div>
+            <input type="file" id="file_47" accept="image/*" class="d-none" onchange="handleFileSelect(this, '47')">
+
+            <div class="upload-zone" id="zone_48" onclick="triggerFileInput('48')">
+                <div class="icon">💳</div><span>4. Thẻ Ngân hàng</span>
+                <img id="preview_48" class="preview-img d-none">
+                <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('48')">✏️ Sửa</button>
+            </div>
+            <input type="file" id="file_48" accept="image/*" class="d-none" onchange="handleFileSelect(this, '48')">
+
+            <div class="upload-zone" id="zone_49" onclick="triggerFileInput('49')">
+                <div class="icon">📘</div><span>5. Bìa sổ BHXH</span>
+                <img id="preview_49" class="preview-img d-none">
+                <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('49')">✏️ Sửa</button>
+            </div>
+            <input type="file" id="file_49" accept="image/*" class="d-none" onchange="handleFileSelect(this, '49')">
         </div>
+
         <div class="step-footer">
             <button type="button" class="btn btn-secondary" onclick="changeStep(5, 4)">⬅️ Quay lại</button>
             <button type="button" class="btn btn-success" onclick="openOverview()">✅ HOÀN TẤT</button>
@@ -434,21 +417,17 @@ input[type="date"] { padding: 0 15px; }
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 
-// CẬP NHẬT LẠI HÀM CHUYỂN BƯỚC: Chỉ cuộn khu vực nội dung (step-body) lên trên cùng
 function changeStep(from, to) {
     try {
         document.getElementById("step" + from).classList.remove("active");
-        let nextStep = document.getElementById("step" + to);
-        nextStep.classList.add("active");
-        
+        document.getElementById("step" + to).classList.add("active");
+        // Update dots
         for(let i=1; i<=5; i++) {
             let ind = document.getElementById("stepIndicator" + i);
             if(ind) { i <= to ? ind.classList.add("active") : ind.classList.remove("active"); }
         }
-        
-        // Chỉ cuộn khúc giữa, Header và Footer vẫn đứng im
-        let stepBody = nextStep.querySelector('.step-body');
-        if(stepBody) stepBody.scrollTo({ top: 0, behavior: 'smooth' });
+        // Cuộn mượt lên đỉnh
+        document.getElementById("mainWrap").scrollTo({ top: 0, behavior: 'smooth' });
     } catch(e) {}
 }
 
@@ -500,16 +479,17 @@ const dataDiaChi = {
 };
 
 window.onload = () => {
+    let tinhs = Object.keys(dataDiaChi);
     let c2 = document.getElementById("c2"); 
     if(c2){ 
         c2.innerHTML = '<option value="">-- Chọn Nơi Sinh --</option>'; 
-        Object.keys(dataDiaChi).forEach(t => c2.add(new Option(t, t))); 
+        tinhs.forEach(t => c2.add(new Option(t, t))); 
     }
     ['18', '38', '24', '43'].forEach(id => {
         let sel = document.getElementById("tinh" + id);
         if(sel) { 
             sel.innerHTML = '<option value="">-- Chọn Tỉnh/Thành --</option>';
-            Object.keys(dataDiaChi).forEach(t => sel.add(new Option(t, t))); 
+            tinhs.forEach(t => sel.add(new Option(t, t))); 
         }
     });
 };
@@ -533,11 +513,15 @@ function handleFileSelect(input, id) {
         reader.onload = function (e) {
             currentEditingField = id;
             document.getElementById("imageWorkspace").src = e.target.result;
+            
             document.getElementById("editorModal").style.display = "flex";
             document.getElementById("filterBright").value = 100; document.getElementById("valBright").innerText = "100%";
             document.getElementById("filterContrast").value = 100; document.getElementById("valContrast").innerText = "100%";
+            
             if(cropper) cropper.destroy();
-            cropper = new Cropper(document.getElementById("imageWorkspace"), { viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, movable: false, toggleDragModeOnDblclick: false });
+            cropper = new Cropper(document.getElementById("imageWorkspace"), { 
+                viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, toggleDragModeOnDblclick: false 
+            });
         }
         reader.readAsDataURL(input.files[0]);
     }
@@ -553,11 +537,13 @@ function editImage(id) {
     if(!editedImages[id]) return;
     currentEditingField = id;
     document.getElementById("imageWorkspace").src = editedImages[id];
+    
     document.getElementById("editorModal").style.display = "flex";
     document.getElementById("filterBright").value = 100; document.getElementById("valBright").innerText = "100%";
     document.getElementById("filterContrast").value = 100; document.getElementById("valContrast").innerText = "100%";
+    
     if(cropper) cropper.destroy();
-    cropper = new Cropper(document.getElementById("imageWorkspace"), { viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, movable: false, toggleDragModeOnDblclick: false });
+    cropper = new Cropper(document.getElementById("imageWorkspace"), { viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, toggleDragModeOnDblclick: false });
 }
 
 function applyFiltersPreview() {
@@ -582,6 +568,7 @@ function saveEditedImage() {
     
     let base64 = finalCanvas.toDataURL("image/jpeg", 0.75);
     editedImages[currentEditingField] = base64;
+    
     let previewImg = document.getElementById("preview_" + currentEditingField);
     previewImg.src = base64;
     previewImg.classList.remove("d-none");
@@ -609,11 +596,8 @@ function openOverview() {
     document.getElementById("overviewModal").style.display = "flex";
 }
 
-function closeOverview() { document.getElementById("overviewModal").style.display = "none"; }
-
-async function toBase64(file){
-    if(!file) return "";
-    return new Promise(r => { let reader = new FileReader(); reader.onload = e => { let img = new Image(); img.onload = () => { let cvs = document.createElement("canvas"); let max=1000; let w=img.width, h=img.height; if(w>max||h>max){if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}} cvs.width=w; cvs.height=h; cvs.getContext("2d").drawImage(img,0,0,w,h); r(cvs.toDataURL("image/jpeg",0.7)); }; img.src = e.target.result; }; reader.readAsDataURL(file); });
+function closeOverview() { 
+    document.getElementById("overviewModal").style.display = "none"; 
 }
 
 async function submitData(){
@@ -639,7 +623,13 @@ async function submitData(){
         }
     }
     
-    p.images = { anh46: editedImages['45'] || "", cccdTruoc: editedImages['46'] || "", cccdSau: editedImages['47'] || "", stk: editedImages['48'] || "", bhxh: editedImages['49'] || "" };
+    p.images = { 
+        anh46: editedImages['45'] || "", 
+        cccdTruoc: editedImages['46'] || "", 
+        cccdSau: editedImages['47'] || "", 
+        stk: editedImages['48'] || "", 
+        bhxh: editedImages['49'] || "" 
+    };
     
     try {
         await fetch(SCRIPT_URL+"?action=submit", { method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(p) });
@@ -648,6 +638,7 @@ async function submitData(){
         let time = new Date().toLocaleString("vi-VN");
         let name = document.getElementById("c0").value || "Nhân viên";
         document.getElementById("successText").innerHTML = `Hồ sơ của <b>${name}</b><br>Đã lưu vào hệ thống lúc:<br><b>${time}</b>`;
+        
         document.getElementById("successModal").style.display = "flex";
     } catch(e){ 
         alert("Lỗi mạng! Vui lòng thử lại."); 
