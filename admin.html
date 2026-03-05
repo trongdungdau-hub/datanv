@@ -48,7 +48,7 @@ th{background:#0056b3;color:#fff}
 <body>
 
 <div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (FIX LỖI FONT, SIZE 10)</h2>
+    <h2>QUẢN TRỊ XUẤT PDF (FIX LỖI FONT WINANSI, SIZE 10)</h2>
     <table>
         <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
         <tbody id="tableBody"></tbody>
@@ -116,6 +116,10 @@ th{background:#0056b3;color:#fff}
 <script>
 // ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
+
+// Dùng LiberationSerif (Giống hệt Times New Roman) - Tải từ server siêu ổn định unpkg
+const FONT_URL = "https://unpkg.com/liberation-fonts-ttf@2.1.5/LiberationSerif-Regular.ttf";
+
 let empData = [];
 let currentIndex = -1;
 let currentPDFBytes = null;
@@ -132,7 +136,6 @@ let croppedImages = {
 let currentCropField = null;
 let cropper = null;
 
-// ==================== HÀM CHÍNH ====================
 window.onload = async () => {
     try {
         let res = await fetch(SCRIPT_URL); empData = await res.json();
@@ -209,7 +212,7 @@ function openModal(idx) {
             croppedImages[id] = { blob: null, original: null };
         }
     });
-    document.getElementById('myModal').style.display = "block";
+    document.getElementById('myModal').style.display = "flex";
     document.getElementById('btnClose').style.display = "block";
     refreshPDF(); 
 }
@@ -249,12 +252,7 @@ function openCropModal(fieldId) {
         document.getElementById('cropModal').style.display = 'flex';
         if(cropper) cropper.destroy();
         setTimeout(() => {
-            cropper = new Cropper(img, {
-                aspectRatio: NaN, 
-                viewMode: 1,
-                autoCropArea: 1,
-                responsive: true,
-            });
+            cropper = new Cropper(img, { aspectRatio: NaN, viewMode: 1, autoCropArea: 1, responsive: true });
         }, 100);
     };
     reader.readAsDataURL(file);
@@ -307,14 +305,14 @@ function formatSal(v){
 }
 
 // -----------------------------------------------------------
-// HÀM ÉP CỠ CHỮ 10 CỐ ĐỊNH 
+// HÀM ÉP CỠ CHỮ 10 CỐ ĐỊNH & FONT TIẾNG VIỆT
 // -----------------------------------------------------------
 function fillField(form, fieldName, value, customFont) {
     try {
         let field = form.getTextField(fieldName);
         if (field && value) {
             field.setText(String(value));
-            field.setFontSize(10); // CỐ ĐỊNH CHỮ SIZE 10
+            field.setFontSize(10); // ÉP CỨNG CHỮ SIZE 10
             field.updateAppearances({ font: customFont });
         }
     } catch(e) {}
@@ -329,13 +327,13 @@ async function refreshPDF() {
         const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
         doc.registerFontkit(window.fontkit);
         
-        // DÙNG CỨNG LINK FONT CHUẨN NÀY, TUYỆT ĐỐI KHÔNG SỬA GÌ Ở ĐÂY NỮA
-        const fontRes = await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf");
+        // TẢI FONT CHUẨN TIMES NEW ROMAN - HỖ TRỢ FULL TIẾNG VIỆT (KHÔNG BAO GIỜ BỊ LỖI WINANSI)
+        const fontRes = await fetch(FONT_URL);
         const fontBytes = await fontRes.arrayBuffer();
         const font = await doc.embedFont(fontBytes);
         const form = doc.getForm();
 
-        // 1. Điền text fields bình thường và ép size 10
+        // ĐIỀN CÁC Ô BÌNH THƯỜNG
         for(let i=0; i<=44; i++){
             if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
             
@@ -346,9 +344,7 @@ async function refreshPDF() {
             fillField(form, i.toString(), val, font);
         }
         
-        // ==========================================
-        // 2. XỬ LÝ NGÀY SINH (TÁCH ĐÚNG 3_nam, 3_thang, 3_ngay)
-        // ==========================================
+        // XỬ LÝ NGÀY SINH (CHẺ RA 3_nam, 3_thang, 3_ngay)
         let dobRaw = emp[3];
         if (dobRaw) {
             let d = new Date(dobRaw);
@@ -361,17 +357,14 @@ async function refreshPDF() {
                 let mm = ("0" + (d.getMonth() + 1)).slice(-2);
                 let yyyy = d.getFullYear().toString();
                 
-                // Trả cho ô 3 (Nếu m dùng 1 ô gộp)
                 fillField(form, '3', `${dd}/${mm}/${yyyy}`, font);
-                
-                // Trả cho 3 lỗ riêng biệt (Chuẩn như m yêu cầu)
                 fillField(form, '3_nam', yyyy, font);
                 fillField(form, '3_thang', mm, font);
                 fillField(form, '3_ngay', dd, font);
             }
         }
 
-        // 3. XỬ LÝ ĐỊA CHỈ (Ô 18, 22, 23)
+        // XỬ LÝ ĐỊA CHỈ (Ô 18)
         let addr18 = emp[18];
         if (addr18) {
             let parts = String(addr18).split('|');
@@ -389,7 +382,7 @@ async function refreshPDF() {
         fillField(form, '22', String(emp[22]||''), font);
         fillField(form, '23', String(emp[23]||''), font);
 
-        // 4. Xử lý học vấn 
+        // HỌC VẤN
         [25,26,27,30].forEach(i => {
             if(emp[i]){
                 let p = String(emp[i]).split('|');
@@ -398,11 +391,14 @@ async function refreshPDF() {
             }
         });
 
-        // 5. Checkbox
+        // CHECKBOX
         try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
         try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
 
-        // 6. Vẽ ảnh
+        // CHỐT CHẶN CUỐI CÙNG TRỊ LỖI WINANSI: ÉP TOÀN BỘ FORM SANG FONT TIẾNG VIỆT
+        form.updateFieldAppearances(font);
+
+        // VẼ ẢNH
         let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
         const allFields = form.getFields();
         let drawTasks = [];
@@ -429,7 +425,7 @@ async function refreshPDF() {
             }
         }
 
-        form.flatten(); 
+        form.flatten(); // Flatten form PDF mượt mà
 
         for(let task of drawTasks) {
             if(task.pageIndex >= 0) {
@@ -449,6 +445,7 @@ async function refreshPDF() {
 
     } catch(e) { 
         alert("Lỗi tạo PDF: " + e.message); 
+        console.error(e);
         document.getElementById('loadingPDF').style.display = 'none';
     }
 }
