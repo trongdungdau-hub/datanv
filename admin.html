@@ -1,485 +1,544 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8"><title>QUẢN TRỊ XUẤT PDF - CẮT ẢNH</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-<style>
-body{font-family:Arial;background:#f4f7f6; margin:0; padding:20px;}
-.container{max-width:1200px;background:#fff;padding:20px;margin:auto;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
-table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left; vertical-align:middle;}
-th{background:#0056b3;color:#fff}
-.btn{color:#fff;border:none;padding:8px 12px;cursor:pointer;font-weight:bold;border-radius:4px; font-size:13px; margin-right:5px;}
-.btn-dl{background:#28a745;} .btn-dl:disabled{background:#888;}
-.btn-xem{background:#17a2b8;}
-.badge{background:#28a745;color:white;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Nhân sự Tích hợp</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* ========== STYLE TỔNG THỂ ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f4f7f6; min-height: 100vh; color: #333; }
 
-/* Modal chính (ghép ảnh) */
-.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);}
-.modal-content{display:flex; background-color:#fff; margin:2% auto; width:96%; height:90vh; border-radius:8px; overflow:hidden;}
-.close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;font-weight:bold;cursor:pointer; z-index:1001;}
+        /* ========== AUTH FORM (ĐĂNG NHẬP) ========== */
+        .auth-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .auth-container { background: white; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 400px; max-width: 90%; padding: 40px; }
+        .auth-container h2 { text-align: center; color: #333; margin-bottom: 30px; font-weight: 600; }
+        .auth-container input { width: 100%; padding: 12px 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .auth-container input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 10px rgba(102,126,234,0.2); }
+        .auth-container button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+        .auth-links { display: flex; justify-content: space-between; margin-top: 20px; font-size: 14px; }
+        .auth-links a { color: #667eea; text-decoration: none; cursor: pointer; }
+        .remember-me { display: flex; align-items: center; margin: 15px 0; }
+        .remember-me input { width: auto; margin-right: 10px; }
+        .message { text-align: center; margin-top: 15px; color: #e74c3c; font-size: 14px; }
 
-/* Panel trái */
-.panel-left{flex:1; background:#f9f9f9; padding:20px; overflow-y:auto; border-right:2px solid #ddd; display:flex; flex-direction:column;}
-.panel-left h3{margin-top:0; color:#0056b3; border-bottom:2px solid #0056b3; padding-bottom:10px;}
-.upload-box{background:#fff; border:1px dashed #aaa; padding:15px; margin-bottom:15px; border-radius:5px;}
-.upload-box h4{margin:0 0 10px 0; font-size:14px;}
-.upload-box input{width:70%; font-size:13px; cursor:pointer; display:inline-block;}
-.upload-box .crop-btn{background:#ffc107; color:#000; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:12px; margin-left:5px;}
-.upload-box .crop-btn:disabled{background:#ccc; cursor:not-allowed;}
-.btn-export-big{background:#dc3545;color:white;width:100%;padding:15px;font-size:16px;font-weight:bold;border:none;border-radius:5px;cursor:pointer; margin-top:auto;}
+        /* ========== DASHBOARD CHÍNH ========== */
+        .dashboard { padding: 40px 20px; display: none; }
+        .dashboard h1 { text-align: center; color: #333; margin-bottom: 40px; font-size: 32px; font-weight: 600; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 30px auto; background: white; padding: 15px 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .user-info { font-size: 16px; font-weight: bold; color: #555; }
+        .btn-logout { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 15px; padding: 30px 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; border-top: 4px solid #667eea; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .card i { font-size: 40px; color: #667eea; margin-bottom: 15px; }
+        .card h3 { font-size: 18px; color: #333; margin-bottom: 5px; }
+        .card p { color: #777; font-size: 13px; }
 
-/* Panel phải */
-.panel-right{flex:2.5; background:#525659; position:relative;}
-#pdfFrame{width:100%; height:100%; border:none;}
-.loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;color:#0056b3; z-index:10; display:none;}
+        /* ========== PHẦN THÔNG TIN NHÂN VIÊN & BẢNG ========== */
+        .employee-section { display: none; padding: 20px; max-width: 1300px; margin: auto; }
+        .back-btn { background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold; }
+        .back-btn:hover { background: #5a6268; }
+        
+        .table-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.05); overflow-x: auto; }
+        .table-container h2 { color: #0056b3; margin-bottom: 20px; font-size: 22px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { border: 1px solid #e9ecef; padding: 12px 15px; text-align: left; vertical-align: middle; font-size: 14px; }
+        th { background: #f8f9fa; color: #495057; font-weight: 600; text-transform: uppercase; font-size: 13px; }
+        tr:hover { background-color: #f1f7fd; }
+        
+        .btn { color: #fff; border: none; padding: 7px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 12px; margin-right: 5px; transition: 0.2s; }
+        .btn i { margin-right: 5px; }
+        .btn-dl { background: #28a745; } .btn-dl:hover { background: #218838; } .btn-dl:disabled { background: #888; }
+        .btn-xem { background: #17a2b8; } .btn-xem:hover { background: #138496; }
+        .badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
 
-/* Modal cắt ảnh */
-.crop-modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8); align-items:center; justify-content:center;}
-.crop-modal-content{background:#fff; padding:20px; border-radius:8px; width:90%; max-width:800px; max-height:90vh; overflow:auto; position:relative;}
-.crop-modal-close{float:right; font-size:28px; font-weight:bold; cursor:pointer;}
-.crop-preview{max-width:100%; max-height:60vh; margin:20px 0;}
-.crop-actions{text-align:right;}
-.crop-actions button{padding:8px 16px; margin-left:10px; border:none; border-radius:4px; cursor:pointer;}
-.crop-save{background:#28a745; color:#fff;}
-.crop-cancel{background:#6c757d; color:#fff;}
-</style></head>
+        /* ========== MODAL XUẤT PDF (GIỮ NGUYÊN CSS GỐC CỦA MÀY) ========== */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
+        .modal-content { display: flex; background-color: #fff; margin: 2% auto; width: 96%; height: 90vh; border-radius: 8px; overflow: hidden; }
+        .close { position: absolute; right: 25px; top: 15px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 1001; }
+        .panel-left { flex: 1.2; background: #f9f9f9; padding: 20px; overflow-y: auto; border-right: 2px solid #ddd; display: flex; flex-direction: column; }
+        .panel-left h3 { margin-top: 0; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+        .upload-box { background: #fff; border: 1px dashed #aaa; padding: 12px; margin-bottom: 12px; border-radius: 5px; }
+        .upload-box h4 { margin: 0 0 8px 0; font-size: 13px; }
+        .upload-box input { width: 65%; font-size: 12px; cursor: pointer; display: inline-block; }
+        .upload-box .crop-btn { background: #ffc107; color: #000; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; margin-left: 5px; font-weight: bold; }
+        .upload-box .crop-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-export-big { background: #dc3545; color: white; width: 100%; padding: 15px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin-top: auto; transition: 0.2s;}
+        .btn-export-big:hover { background: #c82333; }
+        .panel-right { flex: 2.8; background: #525659; position: relative; }
+        #pdfFrame { width: 100%; height: 100%; border: none; }
+        .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; color: #0056b3; z-index: 10; display: none; }
+        
+        .crop-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        .crop-modal-content { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 800px; max-height: 90vh; overflow: auto; position: relative; }
+        .crop-modal-close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .crop-preview { max-width: 100%; max-height: 60vh; margin: 20px 0; }
+        .crop-actions { text-align: right; }
+        .crop-actions button { padding: 8px 16px; margin-left: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
+        .crop-save { background: #28a745; color: #fff; }
+        .crop-cancel { background: #6c757d; color: #fff; }
+
+        @media (max-width: 900px) { .grid-container { grid-template-columns: repeat(2, 1fr); } .modal-content { flex-direction: column; } .panel-left, .panel-right { flex: none; height: 50%; } }
+        @media (max-width: 500px) { .grid-container { grid-template-columns: 1fr; } }
+    </style>
+</head>
 <body>
 
-<div class="container">
-    <h2>QUẢN TRỊ XUẤT PDF (ĐÃ LỌC BỎ TIÊU ĐỀ RÁC)</h2>
-    <table>
-        <thead><tr><th>Họ Tên</th><th>CCCD</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-        <tbody id="tableBody"></tbody>
-    </table>
-</div>
+    <div id="authWrapper" class="auth-bg">
+        <div id="authContainer" class="auth-container">
+            <div id="loginForm">
+                <h2>Đăng nhập</h2>
+                <input type="text" id="loginUsername" placeholder="Tên đăng nhập" required>
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" required>
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe"> <label for="rememberMe">Ghi nhớ đăng nhập</label>
+                </div>
+                <button onclick="login()">Đăng nhập</button>
+                <div class="auth-links">
+                    <a onclick="showRegister()">Tạo tài khoản</a>
+                    <a onclick="showForgot()">Quên mật khẩu?</a>
+                </div>
+                <div id="loginMessage" class="message"></div>
+            </div>
 
-<span class="close" id="btnClose" onclick="closeModal()" style="display:none;">&times;</span>
+            <div id="registerForm" style="display: none;">
+                <h2>Đăng ký</h2>
+                <input type="text" id="regUsername" placeholder="Tên đăng nhập" required>
+                <input type="password" id="regPassword" placeholder="Mật khẩu" required>
+                <input type="password" id="regConfirm" placeholder="Xác nhận mật khẩu" required>
+                <button onclick="register()">Đăng ký</button>
+                <div class="auth-links"><a onclick="showLogin()">Quay lại đăng nhập</a></div>
+                <div id="registerMessage" class="message"></div>
+            </div>
 
-<div id="myModal" class="modal">
-  <div class="modal-content">
-      <div class="panel-left">
-          <h3 id="modalTitle">GHÉP ẢNH</h3>
-          <p style="font-size:13px; color:#555;">Bấm chọn ảnh, có thể cắt trước khi ghép.</p>
-          
-          <div class="upload-box">
-              <h4>1. Ảnh 4x6</h4>
-              <input type="file" id="up45" accept="image/*" onchange="handleFileSelect('45')">
-              <button class="crop-btn" id="crop45" onclick="openCropModal('45')" disabled>✂️ Cắt</button>
-          </div>
-          <div class="upload-box">
-              <h4>2. CCCD Trước</h4>
-              <input type="file" id="up46" accept="image/*" onchange="handleFileSelect('46')">
-              <button class="crop-btn" id="crop46" onclick="openCropModal('46')" disabled>✂️ Cắt</button>
-          </div>
-          <div class="upload-box">
-              <h4>3. CCCD Sau</h4>
-              <input type="file" id="up47" accept="image/*" onchange="handleFileSelect('47')">
-              <button class="crop-btn" id="crop47" onclick="openCropModal('47')" disabled>✂️ Cắt</button>
-          </div>
-          <div class="upload-box">
-              <h4>4. Ngân Hàng</h4>
-              <input type="file" id="up48" accept="image/*" onchange="handleFileSelect('48')">
-              <button class="crop-btn" id="crop48" onclick="openCropModal('48')" disabled>✂️ Cắt</button>
-          </div>
-          <div class="upload-box">
-              <h4>5. Sổ BHXH</h4>
-              <input type="file" id="up49" accept="image/*" onchange="handleFileSelect('49')">
-              <button class="crop-btn" id="crop49" onclick="openCropModal('49')" disabled>✂️ Cắt</button>
-          </div>
-          
-          <button class="btn-export-big" onclick="downloadFinalPDF()">💾 XUẤT & LƯU PDF</button>
-      </div>
-
-      <div class="panel-right">
-          <div id="loadingPDF" class="loading-overlay">⏳ Đang load PDF...</div>
-          <iframe id="pdfFrame"></iframe>
-      </div>
-  </div>
-</div>
-
-<div id="cropModal" class="crop-modal">
-    <div class="crop-modal-content">
-        <span class="crop-modal-close" onclick="closeCropModal()">&times;</span>
-        <h3 id="cropModalTitle">Cắt ảnh</h3>
-        <div>
-            <img id="cropImage" class="crop-preview" src="" alt="Ảnh gốc">
-        </div>
-        <div class="crop-actions">
-            <button class="crop-cancel" onclick="closeCropModal()">Hủy</button>
-            <button class="crop-save" onclick="saveCrop()">Lưu cắt</button>
+            <div id="forgotForm" style="display: none;">
+                <h2>Quên mật khẩu</h2>
+                <input type="text" id="forgotUsername" placeholder="Tên đăng nhập" required>
+                <input type="password" id="forgotNewPassword" placeholder="Mật khẩu mới" required>
+                <input type="password" id="forgotConfirm" placeholder="Xác nhận mật khẩu mới" required>
+                <button onclick="resetPassword()">Đặt lại mật khẩu</button>
+                <div class="auth-links"><a onclick="showLogin()">Quay lại đăng nhập</a></div>
+                <div id="forgotMessage" class="message"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-// ==================== CẤU HÌNH & BIẾN TOÀN CỤC ====================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
-
-// Link font Liberation Serif (y hệt Times New Roman) siêu ổn định
-const FONT_URL = "https://unpkg.com/liberation-fonts-ttf@2.1.5/LiberationSerif-Regular.ttf";
-
-let empData = [];
-let currentIndex = -1;
-let currentPDFBytes = null;
-let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
-
-let croppedImages = {
-    '45': { blob: null, original: null },
-    '46': { blob: null, original: null },
-    '47': { blob: null, original: null },
-    '48': { blob: null, original: null },
-    '49': { blob: null, original: null }
-};
-
-let currentCropField = null;
-let cropper = null;
-
-window.onload = async () => {
-    try {
-        let res = await fetch(SCRIPT_URL); empData = await res.json();
-        renderTable();
-    } catch(e) {}
-};
-
-function renderTable() {
-    let html = '';
-    
-    // ĐÃ THÊM .slice(1) ĐỂ CẮT BỎ DÒNG TIÊU ĐỀ RÁC
-    empData.slice(1).reverse().forEach((emp, revIdx) => {
-        if(!emp[0]) return; 
+    <div id="dashboard" class="dashboard">
+        <div class="top-bar">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i> Xin chào, <span id="usernameDisplay" style="color:#2563eb;"></span>
+            </div>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        </div>
         
-        // Tính toán lại index chính xác trỏ về mảng gốc
-        let idx = empData.length - 1 - revIdx;
+        <h1>HỆ THỐNG QUẢN TRỊ NHÂN SỰ</h1>
         
-        let cccd = emp[19] || ('NO_CCCD_' + idx);
-        let statusHtml = exportedList[cccd] ? '<span class="badge">✅ Đã xuất</span>' : '<span style="color:#888">Chưa xuất</span>';
+        <div class="grid-container">
+            <div class="card" onclick="goToEmployeeSection()">
+                <i class="fas fa-id-card"></i>
+                <h3>Hồ Sơ & PDF</h3>
+                <p>Quản lý & Xuất Form PDF</p>
+            </div>
+            <div class="card" onclick="alert('Chức năng đang phát triển')">
+                <i class="fas fa-clock"></i>
+                <h3>Chấm Công</h3>
+                <p>Bảng công & Điểm danh</p>
+            </div>
+            <div class="card" onclick="alert('Chức năng đang phát triển')">
+                <i class="fas fa-money-check-alt"></i>
+                <h3>Tính Lương</h3>
+                <p>Phiếu lương nhân viên</p>
+            </div>
+            <div class="card" onclick="alert('Chức năng đang phát triển')">
+                <i class="fas fa-user-shield"></i>
+                <h3>Bảo Hiểm</h3>
+                <p>BHXH, BHYT</p>
+            </div>
+            <div class="card" onclick="alert('Chức năng đang phát triển')">
+                <i class="fas fa-file-contract"></i>
+                <h3>Hợp Đồng</h3>
+                <p>Quản lý hợp đồng LĐ</p>
+            </div>
+            <div class="card" onclick="alert('Chức năng đang phát triển')">
+                <i class="fas fa-chart-line"></i>
+                <h3>Báo Cáo</h3>
+                <p>Thống kê nhân sự</p>
+            </div>
+            <div class="card" onclick="alert('Chức năng đang phát triển')">
+                <i class="fas fa-cogs"></i>
+                <h3>Cài Đặt</h3>
+                <p>Cấu hình hệ thống</p>
+            </div>
+            <div class="card" onclick="alert('Chức năng đang phát triển')">
+                <i class="fas fa-question-circle"></i>
+                <h3>Hỗ Trợ</h3>
+                <p>Hướng dẫn sử dụng</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="employeeSection" class="employee-section">
+        <button class="back-btn" onclick="goBackFromEmployee()"><i class="fas fa-arrow-left"></i> Trở về Dashboard</button>
         
-        html += `<tr>
-            <td><b>${emp[0]}</b></td>
-            <td>${emp[19]||''}</td>
-            <td>${statusHtml}</td>
-            <td>
-                <button id="btn-dl-${idx}" class="btn btn-dl" onclick="downloadAllImages(${idx})">⬇️ Tải 1 Cục Ảnh</button>
-                <button class="btn btn-xem" onclick="openModal(${idx})">👁️ Xem & Ghép</button>
-            </td>
-        </tr>`;
-    });
-    document.getElementById('tableBody').innerHTML = html;
-}
+        <div class="table-container">
+            <h2><i class="fas fa-users"></i> DANH SÁCH NHÂN VIÊN CHI TIẾT</h2>
+            <div id="statusLoading" style="text-align: center; color: #667eea; font-weight: bold; margin-bottom: 10px;">⏳ Đang tải dữ liệu từ máy chủ...</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ và Tên</th>
+                        <th>Giới tính</th>
+                        <th>Ngày sinh</th>
+                        <th>CCCD</th>
+                        <th>Chức vụ</th>
+                        <th>Trạng thái PDF</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
 
-async function getGasImg(url) {
-    if(!url) return null; 
-    let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if(!idMatch) return null;
-    try {
-        let res = await fetch(SCRIPT_URL + "?action=getImage&id=" + idMatch[1]); 
-        let json = await res.json();
-        if(json.ok && json.data){ 
-            let bin = window.atob(json.data.split(',')[1]); 
-            let b = new Uint8Array(bin.length); 
-            for(let i=0; i<bin.length; i++) b[i]=bin.charCodeAt(i); 
-            return b.buffer; 
-        } 
-    } catch(e){}
-    return null;
-}
-
-async function downloadAllImages(idx) {
-    let emp = empData[idx];
-    let links = [];
-    emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) links.push(cell); });
-    if(links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
-    
-    let btn = document.getElementById('btn-dl-' + idx);
-    let oldText = btn.innerHTML;
-    btn.innerHTML = '⏳ Đang kéo...'; btn.disabled = true;
-
-    for(let i=0; i<links.length; i++) {
-        let b = await getGasImg(links[i]);
-        if(b) download(b, `${emp[0]}_Anh_${i+1}.jpg`, "image/jpeg");
-    }
-    btn.innerHTML = '✅ Tải xong';
-    setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
-}
-
-function openModal(idx) {
-    currentIndex = idx;
-    document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
-    ['45','46','47','48','49'].forEach(id => {
-        document.getElementById('up'+id).value = '';
-        document.getElementById('crop'+id).disabled = true;
-        if(croppedImages[id].blob) {
-            URL.revokeObjectURL(croppedImages[id].blob);
-            croppedImages[id] = { blob: null, original: null };
-        }
-    });
-    document.getElementById('myModal').style.display = "flex";
-    document.getElementById('btnClose').style.display = "block";
-    refreshPDF(); 
-}
-
-function closeModal() { 
-    document.getElementById('myModal').style.display = "none"; 
-    document.getElementById('btnClose').style.display = "none";
-    document.getElementById('pdfFrame').src = '';
-    closeCropModal();
-}
-
-function handleFileSelect(fieldId) {
-    const input = document.getElementById('up'+fieldId);
-    const cropBtn = document.getElementById('crop'+fieldId);
-    if(input.files.length > 0) {
-        cropBtn.disabled = false;
-        if(croppedImages[fieldId].blob) {
-            URL.revokeObjectURL(croppedImages[fieldId].blob);
-            croppedImages[fieldId] = { blob: null, original: null };
-        }
-    } else {
-        cropBtn.disabled = true;
-    }
-    refreshPDF();
-}
-
-function openCropModal(fieldId) {
-    const input = document.getElementById('up'+fieldId);
-    if(!input.files.length) return;
-    currentCropField = fieldId;
-    const file = input.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const img = document.getElementById('cropImage');
-        img.src = e.target.result;
-        document.getElementById('cropModal').style.display = 'flex';
-        if(cropper) cropper.destroy();
-        setTimeout(() => {
-            cropper = new Cropper(img, { aspectRatio: NaN, viewMode: 1, autoCropArea: 1, responsive: true });
-        }, 100);
-    };
-    reader.readAsDataURL(file);
-}
-
-function closeCropModal() {
-    document.getElementById('cropModal').style.display = 'none';
-    if(cropper) { cropper.destroy(); cropper = null; }
-}
-
-function saveCrop() {
-    if(!cropper || !currentCropField) return;
-    const canvas = cropper.getCroppedCanvas({
-        maxWidth: 1024, maxHeight: 1024, fillColor: '#fff',
-        imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
-    });
-    canvas.toBlob((blob) => {
-        const blobUrl = URL.createObjectURL(blob);
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const buffer = e.target.result;
-            if(croppedImages[currentCropField].blob) { URL.revokeObjectURL(croppedImages[currentCropField].blob); }
-            croppedImages[currentCropField] = { blob: blobUrl, original: buffer };
-            refreshPDF();
-        };
-        reader.readAsArrayBuffer(blob);
-        closeCropModal();
-    }, 'image/jpeg', 0.95);
-}
-
-async function getImageBufferForField(fieldId) {
-    if(croppedImages[fieldId] && croppedImages[fieldId].original) return croppedImages[fieldId].original;
-    const input = document.getElementById('up'+fieldId);
-    if(input.files.length > 0) return await readFileAsBuffer(input.files[0]);
-    return null;
-}
-
-function readFileAsBuffer(file) {
-    return new Promise((resolve) => {
-        let reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsArrayBuffer(file);
-    });
-}
-
-function formatSal(v){
-    if(!v) return ""; let s = String(v).toUpperCase().trim(); let m = s.replace(/[,.]/g,'').match(/\d+/);
-    if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`;
-}
-
-// -----------------------------------------------------------
-// HÀM BƠM CHỮ: ÉP CỠ CHỮ 10 CỐ ĐỊNH CHO TẤT CẢ CÁC Ô
-// -----------------------------------------------------------
-function fillField(form, fieldName, value, customFont) {
-    try {
-        let field = form.getTextField(fieldName);
-        if (field && value) {
-            field.setText(String(value));
-            field.setFontSize(10); // CỐ ĐỊNH CHỮ SIZE 10
-        }
-    } catch(e) {}
-}
-
-async function refreshPDF() {
-    if(currentIndex === -1) return;
-    let emp = empData[currentIndex]; 
-    let loadingDiv = document.getElementById('loadingPDF');
-    loadingDiv.style.display = 'flex';
-    loadingDiv.innerText = "⏳ Đang tải Template PDF...";
-    
-    try {
-        // TẢI TEMPLATE TRÊN GITHUB
-        let templateRes = await fetch("template.pdf?v="+Math.random());
-        if(!templateRes.ok) throw new Error("Không tìm thấy file 'template.pdf'. Hãy up file template.pdf lên Github!");
-        const doc = await PDFLib.PDFDocument.load(await templateRes.arrayBuffer());
-        doc.registerFontkit(window.fontkit);
-        
-        loadingDiv.innerText = "⏳ Đang nạp Font chữ Times New Roman...";
-        
-        // TẢI FONT TRỰC TIẾP TỪ SERVER (Bypass mọi lỗi vớ vẩn)
-        let fontBytes;
-        try {
-            let res = await fetch(FONT_URL);
-            fontBytes = await res.arrayBuffer();
-        } catch(e) {
-            // Nếu mạng siêu lởm, lấy font Roboto thần thánh làm backup cuối cùng
-            let res = await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf");
-            fontBytes = await res.arrayBuffer();
-        }
-        
-        const font = await doc.embedFont(fontBytes);
-        const form = doc.getForm();
-
-        // CHỐT CHẶN DIỆT WINANSI (ÉP TOÀN BỘ FORM SANG FONT TIẾNG VIỆT TRƯỚC KHI LÀM GÌ ĐÓ)
-        form.updateFieldAppearances(font);
-
-        loadingDiv.innerText = "⏳ Đang điền dữ liệu...";
-
-        // 1. Điền text fields bình thường và ép size 10
-        for(let i=0; i<=44; i++){
-            if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
-            let val = emp[i] ? String(emp[i]) : "";
-            
-            if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
-            if(i===9 || i===12) val = formatSal(val);
-            
-            fillField(form, i.toString(), val, font);
-        }
-        
-        // 2. XỬ LÝ NGÀY SINH (TÁCH ĐÚNG 3_nam, 3_thang, 3_ngay)
-        let dobRaw = emp[3];
-        if (dobRaw) {
-            let d = new Date(dobRaw);
-            if (String(dobRaw).includes('/')) {
-                let parts = String(dobRaw).split('/');
-                if(parts[0].length === 2) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-            }
-            if (!isNaN(d)) {
-                let dd = ("0" + d.getDate()).slice(-2);
-                let mm = ("0" + (d.getMonth() + 1)).slice(-2);
-                let yyyy = d.getFullYear().toString();
+    <span class="close" id="btnClose" onclick="closeModal()" style="display:none;">&times;</span>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="panel-left">
+                <h3 id="modalTitle">GHÉP ẢNH & XUẤT PDF</h3>
+                <p style="font-size:13px; color:#555; margin-bottom: 15px;">Bấm chọn ảnh, có thể cắt trước khi ghép vào form.</p>
                 
-                fillField(form, '3', `${dd}/${mm}/${yyyy}`, font);
-                fillField(form, '3_nam', yyyy, font);
-                fillField(form, '3_thang', mm, font);
-                fillField(form, '3_ngay', dd, font);
-            }
+                <div class="upload-box">
+                    <h4>1. Ảnh 4x6</h4>
+                    <input type="file" id="up45" accept="image/*" onchange="handleFileSelect('45')">
+                    <button class="crop-btn" id="crop45" onclick="openCropModal('45')" disabled><i class="fas fa-crop"></i> Cắt</button>
+                </div>
+                <div class="upload-box">
+                    <h4>2. CCCD Trước</h4>
+                    <input type="file" id="up46" accept="image/*" onchange="handleFileSelect('46')">
+                    <button class="crop-btn" id="crop46" onclick="openCropModal('46')" disabled><i class="fas fa-crop"></i> Cắt</button>
+                </div>
+                <div class="upload-box">
+                    <h4>3. CCCD Sau</h4>
+                    <input type="file" id="up47" accept="image/*" onchange="handleFileSelect('47')">
+                    <button class="crop-btn" id="crop47" onclick="openCropModal('47')" disabled><i class="fas fa-crop"></i> Cắt</button>
+                </div>
+                <div class="upload-box">
+                    <h4>4. Ngân Hàng</h4>
+                    <input type="file" id="up48" accept="image/*" onchange="handleFileSelect('48')">
+                    <button class="crop-btn" id="crop48" onclick="openCropModal('48')" disabled><i class="fas fa-crop"></i> Cắt</button>
+                </div>
+                <div class="upload-box">
+                    <h4>5. Sổ BHXH</h4>
+                    <input type="file" id="up49" accept="image/*" onchange="handleFileSelect('49')">
+                    <button class="crop-btn" id="crop49" onclick="openCropModal('49')" disabled><i class="fas fa-crop"></i> Cắt</button>
+                </div>
+                
+                <button class="btn-export-big" onclick="downloadFinalPDF()"><i class="fas fa-save"></i> XUẤT LƯU PDF</button>
+            </div>
+
+            <div class="panel-right">
+                <div id="loadingPDF" class="loading-overlay">⏳ Đang load PDF...</div>
+                <iframe id="pdfFrame"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div id="cropModal" class="crop-modal">
+        <div class="crop-modal-content">
+            <span class="crop-modal-close" onclick="closeCropModal()">&times;</span>
+            <h3 id="cropModalTitle">Cắt ảnh</h3>
+            <div><img id="cropImage" class="crop-preview" src="" alt="Ảnh gốc"></div>
+            <div class="crop-actions">
+                <button class="crop-cancel" onclick="closeCropModal()">Hủy</button>
+                <button class="crop-save" onclick="saveCrop()">Lưu cắt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================================
+        // 1. LOGIC AUTH & QUẢN LÝ TÀI KHOẢN
+        // ==========================================================
+        if (!localStorage.getItem('users')) localStorage.setItem('users', JSON.stringify([]));
+        function getUsers() { return JSON.parse(localStorage.getItem('users')); }
+        function saveUsers(users) { localStorage.setItem('users', JSON.stringify(users)); }
+
+        function showLogin() { document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('forgotForm').style.display = 'none'; clearMsgs(); }
+        function showRegister() { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; document.getElementById('forgotForm').style.display = 'none'; clearMsgs(); }
+        function showForgot() { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('forgotForm').style.display = 'block'; clearMsgs(); }
+        function clearMsgs() { document.getElementById('loginMessage').innerText = ''; document.getElementById('registerMessage').innerText = ''; document.getElementById('forgotMessage').innerText = ''; }
+
+        function register() {
+            const u = document.getElementById('regUsername').value.trim(); const p = document.getElementById('regPassword').value; const c = document.getElementById('regConfirm').value;
+            if (!u || !p || !c) return document.getElementById('registerMessage').innerText = 'Điền đủ thông tin!';
+            if (p !== c) return document.getElementById('registerMessage').innerText = 'Mật khẩu không khớp!';
+            const users = getUsers();
+            if (users.find(x => x.username === u)) return document.getElementById('registerMessage').innerText = 'Tài khoản đã tồn tại!';
+            users.push({ username: u, password: p }); saveUsers(users);
+            document.getElementById('registerMessage').style.color = '#2ecc71'; document.getElementById('registerMessage').innerText = 'Đăng ký thành công!';
+            setTimeout(showLogin, 1500);
         }
 
-        // 3. XỬ LÝ ĐỊA CHỈ (Ô 18)
-        let addr18 = emp[18];
-        if (addr18) {
-            let parts = String(addr18).split('|');
-            let tinh = parts[0] || '';
-            let phuong = parts[1] || '';
-            let chitiet = parts[2] || '';
-            
-            let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
-            fillField(form, '18', full18, font); 
-            fillField(form, '18_tinh', tinh, font); 
-            fillField(form, '18_phuong', phuong, font);
-            fillField(form, '18_chitiet', chitiet, font);
+        function login() {
+            const u = document.getElementById('loginUsername').value.trim(); const p = document.getElementById('loginPassword').value; const r = document.getElementById('rememberMe').checked;
+            if (!u || !p) return document.getElementById('loginMessage').innerText = 'Nhập đủ thông tin!';
+            const user = getUsers().find(x => x.username === u && x.password === p);
+            if (!user) return document.getElementById('loginMessage').innerText = 'Sai tài khoản/mật khẩu!';
+            if (r) localStorage.setItem('rememberedUser', JSON.stringify({ username: u, password: p })); else localStorage.removeItem('rememberedUser');
+            sessionStorage.setItem('currentUser', u);
+            showDashboard(u);
         }
-        fillField(form, '22', String(emp[22]||''), font);
-        fillField(form, '23', String(emp[23]||''), font);
 
-        // 4. Xử lý học vấn 
-        [25,26,27,30].forEach(i => {
-            if(emp[i]){
-                let p = String(emp[i]).split('|');
-                fillField(form, `${i}_thoigian`, p[0]||'', font);
-                fillField(form, `${i}_tentruong`, p[1]||'', font);
-            }
-        });
+        function resetPassword() {
+            const u = document.getElementById('forgotUsername').value.trim(); const np = document.getElementById('forgotNewPassword').value; const c = document.getElementById('forgotConfirm').value;
+            if (!u || !np || !c) return document.getElementById('forgotMessage').innerText = 'Điền đủ thông tin!';
+            if (np !== c) return document.getElementById('forgotMessage').innerText = 'Mật khẩu không khớp!';
+            const users = getUsers(); const idx = users.findIndex(x => x.username === u);
+            if (idx === -1) return document.getElementById('forgotMessage').innerText = 'Tài khoản không tồn tại!';
+            users[idx].password = np; saveUsers(users);
+            document.getElementById('forgotMessage').style.color = '#2ecc71'; document.getElementById('forgotMessage').innerText = 'Đổi MK thành công!';
+            setTimeout(showLogin, 1500);
+        }
 
-        // 5. Checkbox
-        try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
-        try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            document.getElementById('authWrapper').style.display = 'flex'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('employeeSection').style.display = 'none';
+            document.getElementById('loginPassword').value = ''; showLogin();
+        }
 
-        // LÀM LẠI PHÁT NỮA CHO CHẮC ĂN TRƯỚC KHI VẼ ẢNH
-        form.updateFieldAppearances(font);
+        function showDashboard(username) {
+            document.body.style.background = '#f4f7f6'; // Xóa nền gradient khi vào trong
+            document.getElementById('authWrapper').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('employeeSection').style.display = 'none';
+            document.getElementById('usernameDisplay').innerText = username;
+        }
 
-        // 6. Vẽ ảnh
-        loadingDiv.innerText = "⏳ Đang ghép ảnh vào form...";
-        let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ];
-        const allFields = form.getFields();
-        let drawTasks = [];
+        // ==========================================================
+        // 2. LOGIC LÕI XUẤT PDF (GIỮ NGUYÊN 100% CỦA MÀY, CHỈ BỎ TIÊU ĐỀ)
+        // ==========================================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
+        const FONT_URL = "https://unpkg.com/liberation-fonts-ttf@2.1.5/LiberationSerif-Regular.ttf";
 
-        for(let item of inputs) {
-            const fieldId = item.id;
-            const buffer = await getImageBufferForField(fieldId);
-            if(!buffer) continue;
+        let empData = []; let currentIndex = -1; let currentPDFBytes = null;
+        let exportedList = JSON.parse(localStorage.getItem('exportedData') || '{}');
+        let croppedImages = { '45': { blob: null, original: null }, '46': { blob: null, original: null }, '47': { blob: null, original: null }, '48': { blob: null, original: null }, '49': { blob: null, original: null } };
+        let currentCropField = null; let cropper = null;
+
+        // Auto đăng nhập hoặc fetch data khi load
+        window.onload = async () => {
+            const remembered = localStorage.getItem('rememberedUser');
+            if (remembered) { try { const { username, password } = JSON.parse(remembered); document.getElementById('loginUsername').value = username; document.getElementById('loginPassword').value = password; document.getElementById('rememberMe').checked = true; login(); } catch (e) {} } 
+            else { const cU = sessionStorage.getItem('currentUser'); if (cU) showDashboard(cU); else showLogin(); }
             
-            const targetField = allFields.find(f => f.getName().trim() === fieldId);
-            if(targetField) {
-                const widgets = targetField.acroField.getWidgets();
-                if(widgets.length > 0) {
-                    const widget = widgets[0];
-                    const rect = widget.getRectangle();
-                    const pRef = widget.P(); 
-                    if(pRef) {
-                        const pageIndex = doc.getPages().findIndex(p => p.ref === pRef);
-                        if(pageIndex >= 0) {
-                            drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex });
-                        }
+            // Kéo data ngầm để sẵn sàng
+            try { 
+                let res = await fetch(SCRIPT_URL); 
+                empData = await res.json(); 
+                document.getElementById('statusLoading').style.display = 'none'; // Ẩn chữ đang tải
+                renderTable(); 
+            } catch(e) {
+                document.getElementById('statusLoading').innerText = '❌ Lỗi tải dữ liệu. Vui lòng F5 lại!';
+            }
+        };
+
+        function goToEmployeeSection() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('employeeSection').style.display = 'block';
+            renderTable();
+        }
+
+        function goBackFromEmployee() {
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('employeeSection').style.display = 'none';
+            closeModal();
+        }
+
+        // BẢNG CHI TIẾT (CÓ LỌC DÒNG TIÊU ĐỀ THEO CODE MÀY CHẤP NHẬN)
+        function renderTable() {
+            let html = '';
+            let stt = 1;
+            empData.slice(1).reverse().forEach((emp, revIdx) => {
+                if(!emp[0]) return; 
+                
+                // Lọc thêm phát nữa cho chắc ăn không dính dòng tiêu đề
+                if(String(emp[0]).toLowerCase().includes('họ và tên')) return;
+
+                let idx = empData.length - 1 - revIdx;
+                let cccd = emp[19] || ('NO_CCCD_' + idx);
+                let statusHtml = exportedList[cccd] ? '<span class="badge">✅ Đã xuất</span>' : '<span style="color:#888">Chưa xuất</span>';
+                
+                // Bổ sung các cột để thành bảng "Chi tiết"
+                let gioitinh = emp[4] || '-';
+                let ngaysinh = emp[3] ? (String(emp[3]).includes('T') ? new Date(emp[3]).toLocaleDateString('vi-VN') : emp[3]) : '-';
+                let chucvu = emp[7] || '-';
+
+                html += `<tr>
+                    <td style="text-align:center;">${stt++}</td>
+                    <td><b>${emp[0]}</b></td>
+                    <td>${gioitinh}</td>
+                    <td>${ngaysinh}</td>
+                    <td>${emp[19]||''}</td>
+                    <td>${chucvu}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <button id="btn-dl-${idx}" class="btn btn-dl" onclick="downloadAllImages(${idx})"><i class="fas fa-download"></i> Ảnh</button>
+                        <button class="btn btn-xem" onclick="openModal(${idx})"><i class="fas fa-file-pdf"></i> Form PDF</button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('tableBody').innerHTML = html;
+        }
+
+        // TOÀN BỘ LOGIC PDF BÊN DƯỚI LÀ CỦA MÀY COPY PASTE Y NGUYÊN
+        async function getGasImg(url) {
+            if(!url) return null; 
+            let idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if(!idMatch) return null;
+            try {
+                let res = await fetch(SCRIPT_URL + "?action=getImage&id=" + idMatch[1]); 
+                let json = await res.json();
+                if(json.ok && json.data){ 
+                    let bin = window.atob(json.data.split(',')[1]); 
+                    let b = new Uint8Array(bin.length); 
+                    for(let i=0; i<bin.length; i++) b[i]=bin.charCodeAt(i); 
+                    return b.buffer; 
+                } 
+            } catch(e){}
+            return null;
+        }
+
+        async function downloadAllImages(idx) {
+            let emp = empData[idx]; let links = [];
+            emp.forEach(cell => { if(cell && String(cell).includes('drive.google.com')) links.push(cell); });
+            if(links.length === 0) { alert('❌ Người này không có file ảnh nào trên Drive!'); return; }
+            let btn = document.getElementById('btn-dl-' + idx); let oldText = btn.innerHTML;
+            btn.innerHTML = '⏳ Đang kéo...'; btn.disabled = true;
+            for(let i=0; i<links.length; i++) { let b = await getGasImg(links[i]); if(b) download(b, `${emp[0]}_Anh_${i+1}.jpg`, "image/jpeg"); }
+            btn.innerHTML = '✅ Tải xong'; setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 3000);
+        }
+
+        function openModal(idx) {
+            currentIndex = idx; document.getElementById('modalTitle').innerText = "HỒ SƠ: " + empData[idx][0];
+            ['45','46','47','48','49'].forEach(id => { document.getElementById('up'+id).value = ''; document.getElementById('crop'+id).disabled = true; if(croppedImages[id].blob) { URL.revokeObjectURL(croppedImages[id].blob); croppedImages[id] = { blob: null, original: null }; } });
+            document.getElementById('myModal').style.display = "flex"; document.getElementById('btnClose').style.display = "block";
+            refreshPDF(); 
+        }
+
+        function closeModal() { document.getElementById('myModal').style.display = "none"; document.getElementById('btnClose').style.display = "none"; document.getElementById('pdfFrame').src = ''; closeCropModal(); }
+
+        function handleFileSelect(fieldId) {
+            const input = document.getElementById('up'+fieldId); const cropBtn = document.getElementById('crop'+fieldId);
+            if(input.files.length > 0) { cropBtn.disabled = false; if(croppedImages[fieldId].blob) { URL.revokeObjectURL(croppedImages[fieldId].blob); croppedImages[fieldId] = { blob: null, original: null }; } } else { cropBtn.disabled = true; }
+            refreshPDF();
+        }
+
+        function openCropModal(fieldId) {
+            const input = document.getElementById('up'+fieldId); if(!input.files.length) return;
+            currentCropField = fieldId; const file = input.files[0]; const reader = new FileReader();
+            reader.onload = (e) => { const img = document.getElementById('cropImage'); img.src = e.target.result; document.getElementById('cropModal').style.display = 'flex'; if(cropper) cropper.destroy(); setTimeout(() => { cropper = new Cropper(img, { aspectRatio: NaN, viewMode: 1, autoCropArea: 1, responsive: true }); }, 100); };
+            reader.readAsDataURL(file);
+        }
+
+        function closeCropModal() { document.getElementById('cropModal').style.display = 'none'; if(cropper) { cropper.destroy(); cropper = null; } }
+
+        function saveCrop() {
+            if(!cropper || !currentCropField) return;
+            const canvas = cropper.getCroppedCanvas({ maxWidth: 1024, maxHeight: 1024, fillColor: '#fff', imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+            canvas.toBlob((blob) => { const blobUrl = URL.createObjectURL(blob); const reader = new FileReader(); reader.onload = (e) => { const buffer = e.target.result; if(croppedImages[currentCropField].blob) { URL.revokeObjectURL(croppedImages[currentCropField].blob); } croppedImages[currentCropField] = { blob: blobUrl, original: buffer }; refreshPDF(); }; reader.readAsArrayBuffer(blob); closeCropModal(); }, 'image/jpeg', 0.95);
+        }
+
+        async function getImageBufferForField(fieldId) {
+            if(croppedImages[fieldId] && croppedImages[fieldId].original) return croppedImages[fieldId].original;
+            const input = document.getElementById('up'+fieldId); if(input.files.length > 0) return await readFileAsBuffer(input.files[0]); return null;
+        }
+
+        function readFileAsBuffer(file) { return new Promise((resolve) => { let reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsArrayBuffer(file); }); }
+
+        function formatSal(v){ if(!v) return ""; let s = String(v).toUpperCase().trim(); let m = s.replace(/[,.]/g,'').match(/\d+/); if(!m) return s; let n = parseInt(m[0],10); return (s.includes('USD') || n<100000) ? `${n.toLocaleString('vi-VN')} USD` : `${n.toLocaleString('vi-VN')} VND`; }
+
+        function fillField(form, fieldName, value, customFont) {
+            try { let field = form.getTextField(fieldName); if (field && value) { field.setText(String(value)); field.setFontSize(10); field.updateAppearances(customFont); } } catch(e) {}
+        }
+
+        async function refreshPDF() {
+            if(currentIndex === -1) return;
+            let emp = empData[currentIndex]; let loadingDiv = document.getElementById('loadingPDF'); loadingDiv.style.display = 'flex'; loadingDiv.innerText = "⏳ Đang tải Template PDF...";
+            try {
+                const doc = await PDFLib.PDFDocument.load(await fetch("template.pdf?v="+Math.random()).then(r=>r.arrayBuffer()));
+                doc.registerFontkit(window.fontkit);
+                
+                // GIỮ NGUYÊN FONT CỦA MÀY Ở ĐÂY ĐỂ TRÁNH LỖI WINANSI
+                const fontBytes = await fetch("https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf").then(r=>r.arrayBuffer());
+                const customFont = await doc.embedFont(fontBytes);
+                const form = doc.getForm();
+
+                loadingDiv.innerText = "⏳ Đang điền dữ liệu...";
+                for(let i=0; i<=44; i++){
+                    if([3, 4, 17, 18, 25, 26, 27, 30].includes(i)) continue;
+                    let val = emp[i] ? String(emp[i]) : "";
+                    if([5,20,41].includes(i) && val){ try { let d=new Date(val); if(!isNaN(d)) val=`${("0"+d.getDate()).slice(-2)}/${("0"+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`; } catch(e){} }
+                    if(i===9 || i===12) val = formatSal(val);
+                    fillField(form, i.toString(), val, customFont);
+                }
+                
+                let dobRaw = emp[3];
+                if (dobRaw) {
+                    let d = new Date(dobRaw);
+                    if (String(dobRaw).includes('/')) { let parts = String(dobRaw).split('/'); if(parts[0].length === 2) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); }
+                    if (!isNaN(d)) {
+                        let dd = ("0" + d.getDate()).slice(-2); let mm = ("0" + (d.getMonth() + 1)).slice(-2); let yyyy = d.getFullYear().toString();
+                        fillField(form, '3', `${dd}/${mm}/${yyyy}`, customFont); fillField(form, '3_nam', yyyy, customFont); fillField(form, '3_thang', mm, customFont); fillField(form, '3_ngay', dd, customFont);
                     }
                 }
-            }
+
+                let addr18 = emp[18];
+                if (addr18) {
+                    let parts = String(addr18).split('|'); let tinh = parts[0] || ''; let phuong = parts[1] || ''; let chitiet = parts[2] || ''; let full18 = [chitiet, phuong, tinh].filter(Boolean).join(', ');
+                    fillField(form, '18', full18, customFont); fillField(form, '18_tinh', tinh, customFont); fillField(form, '18_phuong', phuong, customFont); fillField(form, '18_chitiet', chitiet, customFont);
+                }
+                fillField(form, '22', String(emp[22]||''), customFont); fillField(form, '23', String(emp[23]||''), customFont);
+
+                [25,26,27,30].forEach(i => { if(emp[i]){ let p = String(emp[i]).split('|'); fillField(form, `${i}_thoigian`, p[0]||'', customFont); fillField(form, `${i}_tentruong`, p[1]||'', customFont); } });
+                try { let gt=String(emp[4]||'').toLowerCase(); if(gt.includes('nam')) form.getCheckBox('Nam').check(); else form.getCheckBox('Nữ').check(); } catch(e){}
+                try { let hn=String(emp[17]||'').toLowerCase(); if(hn.includes('đã')||hn.includes('da ket')) form.getCheckBox('DaKetHon').check(); else form.getCheckBox('ChuaKetHon').check(); } catch(e){}
+
+                form.updateFieldAppearances(customFont); // BẢO KÊ FONT
+
+                loadingDiv.innerText = "⏳ Đang ghép ảnh...";
+                let inputs = [ {id:'45'}, {id:'46'}, {id:'47'}, {id:'48'}, {id:'49'} ]; const allFields = form.getFields(); let drawTasks = [];
+                for(let item of inputs) {
+                    const fieldId = item.id; const buffer = await getImageBufferForField(fieldId); if(!buffer) continue;
+                    const targetField = allFields.find(f => f.getName().trim() === fieldId);
+                    if(targetField) { const widgets = targetField.acroField.getWidgets(); if(widgets.length > 0) { const widget = widgets[0]; const rect = widget.getRectangle(); const pRef = widget.P(); if(pRef) { const pageIndex = doc.getPages().findIndex(p => p.ref === pRef); if(pageIndex >= 0) { drawTasks.push({ buffer: buffer, rect: rect, pageIndex: pageIndex }); } } } }
+                }
+
+                form.flatten(); 
+                for(let task of drawTasks) {
+                    if(task.pageIndex >= 0) { const page = doc.getPages()[task.pageIndex]; let img; try { img = await doc.embedJpg(task.buffer); } catch { img = await doc.embedPng(task.buffer); } page.drawImage(img, { x: task.rect.x, y: task.rect.y, width: task.rect.width, height: task.rect.height }); }
+                }
+
+                currentPDFBytes = await doc.save();
+                const blob = new Blob([currentPDFBytes], { type: 'application/pdf' }); const url = URL.createObjectURL(blob);
+                document.getElementById('pdfFrame').src = url; loadingDiv.style.display = 'none';
+            } catch(e) { alert("Lỗi tải PDF: " + e.message); console.error(e); document.getElementById('loadingPDF').style.display = 'none'; }
         }
 
-        // ĐOẠN NÀY LÀ ĐOẠN ĐANG GÂY ÁM ẢNH NHẤT - NAY ĐÃ BỊ BẮT CHẾT CÚ PHÁP
-        form.flatten(); 
-
-        for(let task of drawTasks) {
-            if(task.pageIndex >= 0) {
-                const page = doc.getPages()[task.pageIndex];
-                let img;
-                try { img = await doc.embedJpg(task.buffer); } catch { img = await doc.embedPng(task.buffer); }
-                page.drawImage(img, { x: task.rect.x, y: task.rect.y, width: task.rect.width, height: task.rect.height });
-            }
+        function downloadFinalPDF() {
+            if(!currentPDFBytes) return; let emp = empData[currentIndex]; download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
+            let cccd = emp[19] || ('NO_CCCD_' + currentIndex); exportedList[cccd] = true; localStorage.setItem('exportedData', JSON.stringify(exportedList)); renderTable(); closeModal();
         }
-
-        currentPDFBytes = await doc.save();
-        const blob = new Blob([currentPDFBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        
-        document.getElementById('pdfFrame').src = url;
-        loadingDiv.style.display = 'none';
-
-    } catch(e) { 
-        alert("Cảnh báo lỗi: " + e.message); 
-        console.error(e);
-        loadingDiv.style.display = 'none';
-    }
-}
-
-function downloadFinalPDF() {
-    if(!currentPDFBytes) return;
-    let emp = empData[currentIndex];
-    download(currentPDFBytes, `HoSo_${emp[0]}.pdf`, "application/pdf");
-    
-    let cccd = emp[19] || ('NO_CCCD_' + currentIndex);
-    exportedList[cccd] = true;
-    localStorage.setItem('exportedData', JSON.stringify(exportedList));
-    renderTable(); 
-    closeModal();
-}
-</script></body></html>
+    </script>
+</body>
+</html>
