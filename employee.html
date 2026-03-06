@@ -6,6 +6,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Giữ nguyên style như bạn đã cung cấp */
         :root {
             --primary: #4338ca;
             --primary-hover: #3730a3;
@@ -19,7 +20,6 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        /* PHẦN 1: TRANG NỀN TỔNG THỂ */
         body { 
             background: var(--bg-color); 
             color: var(--text-main); 
@@ -54,7 +54,6 @@
         }
         .back-btn:hover { background: #f1f5f9; transform: translateY(-2px); }
 
-        /* PHẦN 2: KHỐI 3D TRUNG TÂM */
         .glass-container { 
             position: absolute;
             bottom: 5%; 
@@ -82,7 +81,6 @@
         .btn-edit { background: #f59e0b; padding: 6px 10px; border-radius: 6px; }
         .btn-load { background: #0ea5e9; padding: 6px 10px; border-radius: 6px; }
 
-        /* KHU VỰC BẢNG */
         .table-wrapper {
             position: relative;
             overflow: auto;
@@ -133,7 +131,6 @@
 
         tbody tr:hover td { background-color: #f1f5f9 !important; }
 
-        /* FORM MODAL */
         .form-modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .form-modal-content { background: var(--surface); padding: 32px; border-radius: 16px; width: 850px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .form-modal-content h3 { color: var(--primary); margin-bottom: 24px; font-size: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
@@ -142,7 +139,6 @@
         .form-group label { font-weight: 600; font-size: 13px; color: var(--text-muted); }
         .form-group input, .form-group select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
         .form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1); }
-        .form-group input[readonly] { background-color: var(--bg-color); cursor: not-allowed; }
         .form-actions { margin-top: 32px; display: flex; justify-content: flex-end; gap: 12px; }
         .btn-cancel { background: white; color: var(--text-main); border: 1px solid var(--border); }
         .btn-cancel:hover { background: var(--bg-color); }
@@ -207,7 +203,7 @@
                 <div class="form-group"><label>Giới tính</label><select id="fm_gioitinh"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
                 <div class="form-group"><label>Ngày Sinh</label><input type="date" id="fm_ngaysinh"></div>
                 <div class="form-group"><label>Ngày Vào làm</label><input type="date" id="fm_ngayvao"></div>
-                <div class="form-group"><label>Ngày Hợp Đồng</label><input type="date" id="fm_ngayhd"></div>
+                <div class="form-group"><label>Ngày Hợp Đồng</label><input type="date" id="fm_ngayhd" readonly></div>
                 <div class="form-group"><label>Bộ Phận</label><input type="text" id="fm_bophan"></div>
                 <div class="form-group"><label>Chức Vụ</label><input type="text" id="fm_chucvu"></div>
                 <div class="form-group"><label>Số CCCD</label><input type="text" id="fm_cccd"></div>
@@ -230,10 +226,9 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
         let empData = [];
 
-        // HÀM MỚI: Ép chuẩn mọi định dạng ngày về YYYY-MM-DD để tránh lệch múi giờ
+        // Ép chuẩn ngày về YYYY-MM-DD
         function parseToYYYYMMDD(dateStr) {
             if (!dateStr) return '';
-            // Nếu là dạng của Google Sheets (vd: 2026-02-27T17:00:00.000Z)
             if (dateStr.includes('T')) {
                 let d = new Date(dateStr);
                 if (isNaN(d)) return dateStr.split('T')[0];
@@ -255,7 +250,7 @@
             return dateStr;
         }
 
-        // Logic cộng 2 tháng đã được trị bệnh lùi ngày
+        // Cộng 2 tháng, xử lý ngày cuối tháng
         function calculateNgayHD(ngayVaoStr) {
             if (!ngayVaoStr) return '';
             let yyyy_mm_dd = parseToYYYYMMDD(ngayVaoStr);
@@ -280,7 +275,7 @@
         function renderTable() {
             let html = '';
             empData.slice(1).forEach((emp, index) => {
-                if (!emp[0]) return; 
+                if (!emp || !Array.isArray(emp) || !emp[0]) return; 
                 
                 let ngayVao = formatDateDDMMYYYY(emp[5]);
                 let ngayHD2 = emp[52] ? formatDateDDMMYYYY(emp[52]) : '';
@@ -325,6 +320,7 @@
             } catch (e) {
                 document.getElementById('statusLoading').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Lỗi kết nối dữ liệu!';
                 document.getElementById('statusLoading').style.color = 'red';
+                console.error(e);
             }
         };
 
@@ -343,15 +339,30 @@
         }
 
         function openEditModal(index) {
+            // Kiểm tra dữ liệu
+            if (!empData || empData.length === 0) {
+                alert('Dữ liệu chưa sẵn sàng, vui lòng thử lại sau!');
+                return;
+            }
+            let realRow = index + 1;
+            if (realRow >= empData.length) {
+                alert('Không tìm thấy nhân viên!');
+                return;
+            }
+            let emp = empData[realRow];
+            if (!emp || !Array.isArray(emp)) {
+                alert('Dữ liệu nhân viên không hợp lệ!');
+                return;
+            }
+
             document.getElementById('formModalTitle').innerText = 'SỬA NHÂN VIÊN';
-            document.getElementById('emp_idx').value = index;
-            let emp = empData[index + 1];
+            document.getElementById('emp_idx').value = index; // lưu index trong slice
+            // realRow = index + 1
 
             document.getElementById('fm_msnv').value = emp[51] || '';
             document.getElementById('fm_hoten').value = emp[0] || '';
             document.getElementById('fm_gioitinh').value = emp[4] || 'Nam';
             
-            // Ép múi giờ khi đổ dữ liệu vào Form
             document.getElementById('fm_ngaysinh').value = parseToYYYYMMDD(emp[3]);
             document.getElementById('fm_ngayvao').value = parseToYYYYMMDD(emp[5]);
             document.getElementById('fm_ngayhd').value = parseToYYYYMMDD(emp[52]);
@@ -382,13 +393,27 @@
         async function saveEmployeeData() {
             let idx = parseInt(document.getElementById('emp_idx').value);
             let isNew = (idx === -1);
-            let realIdx = isNew ? -1 : idx + 1; 
+            let realIdx = isNew ? -1 : idx + 1; // vì idx là index trong slice
 
-            if(!document.getElementById('fm_hoten').value.trim()) {
+            if (!document.getElementById('fm_hoten').value.trim()) {
                 alert("Vui lòng nhập Họ và Tên!"); return;
             }
 
-            let emp = isNew ? new Array(60).fill('') : [...empData[realIdx]];
+            // Kiểm tra dữ liệu khi sửa
+            if (!isNew) {
+                if (!empData || realIdx >= empData.length || !empData[realIdx] || !Array.isArray(empData[realIdx])) {
+                    alert('Dữ liệu nhân viên gốc không hợp lệ. Vui lòng tải lại trang!');
+                    return;
+                }
+            }
+
+            // Tạo mảng dữ liệu mới
+            let emp;
+            if (isNew) {
+                emp = new Array(60).fill('');
+            } else {
+                emp = [...empData[realIdx]]; // copy an toàn
+            }
 
             emp[0] = document.getElementById('fm_hoten').value;
             emp[3] = document.getElementById('fm_ngaysinh').value;
@@ -404,10 +429,8 @@
             emp[35] = document.getElementById('fm_mst').value;
             emp[38] = document.getElementById('fm_tamtru').value;
             
-            // Ghi nhận trực tiếp từ Input MSNV và Ngày HD
             emp[51] = document.getElementById('fm_msnv').value;
             emp[52] = document.getElementById('fm_ngayhd').value; 
-            
             emp[53] = document.getElementById('fm_quoctich').value;
 
             let btnSave = document.querySelector('.btn-add:not(.btn-cancel)');
@@ -421,19 +444,28 @@
                     body: JSON.stringify({
                         action: isNew ? 'add' : 'edit',
                         rowData: emp,
-                        rowIndex: isNew ? null : realIdx + 1
+                        rowIndex: isNew ? null : realIdx + 1 // gửi chỉ số dòng thực (1-based)
                     }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    headers: { 'Content-Type': 'application/json' } // thử dùng application/json
                 });
 
-                if (response.ok) {
-                    if (isNew) empData.push(emp); else empData[realIdx] = emp;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                let result = await response.json();
+                if (result.success) {
+                    // Tải lại dữ liệu từ server để đồng bộ
+                    let res = await fetch(SCRIPT_URL);
+                    empData = await res.json();
                     renderTable();
                     closeFormModal();
+                    alert('Lưu thành công!');
                 } else {
-                    alert('Lỗi khi lưu dữ liệu!');
+                    alert('Lỗi từ server: ' + (result.error || 'Không xác định'));
                 }
             } catch (e) {
+                console.error('Lỗi khi lưu:', e);
                 alert('Lỗi kết nối: ' + e.message);
             } finally {
                 btnSave.innerHTML = oldHtml;
