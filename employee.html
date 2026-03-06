@@ -271,11 +271,10 @@
 
         function renderTable() {
             let html = '';
-            let stt = 1; // Tạo biến đếm độc lập cho cột STT
+            let stt = 1; 
             
-            // ĐÃ SỬA LỖI: Bỏ hàm .slice(1) đi để duyệt đúng chỉ số index thật của mảng
             empData.forEach((emp, index) => {
-                if (index === 0 || !emp[0]) return; // Bỏ qua index=0 (dòng Header) và các dòng trống
+                if (index === 0 || !emp[0]) return; 
                 
                 let ngayVao = formatDateDDMMYYYY(emp[5]);
                 let ngayHD2 = emp[52] ? formatDateDDMMYYYY(emp[52]) : '';
@@ -343,7 +342,6 @@
         function openEditModal(index) {
             document.getElementById('formModalTitle').innerText = 'SỬA NHÂN VIÊN';
             document.getElementById('emp_idx').value = index;
-            // ĐÃ SỬA: Lấy chuẩn xác dữ liệu do index đã đồng bộ
             let emp = empData[index];
 
             document.getElementById('fm_msnv').value = emp[51] || '';
@@ -385,7 +383,6 @@
                 alert("Vui lòng nhập Họ và Tên!"); return;
             }
 
-            // Lấy thẳng mảng bằng idx không cần convert nhùng nhằng nữa
             let emp = isNew ? new Array(60).fill('') : [...empData[idx]];
 
             emp[0] = document.getElementById('fm_hoten').value;
@@ -413,11 +410,11 @@
             try {
                 let response = await fetch(SCRIPT_URL, {
                     method: 'POST',
+                    // ĐÃ SỬA TỪ KHÓA MAP CHUẨN VỚI MÃ APPS SCRIPT LÀ 'sheetRow'
                     body: JSON.stringify({
                         action: isNew ? 'add' : 'edit',
                         rowData: emp,
-                        // ĐÃ SỬA LỖI NGHIÊM TRỌNG: idx + 1 sẽ map chuẩn xác đến đúng Dòng Nhân Viên thật sự trên Sheet (Tránh bị đè vào Header Row 1)
-                        rowIndex: isNew ? null : idx + 1 
+                        sheetRow: isNew ? null : idx + 1 
                     }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
