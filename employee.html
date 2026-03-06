@@ -19,7 +19,6 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        /* PHẦN 1: TRANG NỀN TỔNG THỂ */
         body { 
             background: var(--bg-color); 
             color: var(--text-main); 
@@ -54,7 +53,6 @@
         }
         .back-btn:hover { background: #f1f5f9; transform: translateY(-2px); }
 
-        /* PHẦN 2: KHỐI 3D TRUNG TÂM */
         .glass-container { 
             position: absolute;
             bottom: 5%; 
@@ -82,7 +80,6 @@
         .btn-edit { background: #f59e0b; padding: 6px 10px; border-radius: 6px; }
         .btn-load { background: #0ea5e9; padding: 6px 10px; border-radius: 6px; }
 
-        /* KHU VỰC BẢNG */
         .table-wrapper {
             position: relative;
             overflow: auto;
@@ -122,7 +119,6 @@
             border-bottom: 2px solid #94a3b8;
         }
 
-        /* FIXED COLUMNS */
         th:nth-child(1), td:nth-child(1) { position: sticky; left: 0; width: 50px; min-width: 50px; text-align: center; z-index: 20; }
         th:nth-child(2), td:nth-child(2) { position: sticky; left: 50px; width: 90px; min-width: 90px; text-align: center; z-index: 20; font-family: monospace; font-size: 14px;}
         th:nth-child(3), td:nth-child(3) { position: sticky; left: 140px; width: 220px; min-width: 220px; z-index: 20; font-weight: 600; color: var(--primary); border-right: 2px solid #94a3b8; }
@@ -133,7 +129,6 @@
 
         tbody tr:hover td { background-color: #f1f5f9 !important; }
 
-        /* FORM MODAL */
         .form-modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .form-modal-content { background: var(--surface); padding: 32px; border-radius: 16px; width: 850px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .form-modal-content h3 { color: var(--primary); margin-bottom: 24px; font-size: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
@@ -276,8 +271,11 @@
 
         function renderTable() {
             let html = '';
-            empData.slice(1).forEach((emp, index) => {
-                if (!emp[0]) return; 
+            let stt = 1; // Tạo biến đếm độc lập cho cột STT
+            
+            // ĐÃ SỬA LỖI: Bỏ hàm .slice(1) đi để duyệt đúng chỉ số index thật của mảng
+            empData.forEach((emp, index) => {
+                if (index === 0 || !emp[0]) return; // Bỏ qua index=0 (dòng Header) và các dòng trống
                 
                 let ngayVao = formatDateDDMMYYYY(emp[5]);
                 let ngayHD2 = emp[52] ? formatDateDDMMYYYY(emp[52]) : '';
@@ -287,7 +285,7 @@
                 }
 
                 html += `<tr>
-                    <td>${index + 1}</td>
+                    <td>${stt++}</td>
                     <td>${safeStr(emp[51])}</td>
                     <td>${safeStr(emp[0])}</td>
                     <td>${ngayVao}</td>
@@ -345,7 +343,8 @@
         function openEditModal(index) {
             document.getElementById('formModalTitle').innerText = 'SỬA NHÂN VIÊN';
             document.getElementById('emp_idx').value = index;
-            let emp = empData[index + 1];
+            // ĐÃ SỬA: Lấy chuẩn xác dữ liệu do index đã đồng bộ
+            let emp = empData[index];
 
             document.getElementById('fm_msnv').value = emp[51] || '';
             document.getElementById('fm_hoten').value = emp[0] || '';
@@ -381,15 +380,13 @@
         async function saveEmployeeData() {
             let idx = parseInt(document.getElementById('emp_idx').value);
             let isNew = (idx === -1);
-            
-            // realIdx dùng để lưu dữ liệu hiển thị tức thời trên trình duyệt
-            let realIdx = isNew ? -1 : idx + 1; 
 
             if(!document.getElementById('fm_hoten').value.trim()) {
                 alert("Vui lòng nhập Họ và Tên!"); return;
             }
 
-            let emp = isNew ? new Array(60).fill('') : [...empData[realIdx]];
+            // Lấy thẳng mảng bằng idx không cần convert nhùng nhằng nữa
+            let emp = isNew ? new Array(60).fill('') : [...empData[idx]];
 
             emp[0] = document.getElementById('fm_hoten').value;
             emp[3] = document.getElementById('fm_ngaysinh').value;
@@ -404,10 +401,8 @@
             emp[33] = document.getElementById('fm_bhxh').value;
             emp[35] = document.getElementById('fm_mst').value;
             emp[38] = document.getElementById('fm_tamtru').value;
-            
             emp[51] = document.getElementById('fm_msnv').value;
             emp[52] = document.getElementById('fm_ngayhd').value; 
-            
             emp[53] = document.getElementById('fm_quoctich').value;
 
             let btnSave = document.querySelector('.btn-add:not(.btn-cancel)');
@@ -421,15 +416,14 @@
                     body: JSON.stringify({
                         action: isNew ? 'add' : 'edit',
                         rowData: emp,
-                        // KHÔI PHỤC LẠI CHUẨN CODE GỐC: idx + 1 (Để Sheet chọn đúng dòng như cũ)
+                        // ĐÃ SỬA LỖI NGHIÊM TRỌNG: idx + 1 sẽ map chuẩn xác đến đúng Dòng Nhân Viên thật sự trên Sheet (Tránh bị đè vào Header Row 1)
                         rowIndex: isNew ? null : idx + 1 
                     }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
 
                 if (response.ok) {
-                    // Xử lý dữ liệu hiển thị (local)
-                    if (isNew) empData.push(emp); else empData[realIdx] = emp;
+                    if (isNew) empData.push(emp); else empData[idx] = emp;
                     renderTable();
                     closeFormModal();
                 } else {
