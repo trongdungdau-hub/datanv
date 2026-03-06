@@ -1,12 +1,12 @@
-window.onload = async () => {
-    const remembered = localStorage.getItem('rememberedUser');
-    if (remembered) { try { const { username, password } = JSON.parse(remembered); document.getElementById('loginUsername').value = username; document.getElementById('loginPassword').value = password; window.login(); } catch (e) {} } 
-    else { const cU = sessionStorage.getItem('currentUser'); if (cU) window.showDashboard(cU); else window.showLogin(); }
+window.onload = async function() {
+    var remembered = localStorage.getItem('rememberedUser');
+    if (remembered) { try { var acc = JSON.parse(remembered); document.getElementById('loginUsername').value = acc.username; document.getElementById('loginPassword').value = acc.password; login(); } catch (e) {} } 
+    else { var cU = sessionStorage.getItem('currentUser'); if (cU) showDashboard(cU); else showLogin(); }
     
     try { 
-        let res = await fetch(window.SCRIPT_URL); 
-        window.empData = await res.json(); 
+        var res = await fetch(SCRIPT_URL); 
+        empData = await res.json(); 
         document.getElementById('statusLoading').style.display = 'none'; 
-        window.renderTable(); 
+        renderTable(); 
     } catch(e) { document.getElementById('statusLoading').innerText = '❌ Lỗi tải dữ liệu. Vui lòng F5 lại!'; }
 };
