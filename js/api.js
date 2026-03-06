@@ -1,7 +1,7 @@
 // Link Google Apps Script
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
+window.SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec";
 
-// Ép biến thành toàn cục (Global) để các file JS khác đều dùng chung được
+// Biến toàn cục
 window.empData = []; 
 window.currentIndex = -1; 
 window.currentPDFBytes = null;
