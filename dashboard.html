@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Nhân sự - Dashboard</title>
+    <!-- Font Awesome cho icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -201,6 +202,7 @@
             font-size: 14px;
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: repeat(2, 1fr);
@@ -217,6 +219,7 @@
 <body>
     <!-- ===== AUTH ===== -->
     <div id="authContainer" class="auth-container">
+        <!-- Đăng nhập -->
         <div id="loginForm">
             <h2>Đăng nhập quản lý</h2>
             <input type="text" id="loginUsername" placeholder="Tên đăng nhập" required>
@@ -231,22 +234,30 @@
             </div>
             <div id="loginMessage" class="message"></div>
         </div>
+
+        <!-- Đăng ký -->
         <div id="registerForm" style="display: none;">
             <h2>Đăng ký tài khoản quản lý</h2>
             <input type="text" id="regUsername" placeholder="Tên đăng nhập" required>
             <input type="password" id="regPassword" placeholder="Mật khẩu" required>
             <input type="password" id="regConfirm" placeholder="Xác nhận mật khẩu" required>
             <button onclick="register()">Đăng ký</button>
-            <div class="auth-links"><a onclick="showLogin()">Quay lại đăng nhập</a></div>
+            <div class="auth-links">
+                <a onclick="showLogin()">Quay lại đăng nhập</a>
+            </div>
             <div id="registerMessage" class="message"></div>
         </div>
+
+        <!-- Quên mật khẩu -->
         <div id="forgotForm" style="display: none;">
             <h2>Quên mật khẩu</h2>
             <input type="text" id="forgotUsername" placeholder="Tên đăng nhập" required>
             <input type="password" id="forgotNewPassword" placeholder="Mật khẩu mới" required>
             <input type="password" id="forgotConfirm" placeholder="Xác nhận mật khẩu mới" required>
             <button onclick="resetPassword()">Đặt lại mật khẩu</button>
-            <div class="auth-links"><a onclick="showLogin()">Quay lại đăng nhập</a></div>
+            <div class="auth-links">
+                <a onclick="showLogin()">Quay lại đăng nhập</a>
+            </div>
             <div id="forgotMessage" class="message"></div>
         </div>
     </div>
@@ -257,87 +268,96 @@
             Xin chào, <span id="usernameDisplay"></span>
             <button onclick="logout()">Đăng xuất</button>
         </div>
-        <h1>Hệ thống Quản lý Nhân sự</h1>
+        <h1>HỆ THỐNG QUẢN TRỊ NHÂN SỰ</h1>
         <div class="grid-container">
-            <!-- Ô 1: Thông Tin Nhân Viên -> dẫn đến admin.html -->
+            <!-- Ô 1: Thông Tin Nhân Viên -> dẫn đến admin.html (giữ nguyên chức năng xuất PDF) -->
             <div class="card" onclick="window.location.href='admin.html'">
                 <i class="fas fa-users"></i>
                 <h3>Thông Tin Nhân Viên</h3>
-                <p>Quản lý hồ sơ và xuất PDF</p>
+                <p>Xem thông tin & Xuất PDF</p>
             </div>
-            <!-- Ô 2: Chấm Công -> sẽ phát triển sau -->
+            <!-- Ô 2: Chấm Công (sẽ phát triển sau) -->
             <div class="card" onclick="window.location.href='chamcong.html'">
                 <i class="fas fa-clock"></i>
                 <h3>Chấm Công</h3>
-                <p>Theo dõi giờ làm việc</p>
+                <p>Bảng công & Điểm danh</p>
             </div>
             <!-- Ô 3: Bảo Hiểm -->
             <div class="card" onclick="window.location.href='baohiem.html'">
                 <i class="fas fa-shield-alt"></i>
                 <h3>Bảo Hiểm</h3>
-                <p>Quản lý bảo hiểm xã hội</p>
+                <p>BHXH, BHYT</p>
             </div>
             <!-- Ô 4: Tính Lương -->
             <div class="card" onclick="window.location.href='tinhluong.html'">
                 <i class="fas fa-calculator"></i>
                 <h3>Tính Lương</h3>
-                <p>Tính toán lương thưởng</p>
+                <p>Phiếu lương nhân viên</p>
             </div>
             <!-- Ô 5: Thuế -->
             <div class="card" onclick="window.location.href='thue.html'">
                 <i class="fas fa-file-invoice"></i>
                 <h3>Thuế</h3>
-                <p>Quản lý thuế thu nhập</p>
+                <p>Quản lý thuế TNCN</p>
             </div>
             <!-- Ô 6: Trống (chuẩn bị cho tính năng sau) -->
             <div class="card" onclick="window.location.href='tinhnang6.html'">
                 <i class="fas fa-box-open"></i>
                 <h3>Trống</h3>
-                <p>Chưa có chức năng</p>
+                <p>Đang phát triển</p>
             </div>
             <!-- Ô 7: Trống -->
             <div class="card" onclick="window.location.href='tinhnang7.html'">
                 <i class="fas fa-box-open"></i>
                 <h3>Trống</h3>
-                <p>Chưa có chức năng</p>
+                <p>Đang phát triển</p>
             </div>
             <!-- Ô 8: Trống -->
             <div class="card" onclick="window.location.href='tinhnang8.html'">
                 <i class="fas fa-box-open"></i>
                 <h3>Trống</h3>
-                <p>Chưa có chức năng</p>
+                <p>Đang phát triển</p>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== QUẢN LÝ NGƯỜI DÙNG (LOCALSTORAGE) =====
-        // Sử dụng key riêng cho tài khoản quản lý để tránh xung đột với form gửi (nếu có)
+        // ===== QUẢN LÝ TÀI KHOẢN QUẢN LÝ (LOCALSTORAGE) =====
+        // Sử dụng key riêng để tránh xung đột với dữ liệu khác
         if (!localStorage.getItem('managers')) {
             localStorage.setItem('managers', JSON.stringify([]));
         }
-        function getManagers() { return JSON.parse(localStorage.getItem('managers')); }
-        function saveManagers(managers) { localStorage.setItem('managers', JSON.stringify(managers)); }
 
-        // ===== CHUYỂN FORM =====
+        function getManagers() {
+            return JSON.parse(localStorage.getItem('managers'));
+        }
+
+        function saveManagers(managers) {
+            localStorage.setItem('managers', JSON.stringify(managers));
+        }
+
+        // ===== CHUYỂN ĐỔI FORM =====
         function showLogin() {
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('registerForm').style.display = 'none';
             document.getElementById('forgotForm').style.display = 'none';
             clearMessages();
         }
+
         function showRegister() {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'block';
             document.getElementById('forgotForm').style.display = 'none';
             clearMessages();
         }
+
         function showForgot() {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'none';
             document.getElementById('forgotForm').style.display = 'block';
             clearMessages();
         }
+
         function clearMessages() {
             document.getElementById('loginMessage').innerText = '';
             document.getElementById('registerMessage').innerText = '';
@@ -349,6 +369,7 @@
             const username = document.getElementById('regUsername').value.trim();
             const password = document.getElementById('regPassword').value;
             const confirm = document.getElementById('regConfirm').value;
+
             if (!username || !password || !confirm) {
                 document.getElementById('registerMessage').innerText = 'Vui lòng điền đầy đủ thông tin';
                 return;
@@ -357,11 +378,13 @@
                 document.getElementById('registerMessage').innerText = 'Mật khẩu xác nhận không khớp';
                 return;
             }
+
             const managers = getManagers();
             if (managers.find(m => m.username === username)) {
                 document.getElementById('registerMessage').innerText = 'Tên đăng nhập đã tồn tại';
                 return;
             }
+
             managers.push({ username, password });
             saveManagers(managers);
             document.getElementById('registerMessage').style.color = '#2ecc71';
@@ -374,16 +397,21 @@
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
             const remember = document.getElementById('rememberMe').checked;
+
             if (!username || !password) {
-                document.getElementById('loginMessage').innerText = 'Vui lòng nhập đầy đủ';
+                document.getElementById('loginMessage').innerText = 'Vui lòng nhập tên đăng nhập và mật khẩu';
                 return;
             }
+
             const managers = getManagers();
             const user = managers.find(m => m.username === username && m.password === password);
+
             if (!user) {
-                document.getElementById('loginMessage').innerText = 'Sai tên hoặc mật khẩu';
+                document.getElementById('loginMessage').innerText = 'Sai tên đăng nhập hoặc mật khẩu';
                 return;
             }
+
+            // Xử lý ghi nhớ
             if (remember) {
                 localStorage.setItem('rememberedManager', JSON.stringify({ username, password }));
             } else {
@@ -398,24 +426,27 @@
             const username = document.getElementById('forgotUsername').value.trim();
             const newPass = document.getElementById('forgotNewPassword').value;
             const confirm = document.getElementById('forgotConfirm').value;
+
             if (!username || !newPass || !confirm) {
-                document.getElementById('forgotMessage').innerText = 'Vui lòng điền đầy đủ';
+                document.getElementById('forgotMessage').innerText = 'Vui lòng điền đầy đủ thông tin';
                 return;
             }
             if (newPass !== confirm) {
-                document.getElementById('forgotMessage').innerText = 'Mật khẩu không khớp';
+                document.getElementById('forgotMessage').innerText = 'Mật khẩu xác nhận không khớp';
                 return;
             }
+
             const managers = getManagers();
             const idx = managers.findIndex(m => m.username === username);
             if (idx === -1) {
                 document.getElementById('forgotMessage').innerText = 'Tên đăng nhập không tồn tại';
                 return;
             }
+
             managers[idx].password = newPass;
             saveManagers(managers);
             document.getElementById('forgotMessage').style.color = '#2ecc71';
-            document.getElementById('forgotMessage').innerText = 'Đặt lại thành công!';
+            document.getElementById('forgotMessage').innerText = 'Đặt lại mật khẩu thành công!';
             setTimeout(() => showLogin(), 1500);
         }
 
@@ -425,6 +456,10 @@
             localStorage.removeItem('rememberedManager');
             document.getElementById('authContainer').style.display = 'block';
             document.getElementById('dashboard').style.display = 'none';
+            // Reset form đăng nhập
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('rememberMe').checked = false;
             showLogin();
         }
 
@@ -444,7 +479,7 @@
                     document.getElementById('loginUsername').value = username;
                     document.getElementById('loginPassword').value = password;
                     document.getElementById('rememberMe').checked = true;
-                    login();
+                    login(); // tự động đăng nhập
                 } catch (e) {}
             } else {
                 const currentUser = sessionStorage.getItem('currentManager');
@@ -454,16 +489,20 @@
                     showLogin();
                 }
             }
-            // Enter key
+
+            // Gán sự kiện Enter cho form đăng nhập
             const inputs = document.querySelectorAll('#loginForm input');
             inputs.forEach(input => {
                 input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') { e.preventDefault(); login(); }
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        login();
+                    }
                 });
             });
         });
 
-        // Export hàm ra global
+        // Export các hàm ra global để dùng trong onclick
         window.showRegister = showRegister;
         window.showLogin = showLogin;
         window.showForgot = showForgot;
@@ -473,4 +512,4 @@
         window.logout = logout;
     </script>
 </body>
-</html>c
+</html>
