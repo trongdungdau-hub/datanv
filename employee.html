@@ -330,10 +330,8 @@
         function openAddModal() {
             document.getElementById('formModalTitle').innerText = 'THÊM NHÂN VIÊN';
             
-            // SỬA ĐÚNG YÊU CẦU: Đưa dòng xóa input lên TRƯỚC khi set các giá trị ẩn
             document.querySelectorAll('#employeeFormModal input').forEach(inp => inp.value = '');
             
-            // Set lại các giá trị quan trọng
             document.getElementById('emp_idx').value = '-1';
             document.getElementById('fm_quoctich').value = 'Việt Nam';
             document.getElementById('fm_gioitinh').value = 'Nam';
@@ -383,6 +381,8 @@
         async function saveEmployeeData() {
             let idx = parseInt(document.getElementById('emp_idx').value);
             let isNew = (idx === -1);
+            
+            // realIdx dùng để lưu dữ liệu hiển thị tức thời trên trình duyệt
             let realIdx = isNew ? -1 : idx + 1; 
 
             if(!document.getElementById('fm_hoten').value.trim()) {
@@ -421,12 +421,14 @@
                     body: JSON.stringify({
                         action: isNew ? 'add' : 'edit',
                         rowData: emp,
-                        rowIndex: isNew ? null : realIdx + 1
+                        // KHÔI PHỤC LẠI CHUẨN CODE GỐC: idx + 1 (Để Sheet chọn đúng dòng như cũ)
+                        rowIndex: isNew ? null : idx + 1 
                     }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
 
                 if (response.ok) {
+                    // Xử lý dữ liệu hiển thị (local)
                     if (isNew) empData.push(emp); else empData[realIdx] = emp;
                     renderTable();
                     closeFormModal();
