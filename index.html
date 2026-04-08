@@ -48,6 +48,10 @@
             position: relative;
         }
 
+        .cover-mode .header-section {
+            display: none;
+        }
+
         /* Header cố định */
         .header-section {
             padding: 20px 20px 10px 20px;
@@ -94,6 +98,12 @@
             display: flex;
         }
 
+        .cover-step {
+            background:
+                radial-gradient(circle at top, rgba(37, 99, 235, 0.10), transparent 42%),
+                linear-gradient(180deg, #f8fbff 0%, #ffffff 58%, #f8fafc 100%);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -105,6 +115,13 @@
             padding: 20px 20px 20px 20px;
             -webkit-overflow-scrolling: touch;
             scrollbar-gutter: stable;
+        }
+
+        .cover-step .step-body {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            padding: 24px 24px 12px 24px;
         }
 
         .step-body::-webkit-scrollbar {
@@ -132,6 +149,133 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 15px;
+        }
+
+        .cover-card {
+            width: 100%;
+            max-width: 640px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100%;
+            gap: 24px;
+        }
+
+        .cover-brand {
+            padding-top: clamp(24px, 8vh, 88px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+        }
+
+        .cover-logo {
+            width: min(220px, 52vw);
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 18px 24px rgba(37, 99, 235, 0.12));
+        }
+
+        .cover-company-name {
+            margin: 0;
+            font-size: clamp(22px, 3.1vw, 30px);
+            line-height: 1.3;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+            text-transform: uppercase;
+        }
+
+        .cover-company-address {
+            margin: 0;
+            max-width: 560px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .cover-panel {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.08);
+            border-radius: 24px;
+            padding: 22px 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cover-panel h3 {
+            margin-bottom: 12px;
+        }
+
+        .cover-summary {
+            margin: 0 0 16px 0;
+            color: #334155;
+            line-height: 1.65;
+            font-size: 14px;
+        }
+
+        .cover-notes {
+            margin: 0;
+            padding-left: 18px;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .cover-notes li + li {
+            margin-top: 8px;
+        }
+
+        .cover-link {
+            margin-top: 16px;
+            padding: 0;
+            border: none;
+            background: none;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .cover-link:hover {
+            color: var(--primary-hover);
+        }
+
+        .consent-box {
+            margin-top: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #dbeafe;
+            border-radius: 16px;
+            padding: 14px 16px;
+        }
+
+        .consent-box input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            flex: 0 0 auto;
+        }
+
+        .consent-box label {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+
+        .consent-error {
+            margin-top: 10px;
+            min-height: 20px;
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 600;
         }
 
         label {
@@ -234,6 +378,15 @@
             padding: 0 10px;
         }
 
+        .upload-help {
+            margin-top: 8px;
+            font-size: 11px;
+            line-height: 1.45;
+            color: #64748b;
+            text-align: center;
+            padding: 0 14px;
+        }
+
         .upload-zone img.preview-img {
             position: absolute;
             top: 0;
@@ -321,8 +474,16 @@
             transform: scale(0.95);
         }
 
+        .btn-nav:disabled,
+        .btn-submit:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
         /* Ẩn nút prev ở bước 1 */
-        #step1 .btn-prev {
+        .cover-mode #step1 .btn-prev {
             visibility: hidden;
             pointer-events: none;
         }
@@ -360,6 +521,50 @@
             text-align: center;
             border-bottom: none;
             margin-bottom: 20px;
+        }
+
+        .privacy-modal-content {
+            max-width: 760px;
+            padding: 24px;
+        }
+
+        .privacy-modal-content h3 {
+            margin-bottom: 12px;
+        }
+
+        .privacy-meta {
+            margin: 0 0 16px 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .privacy-block {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            line-height: 1.7;
+            color: #334155;
+            font-size: 14px;
+        }
+
+        .privacy-block + .privacy-block {
+            margin-top: 14px;
+        }
+
+        .privacy-block strong {
+            color: #0f172a;
+        }
+
+        .privacy-block ul {
+            margin: 10px 0 0 18px;
+            padding: 0;
+        }
+
+        .privacy-block li + li {
+            margin-top: 8px;
         }
 
         .editor-layout {
@@ -503,19 +708,56 @@
 </head>
 <body>
 
-<div class="wrap" id="mainWrap">
+<div class="wrap cover-mode" id="mainWrap">
     
     <!-- Header cố định (đã bỏ stepper) -->
     <div class="header-section">
         <div class="header-container">
-            <img src="logo.jpg" alt="Samson Logo" class="logo-img" onerror="this.style.display='none'">
+            <img src="samson-logo.png" alt="Samson Logo" class="logo-img" onerror="this.style.display='none'">
             <h2>THÔNG TIN NHÂN VIÊN</h2>
         </div>
         <div id="status"></div>
     </div>
 
+    <div class="step active cover-step" id="step0">
+        <div class="step-body">
+            <div class="cover-card">
+                <div class="cover-brand">
+                    <img src="samson-logo.png" alt="Samson Global" class="cover-logo" onerror="this.style.display='none'">
+                    <h1 class="cover-company-name" id="coverCompanyName">VĂN PHÒNG ĐẠI DIỆN SAMSON GLOBAL CO., LTD TẠI BÌNH DƯƠNG</h1>
+                    <p class="cover-company-address" id="coverCompanyAddress">Lầu 6, Tòa nhà Koham, Lê Duẩn, Bình Dương, Hồ Chí Minh</p>
+                </div>
+                <div class="cover-panel">
+                    <h3>Điều khoản bảo mật dữ liệu cá nhân</h3>
+                    <p class="cover-summary">
+                        Công ty chỉ tiếp nhận, lưu trữ và xử lý dữ liệu bạn cung cấp cho các mục đích tuyển dụng, tiếp nhận lao động,
+                        giao kết hợp đồng, tiền lương, bảo hiểm, thuế và các nghĩa vụ pháp lý liên quan. Bạn có quyền được biết, xem,
+                        chỉnh sửa, rút lại sự đồng ý hoặc yêu cầu xử lý dữ liệu theo quy định pháp luật hiện hành.
+                    </p>
+                    <ul class="cover-notes">
+                        <li>Dữ liệu được xử lý đúng mục đích đã thông báo và trong phạm vi cần thiết cho quan hệ lao động.</li>
+                        <li>Công ty áp dụng biện pháp bảo mật phù hợp, chỉ chia sẻ cho bộ phận liên quan hoặc cơ quan có thẩm quyền khi pháp luật yêu cầu.</li>
+                        <li>Việc đồng ý được thể hiện rõ bằng hành động đánh dấu vào ô xác nhận trước khi tiếp tục khai báo.</li>
+                    </ul>
+                    <button type="button" class="cover-link" onclick="openPrivacyModal()">Đọc đầy đủ điều khoản và căn cứ pháp lý</button>
+                    <div class="consent-box">
+                        <input type="checkbox" id="privacyConsent" onchange="toggleCoverConsent()">
+                        <label for="privacyConsent">
+                            Tôi đã đọc, hiểu và đồng ý để Công ty xử lý dữ liệu cá nhân mà tôi cung cấp theo nội dung thông báo bảo mật.
+                        </label>
+                    </div>
+                    <div class="consent-error" id="coverConsentError"></div>
+                </div>
+            </div>
+        </div>
+        <div class="step-footer">
+            <button class="btn-nav btn-prev" type="button" disabled style="visibility:hidden;">←</button>
+            <button class="btn-nav btn-next" type="button" id="coverNextBtn" onclick="proceedFromCover()" disabled>→</button>
+        </div>
+    </div>
+
     <!-- STEP 1: Thông tin cá nhân cơ bản -->
-    <div class="step active" id="step1">
+    <div class="step" id="step1">
         <div class="step-body">
             <h3>Thông tin cá nhân cơ bản</h3>
             <div class="grid">
@@ -525,7 +767,7 @@
                 <div><label>Ngày sinh <span class="col-id">[3]</span></label><input id="c3" type="date"></div>
                 <div><label>Giới tính <span class="col-id">[4]</span></label><select id="c4"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
                 <div><label>Tình trạng hôn nhân <span class="col-id">[17]</span></label><select id="c17"><option value="Chưa kết hôn">Chưa kết hôn</option><option value="Đã kết hôn">Đã kết hôn</option></select></div>
-                <div><label>Số CCCD / CMND <span class="col-id">[19]</span></label><input id="c19" type="number" placeholder="Nhập 12 số CCCD"></div>
+                <div><label>Số CCCD / CMND <span class="col-id">[19]</span></label><input id="c19" type="tel" inputmode="numeric" placeholder="Nhập 12 số CCCD"></div>
                 <div><label>Ngày cấp CCCD <span class="col-id">[20]</span></label><input id="c20" type="date"></div>
                 <div><label>Số Điện Thoại <span class="col-id">[21]</span></label><input id="c21" type="tel" placeholder="Số điện thoại liên hệ"></div>
                 <div><label>Email cá nhân <span class="col-id">[31]</span></label><input id="c31" type="email" placeholder="example@gmail.com"></div>
@@ -557,7 +799,7 @@
             </div>
         </div>
         <div class="step-footer">
-            <button class="btn-nav btn-prev" onclick="changeStep(1, 0)" disabled style="visibility:hidden;">←</button>
+            <button class="btn-nav btn-prev" onclick="changeStep(1, 0)">←</button>
             <button class="btn-nav btn-next" onclick="changeStep(1, 2)">→</button>
         </div>
     </div>
@@ -579,6 +821,14 @@
                 <div><label>Chức vụ <span class="col-id">[7]</span></label><input id="c7"></div>
                 <div><label>Mức lương hiện tại <span class="col-id">[9]</span></label><input id="c9" type="tel" placeholder="VD: 5000000"></div>
                 <div><label>Lương sau thử việc <span class="col-id">[12]</span></label><input id="c12"></div>
+                <div>
+                    <label>Loại lương <span class="col-id">[14]</span></label>
+                    <select id="c14">
+                        <option value="">-- Chọn loại lương --</option>
+                        <option value="Gross">Gross</option>
+                        <option value="NET">NET</option>
+                    </select>
+                </div>
                 
                 <div style="grid-column: 1 / -1">
                     <label>Ngân hàng nhận lương <span class="col-id">[15]</span></label>
@@ -636,7 +886,7 @@
                         <option value="SHINHAN BANK">SHINHAN BANK</option>
                     </select>
                 </div>
-                <div style="grid-column: 1 / -1"><label>Số Tài Khoản Ngân Hàng <span class="col-id">[16]</span></label><input id="c16" type="number"></div>
+                <div style="grid-column: 1 / -1"><label>Số Tài Khoản Ngân Hàng <span class="col-id">[16]</span></label><input id="c16" type="tel" inputmode="numeric"></div>
             </div>
         </div>
         <div class="step-footer">
@@ -687,7 +937,7 @@
                 </div>
                 
                 <div><label>Đã có sổ BHXH chưa? <span class="col-id">[32]</span></label><select id="c32"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
-                <div><label>Số sổ BHXH (Nếu có) <span class="col-id">[33]</span></label><input id="c33" type="number"></div>
+                <div><label>Số sổ BHXH (Nếu có) <span class="col-id">[33]</span></label><input id="c33" type="tel" inputmode="numeric"></div>
                 
                 <div><label>Đã có Mã số thuế cá nhân? <span class="col-id">[34]</span></label><select id="c34"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
                 <div><label>Mã số thuế (Nếu có) <span class="col-id">[35]</span></label><input id="c35"></div>
@@ -705,7 +955,7 @@
                     <div><label>Tên Chủ hộ <span class="col-id">[40]</span></label><input id="c40"></div>
                     <div><label>Ngày sinh Chủ hộ <span class="col-id">[41]</span></label><input id="c41" type="date"></div>
                     <div><label>Giới tính Chủ hộ <span class="col-id">[42]</span></label><select id="c42"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
-                    <div><label>CCCD Chủ hộ <span class="col-id">[44]</span></label><input id="c44" type="number"></div>
+                    <div><label>CCCD Chủ hộ <span class="col-id">[44]</span></label><input id="c44" type="tel" inputmode="numeric"></div>
                     <div style="grid-column: 1 / -1">
                         <label>👑 Địa chỉ Chủ hộ <span class="col-id">[43]</span></label>
                         <div class="addr-group" style="background:#fff;">
@@ -732,6 +982,7 @@
             <div class="upload-grid">
                 <div class="upload-zone" id="zone_45" onclick="triggerFileInput('45')">
                     <div class="icon">📷</div><span>1. Ảnh 4x6</span>
+                    <div class="upload-help">Ưu tiên ảnh chân dung rõ mặt. Hệ thống sẽ cắt theo khung dọc 4x6, không kéo méo ảnh.</div>
                     <img id="preview_45" class="preview-img d-none">
                     <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('45')">✏️ Sửa</button>
                 </div>
@@ -739,6 +990,7 @@
 
                 <div class="upload-zone" id="zone_46" onclick="triggerFileInput('46')">
                     <div class="icon">🪪</div><span>2. CCCD Trước</span>
+                    <div class="upload-help">Chụp ngang, đủ 4 góc, không lóa sáng. Ảnh sẽ được đặt theo tỷ lệ thẻ, giữ nguyên nội dung.</div>
                     <img id="preview_46" class="preview-img d-none">
                     <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('46')">✏️ Sửa</button>
                 </div>
@@ -746,6 +998,7 @@
 
                 <div class="upload-zone" id="zone_47" onclick="triggerFileInput('47')">
                     <div class="icon">🪪</div><span>3. CCCD Sau</span>
+                    <div class="upload-help">Chụp ngang, đủ 4 góc, không lóa sáng. Ảnh sẽ được đặt theo tỷ lệ thẻ, giữ nguyên nội dung.</div>
                     <img id="preview_47" class="preview-img d-none">
                     <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('47')">✏️ Sửa</button>
                 </div>
@@ -753,6 +1006,7 @@
 
                 <div class="upload-zone" id="zone_48" onclick="triggerFileInput('48')">
                     <div class="icon">💳</div><span>4. Thẻ Ngân hàng</span>
+                    <div class="upload-help">Có thể dùng ảnh thẻ thật hoặc ảnh chụp màn hình app banking. PDF sẽ căn giữa, nền trắng, không ép giãn.</div>
                     <img id="preview_48" class="preview-img d-none">
                     <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('48')">✏️ Sửa</button>
                 </div>
@@ -760,6 +1014,7 @@
 
                 <div class="upload-zone" id="zone_49" onclick="triggerFileInput('49')">
                     <div class="icon">📘</div><span>5. Bìa sổ BHXH</span>
+                    <div class="upload-help">Chụp nguyên bìa sổ BHXH thật, đủ viền, đúng chiều. Hệ thống sẽ giữ tỷ lệ bìa sổ khi đưa vào PDF.</div>
                     <img id="preview_49" class="preview-img d-none">
                     <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('49')">✏️ Sửa</button>
                 </div>
@@ -769,6 +1024,50 @@
         <div class="step-footer">
             <button class="btn-nav btn-prev" onclick="changeStep(5, 4)">←</button>
             <button class="btn-submit" onclick="openOverview()">✔️</button>
+        </div>
+    </div>
+</div>
+
+<div id="privacyModal" class="modal">
+    <div class="modal-content privacy-modal-content">
+        <h3>Điều khoản bảo mật và xử lý dữ liệu cá nhân</h3>
+        <p class="privacy-meta">
+            Nội dung thông báo này được xây dựng để người khai hồ sơ biết rõ mục đích và phạm vi xử lý dữ liệu,
+            phù hợp với Điều 11 và Điều 13 Nghị định 13/2023/NĐ-CP.
+        </p>
+        <div class="privacy-block">
+            <strong>1. Phạm vi dữ liệu được tiếp nhận</strong>
+            <ul>
+                <li>Thông tin nhận diện cá nhân, thông tin liên hệ, địa chỉ, giấy tờ tùy thân, thông tin ngân hàng, thuế, bảo hiểm và hồ sơ đính kèm do bạn trực tiếp cung cấp.</li>
+                <li>Các thông tin phát sinh trong quá trình tuyển dụng, tiếp nhận lao động, giao kết hợp đồng và quản lý hồ sơ nhân sự.</li>
+            </ul>
+        </div>
+        <div class="privacy-block">
+            <strong>2. Mục đích xử lý dữ liệu</strong>
+            <ul>
+                <li>Đánh giá hồ sơ ứng tuyển, hoàn thiện thủ tục tiếp nhận lao động và tạo hồ sơ nhân sự.</li>
+                <li>Phục vụ hợp đồng lao động, chấm công, tiền lương, thuế thu nhập cá nhân, bảo hiểm, quyết toán và nghĩa vụ pháp lý liên quan.</li>
+                <li>Thực hiện trao đổi với bộ phận phụ trách, đơn vị cung cấp dịch vụ có liên quan hoặc cơ quan nhà nước có thẩm quyền khi pháp luật yêu cầu.</li>
+            </ul>
+        </div>
+        <div class="privacy-block">
+            <strong>3. Quyền của người cung cấp dữ liệu</strong>
+            <ul>
+                <li>Được biết dữ liệu nào đang được xử lý, mục đích xử lý và đơn vị liên quan tới việc xử lý.</li>
+                <li>Được yêu cầu xem, chỉnh sửa hoặc cập nhật dữ liệu cá nhân của mình.</li>
+                <li>Được rút lại sự đồng ý hoặc yêu cầu xử lý dữ liệu theo quy định pháp luật, trừ trường hợp dữ liệu cần tiếp tục lưu giữ để thực hiện nghĩa vụ hợp đồng hoặc nghĩa vụ pháp lý.</li>
+            </ul>
+        </div>
+        <div class="privacy-block">
+            <strong>4. Cam kết bảo mật</strong>
+            <ul>
+                <li>Công ty áp dụng biện pháp quản lý và kỹ thuật phù hợp để bảo vệ dữ liệu cá nhân khỏi truy cập trái phép, mất mát hoặc sử dụng sai mục đích.</li>
+                <li>Dữ liệu chỉ được lưu giữ trong thời gian cần thiết cho mục đích đã thông báo hoặc theo thời hạn lưu trữ bắt buộc của pháp luật.</li>
+            </ul>
+        </div>
+        <div class="modal-footer-btns" style="display:flex; gap:10px; margin-top:20px;">
+            <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closePrivacyModal()">Đóng</button>
+            <button type="button" class="btn btn-primary" style="flex:2;" onclick="acceptPrivacyAndContinueReading()">Tôi đã đọc</button>
         </div>
     </div>
 </div>
@@ -868,7 +1167,78 @@ const dataDiaChi = {
     "Tỉnh Cà Mau": ["Phường Bạc Liêu", "Phường Vĩnh Trạch", "Phường Hiệp Thành", "Xã Hồng Dân", "Xã Ninh Quới", "Xã Vĩnh Lộc", "Xã Ninh Thạnh Lợi", "Xã Phước Long", "Xã Vĩnh Phước", "Xã Vĩnh Thanh", "Xã Phong Hiệp", "Xã Hòa Bình", "Xã Châu Thới", "Xã Vĩnh Lợi", "Xã Hưng Hội", "Xã Vĩnh Mỹ", "Xã Vĩnh Hậu", "Phường Giá Rai", "Phường Láng Tròn", "Xã Phong Thạnh", "Xã Gành Hào", "Xã Đông Hải", "Xã Long Điền", "Xã An Trạch", "Xã Định Thành", "Phường An Xuyên", "Phường Lý Văn Lâm", "Phường Tân Thành", "Phường Hòa Thành", "Xã Nguyễn Phích", "Xã U Minh", "Xã Khánh An", "Xã Khánh Lâm", "Xã Thới Bình", "Xã Biển Bạch", "Xã Trí Phải", "Xã Tân Lộc", "Xã Hồ Thị Kỷ", "Xã Trần Văn Thời", "Xã Sông Đốc", "Xã Đá Bạc", "Xã Khánh Bình", "Xã Khánh Hưng", "Xã Cái Nước", "Xã Lương Thế Trân", "Xã Tân Hưng", "Xã Hưng Mỹ", "Xã Đầm Dơi", "Xã Tạ An Khương", "Xã Trần Phán", "Xã Tân Thuận", "Xã Quách Phẩm", "Xã Thanh Tùng", "Xã Tân Tiến", "Xã Năm Căn", "Xã Đất Mới", "Xã Tam Giang", "Xã Cái Đôi Vàm", "Xã Phú Mỹ", "Xã Phú Tân", "Xã Nguyễn Việt Khái", "Xã Tân Ân", "Xã Phan Ngọc Hiển", "Xã Đất Mũi"]
 };
 
+const DEFAULT_COMPANY_PROFILE = {
+    name: 'VĂN PHÒNG ĐẠI DIỆN SAMSON GLOBAL CO., LTD TẠI BÌNH DƯƠNG',
+    address: 'Lầu 6, Tòa nhà Koham, Lê Duẩn, Bình Dương, Hồ Chí Minh'
+};
+
+function getCompanyProfile() {
+    try {
+        const raw = localStorage.getItem('hrm_global_settings');
+        const parsed = raw ? JSON.parse(raw) : null;
+        return {
+            name: parsed?.company_name || DEFAULT_COMPANY_PROFILE.name,
+            address: parsed?.company_address || DEFAULT_COMPANY_PROFILE.address
+        };
+    } catch (_) {
+        return { ...DEFAULT_COMPANY_PROFILE };
+    }
+}
+
+function hydrateCompanyIdentity() {
+    const profile = getCompanyProfile();
+    const nameEl = document.getElementById('coverCompanyName');
+    const addrEl = document.getElementById('coverCompanyAddress');
+    if (nameEl) nameEl.textContent = profile.name;
+    if (addrEl) addrEl.textContent = profile.address;
+}
+
+function setCoverMode(stepNumber) {
+    const wrap = document.getElementById('mainWrap');
+    if (wrap) wrap.classList.toggle('cover-mode', Number(stepNumber) === 0);
+}
+
+function toggleCoverConsent() {
+    const checkbox = document.getElementById('privacyConsent');
+    const nextBtn = document.getElementById('coverNextBtn');
+    const errorEl = document.getElementById('coverConsentError');
+    const checked = !!checkbox?.checked;
+    if (nextBtn) nextBtn.disabled = !checked;
+    if (checked && errorEl) errorEl.textContent = '';
+}
+
+function proceedFromCover() {
+    const checkbox = document.getElementById('privacyConsent');
+    const errorEl = document.getElementById('coverConsentError');
+    if (!checkbox?.checked) {
+        if (errorEl) errorEl.textContent = 'Bạn cần tích đồng ý trước khi tiếp tục khai hồ sơ.';
+        return;
+    }
+    if (errorEl) errorEl.textContent = '';
+    changeStep(0, 1);
+}
+
+function openPrivacyModal() {
+    document.getElementById('privacyModal').style.display = 'flex';
+}
+
+function closePrivacyModal() {
+    document.getElementById('privacyModal').style.display = 'none';
+}
+
+function acceptPrivacyAndContinueReading() {
+    const checkbox = document.getElementById('privacyConsent');
+    if (checkbox) {
+        checkbox.checked = true;
+        toggleCoverConsent();
+    }
+    closePrivacyModal();
+}
+
 window.onload = () => {
+    hydrateCompanyIdentity();
+    toggleCoverConsent();
+    setCoverMode(0);
     let c2 = document.getElementById("c2"); 
     if(c2){ 
         c2.innerHTML = '<option value="">-- Chọn Nơi Sinh --</option>'; 
@@ -895,11 +1265,37 @@ let cropper = null;
 let currentEditingField = null;
 let editedImages = {}; 
 
+const PHOTO_UPLOAD_CONFIG = {
+    '45': { aspectRatio: 4 / 6, title: 'Ảnh 4x6', hint: 'Canh gương mặt vào giữa khung dọc 4x6.' },
+    '46': { aspectRatio: 85.6 / 53.98, title: 'CCCD Trước', hint: 'Giữ nguyên đủ 4 góc CCCD, không cắt mất số.' },
+    '47': { aspectRatio: 85.6 / 53.98, title: 'CCCD Sau', hint: 'Giữ nguyên đủ 4 góc CCCD, không cắt mất thông tin.' },
+    '48': { aspectRatio: NaN, title: 'Thẻ / App Ngân hàng', hint: 'Có thể crop tự do để lấy rõ thông tin thẻ hoặc màn hình app.' },
+    '49': { aspectRatio: 1.42, title: 'Bìa sổ BHXH', hint: 'Canh đủ bìa sổ, giữ đúng chiều và mép ngoài.' }
+};
+
+function getPhotoConfig(fieldId) {
+    return PHOTO_UPLOAD_CONFIG[String(fieldId)] || { aspectRatio: NaN, title: 'Hình ảnh', hint: '' };
+}
+
+function buildCropperOptions(fieldId) {
+    const config = getPhotoConfig(fieldId);
+    return {
+        aspectRatio: Number.isFinite(config.aspectRatio) ? config.aspectRatio : NaN,
+        viewMode: 1,
+        autoCropArea: fieldId === '45' ? 0.82 : 0.9,
+        background: false,
+        zoomOnWheel: false,
+        movable: false,
+        toggleDragModeOnDblclick: false
+    };
+}
+
 function changeStep(from, to) {
-    if (to < 1 || to > 5) return;
+    if (to < 0 || to > 5) return;
     document.getElementById("step" + from).classList.remove("active");
     let nextStep = document.getElementById("step" + to);
     nextStep.classList.add("active");
+    setCoverMode(to);
     let stepBody = nextStep.querySelector('.step-body');
     if(stepBody) stepBody.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -921,12 +1317,15 @@ function handleFileSelect(input, id) {
         let reader = new FileReader();
         reader.onload = function (e) {
             currentEditingField = id;
+            const config = getPhotoConfig(id);
             document.getElementById("imageWorkspace").src = e.target.result;
+            const titleEl = document.querySelector('#editorModal h3');
+            if (titleEl) titleEl.innerText = `Chỉnh Sửa Hình Ảnh - ${config.title}`;
             document.getElementById("editorModal").style.display = "flex";
             document.getElementById("filterBright").value = 100; document.getElementById("valBright").innerText = "100%";
             document.getElementById("filterContrast").value = 100; document.getElementById("valContrast").innerText = "100%";
             if(cropper) cropper.destroy();
-            cropper = new Cropper(document.getElementById("imageWorkspace"), { viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, movable: false, toggleDragModeOnDblclick: false });
+            cropper = new Cropper(document.getElementById("imageWorkspace"), buildCropperOptions(id));
         }
         reader.readAsDataURL(input.files[0]);
     }
@@ -941,12 +1340,15 @@ function closeEditor() {
 function editImage(id) {
     if(!editedImages[id]) return;
     currentEditingField = id;
+    const config = getPhotoConfig(id);
     document.getElementById("imageWorkspace").src = editedImages[id];
+    const titleEl = document.querySelector('#editorModal h3');
+    if (titleEl) titleEl.innerText = `Chỉnh Sửa Hình Ảnh - ${config.title}`;
     document.getElementById("editorModal").style.display = "flex";
     document.getElementById("filterBright").value = 100; document.getElementById("valBright").innerText = "100%";
     document.getElementById("filterContrast").value = 100; document.getElementById("valContrast").innerText = "100%";
     if(cropper) cropper.destroy();
-    cropper = new Cropper(document.getElementById("imageWorkspace"), { viewMode: 1, autoCropArea: 0.9, background: false, zoomOnWheel: false, movable: false, toggleDragModeOnDblclick: false });
+    cropper = new Cropper(document.getElementById("imageWorkspace"), buildCropperOptions(id));
 }
 
 function applyFiltersPreview() {
@@ -1011,7 +1413,7 @@ async function submitData(){
     
     let p = {};
     for(let i=0; i<=44; i++){
-        if([8,10,11,13,14,36].includes(i)) continue; 
+        if([8,10,11,13,36].includes(i)) continue; 
         if(i === 2) { p["col2"] = document.getElementById("c2").value || ""; continue; }
         if(i === 18) { p["col18"] = (document.getElementById("tinh18").value || "") + "|" + (document.getElementById("phuong18").value || "") + "|" + (document.getElementById("chitiet18").value || ""); continue; }
         if([24, 38, 43].includes(i)) {
