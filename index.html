@@ -807,6 +807,7 @@
                 <div style="grid-column: 1 / -1">
                     <label>Nơi ở hiện tại <span class="col-id">[37]</span></label>
                     <select id="c37" onchange="toggleTamTru()">
+                        <option value="">-- Vui lòng chọn --</option>
                         <option value="Thường trú">Sống tại Thường trú (Trùng Hộ khẩu)</option>
                         <option value="Tạm trú">Sống tại Tạm trú (Khác Hộ khẩu)</option>
                     </select>
@@ -926,6 +927,7 @@
             <div class="validate-msg" id="vmsg3"></div>
             <label>Trình độ học vấn cao nhất của bạn? <span class="col-id">[29]</span></label>
             <select id="c29" onchange="toggleHocVan()">
+                <option value="">-- Vui lòng chọn --</option>
                 <option value="Chưa từng đi học">Chưa từng đi học</option>
                 <option value="Tiểu học">Cấp 1 (Tiểu học)</option>
                 <option value="THCS">Cấp 2 (THCS)</option>
@@ -971,6 +973,7 @@
                 <div style="grid-column: 1 / -1">
                     <label>Bạn có phải là Chủ hộ không? <span class="col-id">[39]</span></label>
                     <select id="c39" onchange="toggleChuHo()">
+                        <option value="">-- Vui lòng chọn --</option>
                         <option value="Có">Có, tôi là chủ hộ</option>
                         <option value="Không">Không, người khác là chủ hộ</option>
                     </select>
@@ -1347,6 +1350,7 @@ function validateStep(n) {
         check('tinh18', 'Tỉnh/Thành (Thường trú)');
         check('phuong18', 'Phường/Xã (Thường trú)');
         check('chitiet18', 'Chi tiết địa chỉ Thường trú');
+        check('c37', 'Nơi ở hiện tại');
         if ((document.getElementById('c37') || {}).value === 'Tạm trú') {
             check('tinh38', 'Tỉnh/Thành (Tạm trú)');
             check('phuong38', 'Phường/Xã (Tạm trú)');
@@ -1361,6 +1365,7 @@ function validateStep(n) {
         check('c15', 'Ngân hàng nhận lương');
         check('c16', 'Số Tài Khoản Ngân Hàng');
     } else if (n === 3) {
+        check('c29', 'Trình độ học vấn');
         const hv = (document.getElementById('c29') || {}).value || '';
         if (['Tiểu học','THCS','THPT','Cao đẳng / Đại học'].includes(hv)) {
             check('tg25', 'Thời gian học Cấp 1'); check('tr25', 'Tên trường Cấp 1');
@@ -1380,6 +1385,7 @@ function validateStep(n) {
         check('tinh24', 'Tỉnh/Thành (Người liên hệ)');
         check('phuong24', 'Phường/Xã (Người liên hệ)');
         check('chitiet24', 'Chi tiết địa chỉ Người liên hệ');
+        check('c39', 'Bạn có phải là Chủ hộ không');
         if ((document.getElementById('c32') || {}).value === 'Rồi') {
             check('c33', 'Số sổ BHXH');
         }
