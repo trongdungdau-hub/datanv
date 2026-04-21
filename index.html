@@ -704,6 +704,28 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
+
+        input.field-error, select.field-error {
+            border-color: #dc2626 !important;
+            background: #fef2f2;
+        }
+        .upload-zone.field-error {
+            border-color: #dc2626 !important;
+            border-style: dashed !important;
+            background: #fef2f2;
+        }
+        .validate-msg {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.7;
+        }
     </style>
 </head>
 <body>
@@ -760,6 +782,7 @@
     <div class="step" id="step1">
         <div class="step-body">
             <h3>Thông tin cá nhân cơ bản</h3>
+            <div class="validate-msg" id="vmsg1"></div>
             <div class="grid">
                 <div><label>Họ và Tên (Viết Hoa) <span class="col-id">[0]</span></label><input id="c0" placeholder="VD: NGUYỄN VĂN A"></div>
                 <div><label>Học lực <span class="col-id">[1]</span></label><input id="c1" placeholder="VD: 12/12"></div>
@@ -808,6 +831,7 @@
     <div class="step" id="step2">
         <div class="step-body">
             <h3>Công việc & Lương</h3>
+            <div class="validate-msg" id="vmsg2"></div>
             <div class="grid">
                 <div><label>Ngày vào làm <span class="col-id">[5]</span></label><input id="c5" type="date"></div>
                 <div>
@@ -899,6 +923,7 @@
     <div class="step" id="step3">
         <div class="step-body">
             <h3>Quá trình học tập</h3>
+            <div class="validate-msg" id="vmsg3"></div>
             <label>Trình độ học vấn cao nhất của bạn? <span class="col-id">[29]</span></label>
             <select id="c29" onchange="toggleHocVan()">
                 <option value="Chưa từng đi học">Chưa từng đi học</option>
@@ -923,6 +948,7 @@
     <div class="step" id="step4">
         <div class="step-body">
             <h3>Khẩn cấp & Bảo hiểm</h3>
+            <div class="validate-msg" id="vmsg4"></div>
             <div class="grid">
                 <div><label>Người liên hệ Khẩn cấp <span class="col-id">[22]</span></label><input id="c22" placeholder="Tên người thân"></div>
                 <div><label>SĐT Khẩn cấp <span class="col-id">[23]</span></label><input id="c23" type="tel"></div>
@@ -977,6 +1003,7 @@
     <div class="step" id="step5">
         <div class="step-body">
             <h3>Đính kèm hình ảnh</h3>
+            <div class="validate-msg" id="vmsg5"></div>
             <p style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 20px;">Bấm vào từng ô để tải ảnh lên. Có thể tự cắt chỉnh hình ngay trên web.</p>
             
             <div class="upload-grid">
@@ -1005,7 +1032,7 @@
                 <input type="file" id="file_47" accept="image/*" class="d-none" onchange="handleFileSelect(this, '47')">
 
                 <div class="upload-zone" id="zone_48" onclick="triggerFileInput('48')">
-                    <div class="icon">💳</div><span>4. Thẻ Ngân hàng</span>
+                    <div class="icon">💳</div><span>4. Ảnh số tài khoản ngân hàng</span>
                     <div class="upload-help">Có thể dùng ảnh thẻ thật hoặc ảnh chụp màn hình app banking. PDF sẽ căn giữa, nền trắng, không ép giãn.</div>
                     <img id="preview_48" class="preview-img d-none">
                     <button type="button" class="btn-edit-img" onclick="event.stopPropagation(); editImage('48')">✏️ Sửa</button>
@@ -1290,8 +1317,101 @@ function buildCropperOptions(fieldId) {
     };
 }
 
+function clearValidation(stepN) {
+    const step = document.getElementById('step' + stepN);
+    if (!step) return;
+    step.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+    const msg = document.getElementById('vmsg' + stepN);
+    if (msg) { msg.style.display = 'none'; msg.innerHTML = ''; }
+}
+
+function validateStep(n) {
+    clearValidation(n);
+    const errors = [];
+
+    function check(id, label) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (!(el.value || '').trim()) errors.push({ id, label });
+    }
+
+    if (n === 1) {
+        check('c0', 'Họ và Tên');
+        check('c1', 'Học lực');
+        check('c2', 'Nơi sinh');
+        check('c3', 'Ngày sinh');
+        check('c19', 'Số CCCD / CMND');
+        check('c20', 'Ngày cấp CCCD');
+        check('c21', 'Số Điện Thoại');
+        check('c31', 'Email cá nhân');
+        check('tinh18', 'Tỉnh/Thành (Thường trú)');
+        check('phuong18', 'Phường/Xã (Thường trú)');
+        check('chitiet18', 'Chi tiết địa chỉ Thường trú');
+        if ((document.getElementById('c37') || {}).value === 'Tạm trú') {
+            check('tinh38', 'Tỉnh/Thành (Tạm trú)');
+            check('phuong38', 'Phường/Xã (Tạm trú)');
+            check('chitiet38', 'Chi tiết địa chỉ Tạm trú');
+        }
+    } else if (n === 2) {
+        check('c5', 'Ngày vào làm');
+        check('c7', 'Chức vụ');
+        check('c9', 'Mức lương hiện tại');
+        check('c12', 'Lương sau thử việc');
+        check('c14', 'Loại lương');
+        check('c15', 'Ngân hàng nhận lương');
+        check('c16', 'Số Tài Khoản Ngân Hàng');
+    } else if (n === 3) {
+        const hv = (document.getElementById('c29') || {}).value || '';
+        if (['Tiểu học','THCS','THPT','Cao đẳng / Đại học'].includes(hv)) {
+            check('tg25', 'Thời gian học Cấp 1'); check('tr25', 'Tên trường Cấp 1');
+        }
+        if (['THCS','THPT','Cao đẳng / Đại học'].includes(hv)) {
+            check('tg26', 'Thời gian học Cấp 2'); check('tr26', 'Tên trường Cấp 2');
+        }
+        if (['THPT','Cao đẳng / Đại học'].includes(hv)) {
+            check('tg27', 'Thời gian học Cấp 3'); check('tr27', 'Tên trường Cấp 3');
+        }
+        if (hv === 'Cao đẳng / Đại học') {
+            check('tg30', 'Thời gian học CĐ/ĐH'); check('tr30', 'Tên trường CĐ/ĐH');
+        }
+    } else if (n === 4) {
+        check('c22', 'Người liên hệ Khẩn cấp');
+        check('c23', 'SĐT Khẩn cấp');
+        check('tinh24', 'Tỉnh/Thành (Người liên hệ)');
+        check('phuong24', 'Phường/Xã (Người liên hệ)');
+        check('chitiet24', 'Chi tiết địa chỉ Người liên hệ');
+        if ((document.getElementById('c39') || {}).value === 'Không') {
+            check('c40', 'Tên Chủ hộ');
+            check('c41', 'Ngày sinh Chủ hộ');
+            check('c44', 'CCCD Chủ hộ');
+            check('tinh43', 'Tỉnh/Thành (Chủ hộ)');
+            check('phuong43', 'Phường/Xã (Chủ hộ)');
+            check('chitiet43', 'Chi tiết địa chỉ Chủ hộ');
+        }
+    } else if (n === 5) {
+        [['45','Ảnh 4x6'],['46','CCCD Mặt Trước'],['47','CCCD Mặt Sau'],['48','Ảnh số tài khoản ngân hàng'],['49','Bìa sổ BHXH']].forEach(([id, label]) => {
+            if (!editedImages[id]) errors.push({ id: 'zone_' + id, label });
+        });
+    }
+
+    if (errors.length) {
+        errors.forEach(({ id }) => { const el = document.getElementById(id); if (el) el.classList.add('field-error'); });
+        const msg = document.getElementById('vmsg' + n);
+        if (msg) {
+            msg.innerHTML = '⚠️ Vui lòng điền đầy đủ các trường bắt buộc:<br>' + errors.map(e => '• ' + e.label).join('<br>');
+            msg.style.display = 'block';
+            const stepBody = document.querySelector('#step' + n + ' .step-body');
+            if (stepBody) stepBody.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return false;
+    }
+    return true;
+}
+
 function changeStep(from, to) {
     if (to < 0 || to > 5) return;
+    if (to > from && !validateStep(from)) return;
+    clearValidation(from);
     document.getElementById("step" + from).classList.remove("active");
     let nextStep = document.getElementById("step" + to);
     nextStep.classList.add("active");
@@ -1381,6 +1501,7 @@ function saveEditedImage() {
 }
 
 function openOverview() {
+    if (!validateStep(5)) return;
     let name = document.getElementById("c0").value || "Chưa nhập họ tên";
     let dob = document.getElementById("c3").value || "Chưa nhập";
     let cccd = document.getElementById("c19").value || "Chưa nhập";
