@@ -1380,6 +1380,12 @@ function validateStep(n) {
         check('tinh24', 'Tỉnh/Thành (Người liên hệ)');
         check('phuong24', 'Phường/Xã (Người liên hệ)');
         check('chitiet24', 'Chi tiết địa chỉ Người liên hệ');
+        if ((document.getElementById('c32') || {}).value === 'Rồi') {
+            check('c33', 'Số sổ BHXH');
+        }
+        if ((document.getElementById('c34') || {}).value === 'Rồi') {
+            check('c35', 'Mã số thuế cá nhân');
+        }
         if ((document.getElementById('c39') || {}).value === 'Không') {
             check('c40', 'Tên Chủ hộ');
             check('c41', 'Ngày sinh Chủ hộ');
