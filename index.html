@@ -295,7 +295,7 @@
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
             font-size: 16px;
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
             background-color: #fff;
             color: var(--text-main);
         }
@@ -440,7 +440,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
@@ -862,7 +862,7 @@
                         <!-- Danh sách ngân hàng giữ nguyên từ code gốc -->
                         <option value="(ABBANK) An Bình">(ABBANK) An Bình</option>
                         <option value="(ACB) Á Châu">(ACB) Á Châu</option>
-                        <option value="(AGRIBANK) Nông nghiệp và phát triển nông thôn Việt Nam">(AGRIBANK) Nông nghiệp và phát triển nông thôn Việt Nam</option>
+                        <option value="(AGRIBANK) NN & PTNT Việt Nam">(AGRIBANK) Nông nghiệp và phát triển nông thôn Việt Nam</option>
                         <option value="(ANZ) ANZ Việt Nam">(ANZ) TNHH Một Thành Viên ANZ Việt Nam</option>
                         <option value="(BAC A) Bắc Á">(BAC A) Bắc Á</option>
                         <option value="(BAO VIET BANK) Bảo Việt">(BAO VIET BANK) Bảo Việt</option>
@@ -1566,7 +1566,7 @@ async function submitData(){
     p.images = { anh46: editedImages['45'] || "", cccdTruoc: editedImages['46'] || "", cccdSau: editedImages['47'] || "", stk: editedImages['48'] || "", bhxh: editedImages['49'] || "" };
     
     try {
-        await fetch("https://script.google.com/macros/s/AKfycbxWaVZbc24TCQHZoowqhW9tTEf5gtewczPfLMYrKMqDKLfjT9C3jUPYsQyXdNpCRleA/exec?action=submit", { method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(p) });
+        await fetch("https://script.google.com/macros/s/AKfycbxWkmmjAD3CqGoPvPeqycIV-rq2chzij3b2Feq1CDa7_p_8mfIH5PD8MNz0G4qDW0f94w/exec?action=submit", { method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(p) });
         document.getElementById("overviewModal").style.display = "none";
         
         let time = new Date().toLocaleString("vi-VN");
