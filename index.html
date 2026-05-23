@@ -1566,7 +1566,17 @@ async function submitData(){
     p.images = { anh46: editedImages['45'] || "", cccdTruoc: editedImages['46'] || "", cccdSau: editedImages['47'] || "", stk: editedImages['48'] || "", bhxh: editedImages['49'] || "" };
     
     try {
-        await fetch("https://script.google.com/macros/s/AKfycbxWkmmjAD3CqGoPvPeqycIV-rq2chzij3b2Feq1CDa7_p_8mfIH5PD8MNz0G4qDW0f94w/exec?action=submit", { method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(p) });
+        let response = await fetch("https://script.google.com/macros/s/AKfycbxWkmmjAD3CqGoPvPeqycIV-rq2chzij3b2Feq1CDa7_p_8mfIH5PD8MNz0G4qDW0f94w/exec?action=submit", { method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(p) });
+        let result = {};
+        try { result = await response.json(); } catch(_) {}
+        
+        if (result && (result.status === 'error' || result.ok === false || result.err)) {
+            alert(result.message || result.err || "Gửi hồ sơ thất bại! Vui lòng thử lại.");
+            document.getElementById("btnFinalSubmit").innerText = "🚀 GỬI HỒ SƠ";
+            document.getElementById("btnFinalSubmit").disabled = false;
+            return;
+        }
+        
         document.getElementById("overviewModal").style.display = "none";
         
         let time = new Date().toLocaleString("vi-VN");
