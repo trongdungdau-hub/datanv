@@ -20,6 +20,11 @@
             --ring: rgba(37, 99, 235, 0.2);
         }
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--background);
@@ -27,7 +32,7 @@
             padding: 0;
             color: var(--text-main);
             height: 100vh;
-            width: 100vw;
+            width: 100%;
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -112,9 +117,9 @@
         .step-body {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 20px 20px 20px;
+            overflow-x: hidden;
+            padding: 20px;
             -webkit-overflow-scrolling: touch;
-            scrollbar-gutter: stable;
         }
 
         .cover-step .step-body {
