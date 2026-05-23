@@ -1237,7 +1237,33 @@ function toggleCoverConsent() {
     if (checked && errorEl) errorEl.textContent = '';
 }
 
+const PAGE_LOAD_TIME = Date.now();
+const MAX_PAGE_AGE_MS = 10 * 60 * 1000; // Phiên làm việc tối đa 10 phút
+
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        const currentStep = document.querySelector('.step.active');
+        // Bắt buộc tải lại nếu để trang quá 10 phút rồi quay lại
+        if (Date.now() - PAGE_LOAD_TIME > MAX_PAGE_AGE_MS) {
+            alert("Trang web đã mở quá lâu (trên 10 phút). Hệ thống bắt buộc tải lại để lấy kết nối mới nhất!");
+            window.location.reload(true);
+            return;
+        }
+        // Nếu người dùng đang ở trang bìa (chưa điền thông tin) mà quay lại tab, tự động reload để cập nhật bản mới nhất
+        if (currentStep && currentStep.id === 'step0') {
+            window.location.reload(true);
+        }
+    }
+});
+
 function proceedFromCover() {
+    // Nếu trang mở quá 10 phút, bắt buộc làm mới trang trước khi cho phép điền để tránh cache cũ
+    if (Date.now() - PAGE_LOAD_TIME > MAX_PAGE_AGE_MS) {
+        alert("Phiên làm việc đã hết hạn (quá 10 phút). Trang web sẽ tự động tải lại phiên bản mới nhất.");
+        window.location.reload(true);
+        return;
+    }
+    
     const checkbox = document.getElementById('privacyConsent');
     const errorEl = document.getElementById('coverConsentError');
     if (!checkbox?.checked) {
@@ -1513,6 +1539,11 @@ function saveEditedImage() {
 }
 
 function openOverview() {
+    if (Date.now() - PAGE_LOAD_TIME > MAX_PAGE_AGE_MS) {
+        alert("Phiên làm việc đã quá 10 phút! Hệ thống không cho phép gửi để tránh gửi nhầm máy chủ cũ. Vui lòng tải lại trang!");
+        window.location.reload(true);
+        return;
+    }
     if (!validateStep(5)) return;
     let name = document.getElementById("c0").value || "Chưa nhập họ tên";
     let dob = document.getElementById("c3").value || "Chưa nhập";
@@ -1541,6 +1572,11 @@ async function toBase64(file){
 }
 
 async function submitData(){
+    if (Date.now() - PAGE_LOAD_TIME > MAX_PAGE_AGE_MS) {
+        alert("Phiên làm việc đã quá 10 phút! Hệ thống đã chặn gửi dữ liệu để tránh lỗi. Vui lòng tải lại trang để làm lại.");
+        window.location.reload(true);
+        return;
+    }
     document.getElementById("btnFinalSubmit").innerText = "⏳ ĐANG XỬ LÝ & GỬI...";
     document.getElementById("btnFinalSubmit").disabled = true;
     
