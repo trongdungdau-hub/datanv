@@ -156,6 +156,11 @@
             gap: 15px;
         }
 
+        .grid > div {
+            min-width: 0;
+            width: 100%;
+        }
+
         .cover-card {
             width: 100%;
             max-width: 640px;
@@ -293,6 +298,7 @@
 
         input, select {
             width: 100%;
+            max-width: 100%;
             padding: 0 15px;
             height: 48px;
             border: 1.5px solid var(--border);
@@ -303,6 +309,14 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
             background-color: #fff;
             color: var(--text-main);
+        }
+
+        /* Xử lý riêng cho input type date trên iOS Safari để không bị tràn */
+        input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+            min-width: 0;
+            display: block;
         }
 
         input:focus, select:focus {
