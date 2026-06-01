@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Thông tin nhân viên</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="vendor/inter-fonts/inter.css">
+    <link href="vendor/cropperjs-1.5.13/cropper.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
@@ -130,14 +130,17 @@
         }
 
         .step-body::-webkit-scrollbar {
-            width: 5px;
+            width: var(--app-scrollbar-compact-size, 6px);
+            height: var(--app-scrollbar-compact-size, 6px);
         }
         .step-body::-webkit-scrollbar-track {
-            background: transparent;
+            background: var(--app-scrollbar-track, transparent);
         }
         .step-body::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+            background-color: var(--app-scrollbar-thumb, #cbd5e1);
+            border: var(--app-scrollbar-thumb-border, 2px) solid transparent;
+            border-radius: 999px;
+            background-clip: content-box;
         }
 
         h3 {
@@ -748,7 +751,10 @@
     </style>
 </head>
 <body>
-
+    <div id="global-loader">
+        <i class="fas fa-fingerprint loader-logo"></i>
+        <div class="loader-text">HỆ THỐNG HRM</div>
+    </div>
 <div class="wrap cover-mode" id="mainWrap">
     
     <!-- Header cố định (đã bỏ stepper) -->
@@ -983,7 +989,7 @@
                     </div>
                 </div>
                 
-                <div><label>Đã có sổ BHXH chưa? <span class="col-id">[32]</span></label><select id="c32"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
+                <div><label>Đã có sổ BHXH chưa? <span class="col-id">[32]</span></label><select id="c32" onchange="syncBhxhUploadState()"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
                 <div><label>Số sổ BHXH (Nếu có) <span class="col-id">[33]</span></label><input id="c33" type="tel" inputmode="numeric"></div>
                 
                 <div><label>Đã có Mã số thuế cá nhân? <span class="col-id">[34]</span></label><select id="c34"><option value="Chưa">Chưa</option><option value="Rồi">Rồi</option></select></div>
@@ -1176,7 +1182,7 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="vendor/cropperjs-1.5.13/cropper.min.js"></script>
 <script>
 // Toàn bộ dữ liệu địa chỉ (giữ nguyên từ code gốc)
 const dataDiaChi = {
@@ -1474,7 +1480,12 @@ function validateStep(n) {
             check('chitiet43', 'Chi tiết địa chỉ Chủ hộ');
         }
     } else if (n === 5) {
-        [['45','Ảnh 4x6'],['46','CCCD Mặt Trước'],['47','CCCD Mặt Sau'],['48','Ảnh số tài khoản ngân hàng'],['49','Bìa sổ BHXH']].forEach(([id, label]) => {
+        const requiredImages = [['45','Ảnh 4x6'],['46','CCCD Mặt Trước'],['47','CCCD Mặt Sau'],['48','Ảnh số tài khoản ngân hàng']];
+        // Bìa sổ BHXH chỉ bắt buộc khi NV đã có sổ BHXH (c32 = 'Rồi'); chọn 'Chưa' thì bỏ qua, không cần up
+        if ((document.getElementById('c32') || {}).value === 'Rồi') {
+            requiredImages.push(['49', 'Bìa sổ BHXH']);
+        }
+        requiredImages.forEach(([id, label]) => {
             if (!editedImages[id]) errors.push({ id: 'zone_' + id, label });
         });
     }
@@ -1501,6 +1512,7 @@ function changeStep(from, to) {
     let nextStep = document.getElementById("step" + to);
     nextStep.classList.add("active");
     setCoverMode(to);
+    if (to === 5) syncBhxhUploadState();
     let stepBody = nextStep.querySelector('.step-body');
     if(stepBody) stepBody.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1514,6 +1526,25 @@ function toggleHocVan(){
 }
 function toggleTamTru() { document.getElementById("c37").value === "Tạm trú" ? document.getElementById("khu_vuc_tam_tru").classList.remove("d-none") : document.getElementById("khu_vuc_tam_tru").classList.add("d-none"); }
 function toggleChuHo() { document.getElementById("c39").value === "Không" ? document.getElementById("khu_vuc_chu_ho").classList.remove("d-none") : document.getElementById("khu_vuc_chu_ho").classList.add("d-none"); }
+
+// Nếu chưa có sổ BHXH (c32 = 'Chưa') -> làm mờ & tắt ô upload "Bìa sổ BHXH" (49), không cần up
+function syncBhxhUploadState() {
+    const zone = document.getElementById('zone_49');
+    if (!zone) return;
+    const hasBook = (document.getElementById('c32') || {}).value === 'Rồi';
+    const label = zone.querySelector('span');
+    if (hasBook) {
+        zone.style.opacity = '';
+        zone.style.filter = '';
+        zone.style.pointerEvents = '';
+        if (label) label.textContent = '5. Bìa sổ BHXH';
+    } else {
+        zone.style.opacity = '0.45';
+        zone.style.filter = 'grayscale(1)';
+        zone.style.pointerEvents = 'none';   // không cho bấm upload
+        if (label) label.textContent = '5. Bìa sổ BHXH (không cần — chưa có sổ)';
+    }
+}
 
 function triggerFileInput(id) { document.getElementById("file_" + id).click(); }
 
