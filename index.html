@@ -1596,23 +1596,42 @@ function applyFiltersPreview() {
 }
 
 function saveEditedImage() {
-    if(!cropper) return;
-    let canvas = cropper.getCroppedCanvas({ maxWidth: 1200, maxHeight: 1200 });
-    let finalCanvas = document.createElement('canvas');
-    finalCanvas.width = canvas.width; finalCanvas.height = canvas.height;
-    let fctx = finalCanvas.getContext('2d');
-    let b = document.getElementById("filterBright").value;
-    let c = document.getElementById("filterContrast").value;
-    fctx.filter = `brightness(${b}%) contrast(${c}%)`;
-    fctx.drawImage(canvas, 0, 0);
-    
-    let base64 = finalCanvas.toDataURL("image/jpeg", 0.75);
-    editedImages[currentEditingField] = base64;
-    let previewImg = document.getElementById("preview_" + currentEditingField);
-    previewImg.src = base64;
-    previewImg.classList.remove("d-none");
-    document.getElementById("zone_" + currentEditingField).classList.add("has-img");
-    closeEditor();
+    if(!cropper) { alert('Ảnh chưa sẵn sàng. Vui lòng đợi ảnh tải xong rồi bấm Lưu lại.'); return; }
+
+    // getCroppedCanvas có thể trả null (ảnh chưa tải xong, ảnh quá lớn, hoặc định dạng
+    // không hỗ trợ như HEIC). Phải kiểm tra null, KHÔNG được dùng thẳng canvas.width.
+    let canvas = null;
+    try {
+        canvas = cropper.getCroppedCanvas({ maxWidth: 1600, maxHeight: 1600, fillColor: '#ffffff', imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+    } catch (e) { canvas = null; }
+    if (!canvas) {
+        // thử lại không giới hạn kích thước (đôi khi maxWidth/maxHeight gây null)
+        try { canvas = cropper.getCroppedCanvas({ fillColor: '#ffffff' }); } catch (e) { canvas = null; }
+    }
+    if (!canvas) {
+        alert('Không cắt được ảnh. Có thể ảnh chưa tải xong, ảnh quá lớn, hoặc định dạng không hỗ trợ (vd: HEIC của iPhone). Vui lòng thử lại, hoặc chọn ảnh JPG/PNG.');
+        return;
+    }
+
+    try {
+        let finalCanvas = document.createElement('canvas');
+        finalCanvas.width = canvas.width; finalCanvas.height = canvas.height;
+        let fctx = finalCanvas.getContext('2d');
+        let b = document.getElementById("filterBright").value;
+        let c = document.getElementById("filterContrast").value;
+        fctx.filter = `brightness(${b}%) contrast(${c}%)`;
+        fctx.drawImage(canvas, 0, 0);
+
+        let base64 = finalCanvas.toDataURL("image/jpeg", 0.75);
+        editedImages[currentEditingField] = base64;
+        let previewImg = document.getElementById("preview_" + currentEditingField);
+        previewImg.src = base64;
+        previewImg.classList.remove("d-none");
+        document.getElementById("zone_" + currentEditingField).classList.add("has-img");
+        closeEditor();
+    } catch (e) {
+        alert('Lỗi khi lưu ảnh: ' + (e && e.message ? e.message : e) + '. Vui lòng thử lại.');
+    }
 }
 
 function openOverview() {
