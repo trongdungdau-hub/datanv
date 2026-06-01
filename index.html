@@ -416,12 +416,15 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            background: #fff;       /* nền trắng sạch thay nền đen */
-            padding: 6px;
-            box-sizing: border-box;
+            object-fit: cover;      /* lấp đầy khung, không viền trắng (ô đã đúng tỉ lệ ảnh) */
             z-index: 5;
         }
+
+        /* Mỗi ô đúng TỈ LỆ ảnh của nó (cả mobile lẫn desktop) -> ảnh lấp khít, không viền */
+        #zone_45 { aspect-ratio: 4 / 6;        height: auto; }   /* 4x6 dọc */
+        #zone_46, #zone_47 { aspect-ratio: 85.6 / 53.98; height: auto; } /* CCCD ngang */
+        #zone_48 { aspect-ratio: 9 / 16;       height: auto; }   /* TK ngân hàng dọc */
+        #zone_49 { aspect-ratio: 1 / 1.42;     height: auto; }   /* Bìa sổ BHXH dọc */
 
         .btn-edit-img {
             position: absolute;
@@ -727,7 +730,17 @@
             }
             .upload-grid {
                 grid-template-columns: 1fr 1fr;
+                grid-template-areas:
+                    "photo cccdf"
+                    "photo cccdb"
+                    "tk    bhxh";
+                align-items: start;
             }
+            #zone_45 { grid-area: photo; }  /* 4x6 (ô lớn trái) */
+            #zone_46 { grid-area: cccdf; }  /* CCCD trước */
+            #zone_47 { grid-area: cccdb; }  /* CCCD sau (dưới mặt trước) */
+            #zone_48 { grid-area: tk;    }  /* TK ngân hàng */
+            #zone_49 { grid-area: bhxh;  }  /* Bìa sổ BHXH */
         }
 
         input.field-error, select.field-error {
@@ -1598,6 +1611,47 @@ function applyFiltersPreview() {
     if(img) img.style.filter = `brightness(${b}%) contrast(${c}%)`;
 }
 
+// ===== Kiểm tra dung lượng + chất lượng ảnh (JS thuần, không AI) =====
+const IMG_MAX_BYTES = 1024 * 1024;            // 1 MB / tệp
+const IMG_TOTAL_MAX_BYTES = 5 * 1024 * 1024;  // 5 MB tổng 5 ảnh
+const Q_DARK_MEAN = 50;     // sáng trung bình < 50 -> quá tối
+const Q_BRIGHT_MEAN = 236;  // sáng TB > 236 VÀ ...
+const Q_BRIGHT_STD = 22;    // ... tương phản < 22 -> cháy sáng/trắng xóa (tài liệu có chữ -> std cao -> KHÔNG bị tính nhầm)
+const Q_BLUR_SHARP = 70;    // phương sai Laplacian < 70 -> mờ
+
+function dataUrlBytes(url){ const i = (url || '').indexOf(','); return i < 0 ? 0 : Math.ceil((url.length - i - 1) * 0.75); }
+
+// Nén canvas thành JPEG dưới maxBytes (giảm chất lượng dần, không xuống dưới 0.45 để giữ nét)
+function canvasToJpegUnderLimit(canvas, maxBytes){
+    let q = 0.85, url = canvas.toDataURL('image/jpeg', q);
+    while (dataUrlBytes(url) > maxBytes && q > 0.45){ q = Math.round((q - 0.1) * 100) / 100; url = canvas.toDataURL('image/jpeg', q); }
+    return { url: url, bytes: dataUrlBytes(url) };
+}
+
+// Phân tích sáng/tối (luminance trung bình) + mờ (phương sai Laplacian)
+function analyzeImageQuality(canvas){
+    try {
+        const W = 320, H = Math.max(1, Math.round(canvas.height * W / canvas.width));
+        const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H;
+        const tctx = tmp.getContext('2d'); tctx.drawImage(canvas, 0, 0, W, H);
+        const data = tctx.getImageData(0, 0, W, H).data;
+        const n = W * H; const gray = new Float32Array(n); let sum = 0;
+        for (let i = 0, p = 0; i < data.length; i += 4, p++){ const g = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2]; gray[p] = g; sum += g; }
+        const mean = sum / n;
+        let vs = 0; for (let p = 0; p < n; p++){ const d = gray[p] - mean; vs += d*d; } const std = Math.sqrt(vs / n);
+        let ls = 0, lss = 0, cnt = 0;
+        for (let y = 1; y < H-1; y++){ for (let x = 1; x < W-1; x++){ const idx = y*W + x;
+            const lap = 4*gray[idx] - gray[idx-1] - gray[idx+1] - gray[idx-W] - gray[idx+W];
+            ls += lap; lss += lap*lap; cnt++; } }
+        const sharp = cnt ? (lss/cnt - (ls/cnt)*(ls/cnt)) : 9999;
+        const issues = [];
+        if (mean < Q_DARK_MEAN) issues.push('quá tối');
+        else if (mean > Q_BRIGHT_MEAN && std < Q_BRIGHT_STD) issues.push('quá sáng (cháy/trắng xóa)');
+        if (sharp < Q_BLUR_SHARP) issues.push('quá mờ');
+        return { ok: issues.length === 0, issues: issues, mean: Math.round(mean), std: Math.round(std), sharp: Math.round(sharp) };
+    } catch (e) { return { ok: true, issues: [], err: String(e) }; }   // lỗi phân tích -> KHÔNG chặn
+}
+
 function saveEditedImage() {
     if(!cropper) { alert('Ảnh chưa sẵn sàng. Vui lòng đợi ảnh tải xong rồi bấm Lưu lại.'); return; }
 
@@ -1625,10 +1679,25 @@ function saveEditedImage() {
         fctx.filter = `brightness(${b}%) contrast(${c}%)`;
         fctx.drawImage(canvas, 0, 0);
 
-        let base64 = finalCanvas.toDataURL("image/jpeg", 0.75);
-        editedImages[currentEditingField] = base64;
+        // CHẶN nếu ảnh quá tối / quá sáng / quá mờ (đánh giá sau khi đã áp Sáng/Tương phản)
+        const q = analyzeImageQuality(finalCanvas);
+        if (!q.ok) {
+            const fix = q.issues.indexOf('quá tối') >= 0 ? 'tăng thanh "Sáng" hoặc '
+                      : (q.issues.indexOf('quá sáng (cháy/trắng xóa)') >= 0 ? 'giảm thanh "Sáng" hoặc ' : '');
+            alert('Ảnh ' + q.issues.join(' và ') + '. Vui lòng ' + fix + 'chụp lại cho rõ và đủ sáng rồi bấm Lưu lại.');
+            return;
+        }
+
+        // Tự nén xuống DƯỚI 1MB; nếu vẫn quá -> báo, yêu cầu giảm
+        const out = canvasToJpegUnderLimit(finalCanvas, IMG_MAX_BYTES);
+        if (out.bytes > IMG_MAX_BYTES) {
+            alert('Ảnh vẫn lớn hơn 1MB (' + (out.bytes/1048576).toFixed(2) + 'MB) dù đã nén tối đa. Vui lòng chụp gọn lại rồi thử lại.');
+            return;
+        }
+
+        editedImages[currentEditingField] = out.url;
         let previewImg = document.getElementById("preview_" + currentEditingField);
-        previewImg.src = base64;
+        previewImg.src = out.url;
         previewImg.classList.remove("d-none");
         document.getElementById("zone_" + currentEditingField).classList.add("has-img");
         closeEditor();
@@ -1699,7 +1768,17 @@ async function submitData(){
     }
     
     p.images = { anh46: editedImages['45'] || "", cccdTruoc: editedImages['46'] || "", cccdSau: editedImages['47'] || "", stk: editedImages['48'] || "", bhxh: editedImages['49'] || "" };
-    
+
+    // Kiểm tổng dung lượng 5 ảnh <= 5MB (mỗi ảnh đã ép < 1MB nên hiếm khi vượt)
+    let __totalImgBytes = 0;
+    Object.keys(p.images).forEach(k => { __totalImgBytes += dataUrlBytes(p.images[k]); });
+    if (__totalImgBytes > IMG_TOTAL_MAX_BYTES) {
+        alert('Tổng dung lượng ảnh ' + (__totalImgBytes/1048576).toFixed(2) + 'MB vượt quá 5MB. Vui lòng mở vài ảnh ra chụp/cắt lại nhẹ hơn rồi gửi.');
+        document.getElementById("btnFinalSubmit").innerText = "🚀 GỬI HỒ SƠ";
+        document.getElementById("btnFinalSubmit").disabled = false;
+        return;
+    }
+
     try {
         let response = await fetch("https://script.google.com/macros/s/AKfycbxWkmmjAD3CqGoPvPeqycIV-rq2chzij3b2Feq1CDa7_p_8mfIH5PD8MNz0G4qDW0f94w/exec?action=submit", { method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(p) });
         let result = {};
