@@ -423,7 +423,7 @@
         /* Mỗi ô đúng TỈ LỆ ảnh của nó (cả mobile lẫn desktop) -> ảnh lấp khít, không viền */
         #zone_45 { aspect-ratio: 4 / 6;        height: auto; }   /* 4x6 dọc */
         #zone_46, #zone_47 { aspect-ratio: 85.6 / 53.98; height: auto; } /* CCCD ngang */
-        #zone_48 { aspect-ratio: 9 / 16;       height: auto; }   /* TK ngân hàng dọc */
+        #zone_48 { aspect-ratio: 1 / 1.42;     height: auto; }   /* TK ngân hàng (bằng khung sổ BHXH) */
         #zone_49 { aspect-ratio: 1 / 1.42;     height: auto; }   /* Bìa sổ BHXH dọc */
 
         .btn-edit-img {
@@ -1375,7 +1375,7 @@ const PHOTO_UPLOAD_CONFIG = {
     '45': { aspectRatio: 4 / 6, title: 'Ảnh 4x6', hint: 'Canh gương mặt vào giữa khung dọc 4x6.' },
     '46': { aspectRatio: 85.6 / 53.98, title: 'CCCD Trước', hint: 'Giữ nguyên đủ 4 góc CCCD, không cắt mất số.' },
     '47': { aspectRatio: 85.6 / 53.98, title: 'CCCD Sau', hint: 'Giữ nguyên đủ 4 góc CCCD, không cắt mất thông tin.' },
-    '48': { aspectRatio: 9 / 16, title: 'Số TK ngân hàng (dọc)', hint: 'Ảnh chụp màn hình điện thoại — khung DỌC. Canh đủ thông tin số tài khoản.' },
+    '48': { aspectRatio: 1 / 1.42, title: 'Số TK ngân hàng (dọc)', hint: 'Ảnh chụp màn hình điện thoại — khung DỌC (bằng khung sổ BHXH). Canh đủ thông tin số tài khoản.' },
     '49': { aspectRatio: 1 / 1.42, title: 'Bìa sổ BHXH (dọc)', hint: 'Khung DỌC theo kích thước bìa sổ BHXH. Canh đủ bìa sổ, đúng chiều, đủ mép.' }
 };
 
@@ -1646,7 +1646,7 @@ function analyzeImageQuality(canvas){
         const sharp = cnt ? (lss/cnt - (ls/cnt)*(ls/cnt)) : 9999;
         const issues = [];
         if (mean < Q_DARK_MEAN) issues.push('quá tối');
-        else if (mean > Q_BRIGHT_MEAN && std < Q_BRIGHT_STD) issues.push('quá sáng (cháy/trắng xóa)');
+        // (Đã BỎ kiểm "quá sáng" theo yêu cầu — hay báo nhầm với ảnh chụp màn hình / tài liệu nền trắng)
         if (sharp < Q_BLUR_SHARP) issues.push('quá mờ');
         return { ok: issues.length === 0, issues: issues, mean: Math.round(mean), std: Math.round(std), sharp: Math.round(sharp) };
     } catch (e) { return { ok: true, issues: [], err: String(e) }; }   // lỗi phân tích -> KHÔNG chặn
@@ -1682,8 +1682,7 @@ function saveEditedImage() {
         // CHẶN nếu ảnh quá tối / quá sáng / quá mờ (đánh giá sau khi đã áp Sáng/Tương phản)
         const q = analyzeImageQuality(finalCanvas);
         if (!q.ok) {
-            const fix = q.issues.indexOf('quá tối') >= 0 ? 'tăng thanh "Sáng" hoặc '
-                      : (q.issues.indexOf('quá sáng (cháy/trắng xóa)') >= 0 ? 'giảm thanh "Sáng" hoặc ' : '');
+            const fix = q.issues.indexOf('quá tối') >= 0 ? 'tăng thanh "Sáng" hoặc ' : '';
             alert('Ảnh ' + q.issues.join(' và ') + '. Vui lòng ' + fix + 'chụp lại cho rõ và đủ sáng rồi bấm Lưu lại.');
             return;
         }
